@@ -1,16 +1,19 @@
 package service
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
-const (
-	PSQLHost     = "localhost"
-	PSQLPort     = 5431
-	PSQLUser     = "cfabrica46"
-	PSQLPassword = "01234"
-	PSQLDBName   = "go_crud"
-	PSQLSSL      = "require"
+var (
+	PSQLHost     = os.Getenv("POSTGRES_HOST")
+	PSQLPort     = os.Getenv("POSTGRES_PORT")
+	PSQLUser     = os.Getenv("POSTGRES_USERNAME")
+	PSQLPassword = os.Getenv("POSTGRES_PASSWORD")
+	PSQLDBName   = os.Getenv("POSTGRES_DB")
+	PSQLSSL      = "disable"
 )
 
 const dbDriver = "postgres"
 
-var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)
+var psqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)

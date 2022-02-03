@@ -1,8 +1,8 @@
 # GetAllUsers
-curl localhost:8080/users
+# curl localhost:8080/users
 
 # GetUserByID
-# curl -XPOST -d'{"id":554}' localhost:8080/userByID
+# curl -XPOST -d'{"id":1}' localhost:8080/userByID
 
 # GetUserByUsernameAndPassword
 # curl -XPOST -d'{"username":"cesar","password":"caycho"}' localhost:8080/userByUsernameAndPassword

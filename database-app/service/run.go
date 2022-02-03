@@ -3,6 +3,7 @@ package service
 import (
 	"log"
 	"net/http"
+	"os"
 
 	httptransport "github.com/go-kit/kit/transport/http"
 )
@@ -59,5 +60,5 @@ func RunServer() {
 	http.Handle("/delete", deleteUserByUsernameHandler)
 
 	log.Println("ListenAndServe on localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
