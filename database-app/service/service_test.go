@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cfabrica46/go-crud/structure"
 	"github.com/cfabrica46/gokit-crud/database-app/models"
 )
 
@@ -93,12 +92,20 @@ func TestGetUserByID(t *testing.T) {
 		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			s := getServiceDB()
+
+			err := s.OpenDB(dbDriver, psqlInfo)
+			if err != nil {
+				t.Error(err)
+			}
+			defer s.db.Close()
+
 			if tt.in.ID != -1 {
 				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
 				if err != nil {
 					t.Error(err)
 				}
-				defer s.DeleteUserbByUsername(tt.in.Username)
+				defer s.DeleteUserByUsername(tt.in.Username)
 			}
 
 			id, err := s.GetIDByUsername(tt.in.Username)
@@ -110,50 +117,49 @@ func TestGetUserByID(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			if tt.in.ID == -1 {
-				if user != nil {
-					t.Errorf("want %v; got %v", tt.out, user)
-				}
-			} else {
-				if user == nil {
-					t.Errorf("want %v; got %v", tt.out, user)
-				}
+
+			if user.Username != tt.out.Username {
+				t.Errorf("want %v; got %v", tt.out, user)
 			}
+
 		})
 	}
 }
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
 	for i, tt := range []struct {
-		in  structure.User
-		out structure.User
+		in  models.User
+		out models.User
 	}{
-		{structure.User{}, structure.User{}},
-		{structure.User{Username: "username", Password: "password", Email: "email"}, structure.User{Username: "username", Password: "password", Email: "email"}},
+		{models.User{}, models.User{}},
+		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			if tt.in.Username == "username" {
-				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+			s := getServiceDB()
+
+			err := s.OpenDB(dbDriver, psqlInfo)
+			if err != nil {
+				t.Error(err)
+			}
+			defer s.db.Close()
+
+			if tt.in.Username != "" {
+				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
 				if err != nil {
 					t.Error(err)
 				}
-				defer DeleteUserbByUsername(tt.in.Username)
+				defer s.DeleteUserByUsername(tt.in.Username)
 			}
 
-			user, err := GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
+			user, err := s.GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
 			if err != nil {
 				t.Error(err)
 			}
 
-			if tt.in.Username != "username" {
-				if user != nil {
-					t.Errorf("want %v; got %v", tt.out, user)
-				}
-			} else {
-				if user == nil {
-					t.Errorf("want %v; got %v", tt.out, user)
-				}
+			if user.Username != tt.out.Username {
+				t.Errorf("want %v; got %v", tt.out, user)
 			}
+
 		})
 	}
 }
