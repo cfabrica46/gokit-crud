@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cfabrica46/go-crud/structure"
 	"github.com/cfabrica46/gokit-crud/database-app/models"
 )
 
@@ -35,6 +36,128 @@ func TestOpenDB(t *testing.T) {
 	}
 }
 
+func TestGetAllUsers(t *testing.T) {
+	for i, tt := range []struct {
+		in  models.User
+		out string
+	}{
+		{models.User{Username: "username", Password: "password", Email: "email"}, ""},
+		{models.User{}, "database is closed"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result string
+
+			s := getServiceDB()
+
+			err := s.OpenDB(dbDriver, psqlInfo)
+			if err != nil {
+				t.Error(err)
+			}
+			defer s.db.Close()
+
+			// generate confict closing db
+			if tt.out == "database is closed" {
+				err := s.db.Close()
+				if err != nil {
+					t.Error(err)
+				}
+			}
+
+			// insert user
+			if tt.out == "" {
+				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer s.DeleteUserByUsername(tt.in.Username)
+			}
+
+			_, err = s.GetAllUsers()
+			if err != nil {
+				result = err.Error()
+			}
+
+			if !strings.Contains(result, tt.out) {
+				t.Errorf("want %v; got %v", tt.out, result)
+			}
+		})
+	}
+}
+
+func TestGetUserByID(t *testing.T) {
+	for i, tt := range []struct {
+		in  models.User
+		out models.User
+	}{
+		{models.User{ID: -1}, models.User{}},
+		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in.ID != -1 {
+				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer s.DeleteUserbByUsername(tt.in.Username)
+			}
+
+			id, err := s.GetIDByUsername(tt.in.Username)
+			if err != nil {
+				t.Error(err)
+			}
+
+			user, err := s.GetUserByID(id)
+			if err != nil {
+				t.Error(err)
+			}
+			if tt.in.ID == -1 {
+				if user != nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			} else {
+				if user == nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			}
+		})
+	}
+}
+
+func TestGetUserByUsernameAndPassword(t *testing.T) {
+	for i, tt := range []struct {
+		in  structure.User
+		out structure.User
+	}{
+		{structure.User{}, structure.User{}},
+		{structure.User{Username: "username", Password: "password", Email: "email"}, structure.User{Username: "username", Password: "password", Email: "email"}},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in.Username == "username" {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer DeleteUserbByUsername(tt.in.Username)
+			}
+
+			user, err := GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
+			if err != nil {
+				t.Error(err)
+			}
+
+			if tt.in.Username != "username" {
+				if user != nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			} else {
+				if user == nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			}
+		})
+	}
+}
+
 func TestInsertUser(t *testing.T) {
 	for i, tt := range []struct {
 		in  models.User
@@ -51,7 +174,7 @@ func TestInsertUser(t *testing.T) {
 
 			err := s.OpenDB(dbDriver, psqlInfo)
 			if err != nil {
-				result = err.Error()
+				t.Error(err)
 			}
 			defer s.db.Close()
 
@@ -100,7 +223,7 @@ func TestDeleteUserbByUsername(t *testing.T) {
 
 			err := s.OpenDB(dbDriver, psqlInfo)
 			if err != nil {
-				result = err.Error()
+				t.Error(err)
 			}
 			defer s.db.Close()
 
@@ -112,6 +235,7 @@ func TestDeleteUserbByUsername(t *testing.T) {
 				}
 			}
 
+			// insert user
 			if tt.outRowsAffected == 1 {
 				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
 				if err != nil {

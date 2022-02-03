@@ -4,14 +4,18 @@ import (
 	"database/sql"
 	"sync"
 
+	"github.com/cfabrica46/go-crud/structure"
+	"github.com/cfabrica46/gokit-crud/database-app/models"
 	_ "github.com/lib/pq"
 )
 
 type serviceDBInterface interface {
 	OpenDB() error
-	InsertUser() error
-	DeleteUserByUsername() error
-	// GetAllUsers() (users []models.User, err error)
+	GetAllUsers() ([]models.User, error)
+	GetUserByID(int) (models.User, error)
+	GetUserByUsernameAndPassword(string, string) (models.User, error)
+	InsertUser(string, string, string) error
+	DeleteUserByUsername(string) error
 }
 
 type serviceDB struct {
@@ -34,6 +38,53 @@ func (s *serviceDB) OpenDB(dbDriver, psqlInfo string) (err error) {
 			return
 		}
 	})
+	return
+}
+
+func (s serviceDB) GetAllUsers() (users []models.User, err error) {
+	rows, err := s.db.Query("SELECT users.id,users.username,users.email FROM users")
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		var userBeta models.User
+		rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
+		users = append(users, userBeta)
+	}
+	return
+}
+
+func (s serviceDB) GetUserByID(id int) (user *models.User, err error) {
+	row := s.db.QueryRow("SELECT users.id,users.username,users.password,users.email FROM users WHERE users.id = $1", id)
+
+	var userBeta models.User
+	err = row.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Password, &userBeta.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = nil
+		}
+		return
+	}
+	user = &userBeta
+	return
+}
+
+func (s serviceDB) GetUserByUsernameAndPassword(username, password string) (user *models.User, err error) {
+	row := s.db.QueryRow("SELECT users.id, users.email FROM users WHERE users.username = $1 AND users.password = $2", username, password)
+
+	var userBeta structure.User
+
+	err = row.Scan(&userBeta.ID, &userBeta.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = nil
+		}
+		return
+	}
+	user = &userBeta
+	user.Username = username
+	user.Password = password
 	return
 }
 
