@@ -1,16 +1,6 @@
 package main
 
-import (
-	"log"
-	"net/http"
-
-	"github.com/cfabrica46/go-crud/handler"
-	"github.com/cfabrica46/go-crud/middleware"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-)
-
-func runServer(portHTTP, portHTTPS string) {
+/* func runServer(portHTTP, portHTTPS string) {
 	// gin.SetMode(gin.ReleaseMode)
 	httpsRouter := setupRouterHTTPS()
 	httpRouter := setupRouterHTTP(portHTTPS)
@@ -21,9 +11,9 @@ func runServer(portHTTP, portHTTPS string) {
 	if err != nil {
 		log.Println(err)
 	}
-}
+} */
 
-func setupRouterHTTPS() (r *gin.Engine) {
+/* func setupRouterHTTPS() (r *gin.Engine) {
 	r = gin.Default()
 
 	setCors(r)
@@ -47,9 +37,9 @@ func setupRouterHTTPS() (r *gin.Engine) {
 		}
 	}
 	return
-}
+} */
 
-func setupRouterHTTP(portHTTPS string) (r *gin.Engine) {
+/* func setupRouterHTTP(portHTTPS string) (r *gin.Engine) {
 	r = gin.Default()
 	setCors(r)
 
@@ -57,10 +47,10 @@ func setupRouterHTTP(portHTTPS string) (r *gin.Engine) {
 		c.Redirect(http.StatusPermanentRedirect, "https://localhost:"+portHTTPS+c.Request.RequestURI)
 	})
 	return
-}
+} */
 
-func setCors(router *gin.Engine) {
+/* func setCors(router *gin.Engine) {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	router.Use(cors.New(config))
-}
+} */

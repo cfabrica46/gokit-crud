@@ -1,19 +1,6 @@
 package handler
 
-import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
-
-	"github.com/cfabrica46/go-crud/database/cache"
-	"github.com/cfabrica46/go-crud/database/userdb"
-	"github.com/cfabrica46/go-crud/structure"
-	"github.com/cfabrica46/go-crud/token"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-)
-
-func SignUp(c *gin.Context) {
+/* func SignUp(c *gin.Context) {
 	username := c.MustGet("username").(string)
 	password := c.MustGet("password").(string)
 	email := c.MustGet("email").(string)
@@ -56,9 +43,9 @@ func SignUp(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK, Content: userToken})
-}
+} */
 
-func SignIn(c *gin.Context) {
+/* func SignIn(c *gin.Context) {
 	username := c.MustGet("username").(string)
 	password := c.MustGet("password").(string)
 	// email := c.MustGet("email").(string)
@@ -95,9 +82,9 @@ func SignIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK, Content: userToken})
-}
+} */
 
-func LogOut(c *gin.Context) {
+/* func LogOut(c *gin.Context) {
 	userToken := c.MustGet("token").(string)
 
 	err := cache.DeleteTokenUsingValue(userToken)
@@ -107,4 +94,4 @@ func LogOut(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK})
-}
+} */

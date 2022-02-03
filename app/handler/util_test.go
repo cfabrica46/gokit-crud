@@ -1,12 +1,6 @@
 package handler
 
-import (
-	"encoding/hex"
-	"fmt"
-	"testing"
-)
-
-func TestNewSha256(t *testing.T) {
+/* func TestNewSha256(t *testing.T) {
 	for i, tt := range []struct {
 		in  []byte
 		out string
@@ -23,4 +17,4 @@ func TestNewSha256(t *testing.T) {
 		})
 	}
 
-}
+} */

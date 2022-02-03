@@ -1,16 +1,6 @@
 package middleware
 
-import (
-	"net/http"
-
-	"github.com/cfabrica46/go-crud/database/cache"
-	"github.com/cfabrica46/go-crud/structure"
-	"github.com/cfabrica46/go-crud/token"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-)
-
-func GetUserFromBody(c *gin.Context) {
+/* func GetUserFromBody(c *gin.Context) {
 	var user structure.User
 
 	err := c.BindJSON(&user)
@@ -23,9 +13,9 @@ func GetUserFromBody(c *gin.Context) {
 	c.Set("password", user.Password)
 	c.Set("email", user.Email)
 	c.Next()
-}
+} */
 
-func GetUserFromToken(c *gin.Context) {
+/* func GetUserFromToken(c *gin.Context) {
 	var tokenStructure structure.Token
 
 	err := c.BindHeader(&tokenStructure)
@@ -55,4 +45,4 @@ func GetUserFromToken(c *gin.Context) {
 	c.Set("email", email)
 	c.Set("token", tokenStructure.Token)
 	c.Next()
-}
+} */

@@ -19,5 +19,5 @@ func main() {
 	portHTTP := os.Getenv("PORT")
 	portHTTPS := os.Getenv("PORTHTTPS")
 
-	runServer(portHTTP, portHTTPS)
+	// runServer(portHTTP, portHTTPS)
 }
