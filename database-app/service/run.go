@@ -7,8 +7,13 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-func runServer() {
+func RunServer() {
 	svc := &serviceDB{}
+
+	err := svc.OpenDB(dbDriver, psqlInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	getAllUsersHandler := httptransport.NewServer(
 		makeGetAllUsersEndpoint(svc),

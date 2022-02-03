@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -10,6 +11,7 @@ func makeGetAllUsersEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		// req := request.(getAllUsersRequest)
 		users, err := svc.GetAllUsers()
+		fmt.Println(users, err)
 		if err != nil {
 			return getAllUsersResponse{users, err.Error()}, nil
 		}
