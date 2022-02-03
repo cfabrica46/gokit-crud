@@ -9,13 +9,12 @@ import (
 )
 
 type serviceDBInterface interface {
-	OpenDB() error
 	GetAllUsers() ([]models.User, error)
 	GetUserByID(int) (models.User, error)
 	GetUserByUsernameAndPassword(string, string) (models.User, error)
 	GetIDByUsername(string) (int, error)
 	InsertUser(string, string, string) error
-	DeleteUserByUsername(string) error
+	DeleteUserByUsername(string) (int, error)
 }
 
 type serviceDB struct {
@@ -125,7 +124,3 @@ func (s *serviceDB) DeleteUserByUsername(username string) (rowsAffected int, err
 	rowsAffected = int(count)
 	return
 }
-
-/* func (serviceDB) GetAllUsers() (users []models.User, err error) {
-	return
-} */
