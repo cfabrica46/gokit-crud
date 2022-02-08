@@ -2,16 +2,13 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-kit/kit/endpoint"
 )
 
 func makeGetAllUsersEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		// req := request.(getAllUsersRequest)
 		users, err := svc.GetAllUsers()
-		fmt.Println(users, err)
 		if err != nil {
 			return getAllUsersResponse{users, err.Error()}, nil
 		}
@@ -63,13 +60,13 @@ func makeInsertUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	}
 }
 
-func makeDeleteUserByUsernameEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func makeDeleteUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(deleteUserByUsernameRequest)
-		rowsAffected, err := svc.DeleteUserByUsername(req.Username)
+		req := request.(deleteUserRequest)
+		rowsAffected, err := svc.DeleteUser(req.Username, req.Password, req.Email)
 		if err != nil {
-			return deleteUserByUsernameResponse{rowsAffected, err.Error()}, nil
+			return deleteUserResponse{rowsAffected, err.Error()}, nil
 		}
-		return deleteUserByUsernameResponse{rowsAffected, ""}, nil
+		return deleteUserResponse{rowsAffected, ""}, nil
 	}
 }

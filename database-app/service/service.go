@@ -14,7 +14,7 @@ type serviceDBInterface interface {
 	GetUserByUsernameAndPassword(string, string) (models.User, error)
 	GetIDByUsername(string) (int, error)
 	InsertUser(string, string, string) error
-	DeleteUserByUsername(string) (int, error)
+	DeleteUser(string, string, string) (int, error)
 }
 
 type serviceDB struct {
@@ -113,13 +113,13 @@ func (s *serviceDB) InsertUser(username, password, email string) (err error) {
 	return
 }
 
-func (s *serviceDB) DeleteUserByUsername(username string) (rowsAffected int, err error) {
-	stmt, err := s.db.Prepare("DELETE FROM users WHERE username = $1")
+func (s *serviceDB) DeleteUser(username, password, email string) (rowsAffected int, err error) {
+	stmt, err := s.db.Prepare("DELETE FROM users WHERE username = $1 AND password = $2 AND email = $3")
 	if err != nil {
 		return
 	}
 
-	r, _ := stmt.Exec(username)
+	r, _ := stmt.Exec(username, password, email)
 	count, _ := r.RowsAffected()
 	rowsAffected = int(count)
 	return

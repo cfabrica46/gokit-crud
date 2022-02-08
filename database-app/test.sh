@@ -1,17 +1,18 @@
 # GetAllUsers
-# curl localhost:8080/users
+# curl -XGET localhost:8080/users
 
 # GetUserByID
-curl localhost:8080/user/1
+# curl -XGET localhost:8080/user/1
 
 # GetUserByUsernameAndPassword
-# curl -XPOST -d'{"username":"cesar","password":"caycho"}' localhost:8080/userByUsernameAndPassword
+# curl -XGET -d'{"username":"cesar","password":"01234"}' localhost:8080/user/username_password
 
 # GetIDByUsername
-# curl -XPOST -d'{"username":"cesar"}' localhost:8080/idByUsername
+# curl -XGET localhost:8080/id/cesar
 
 # Insert User
-# curl -XPOST -d'{"username":"cesar","password":"caycho","email":"cfabrica46@gmail.com"}' localhost:8080/insert
+# curl -XPOST -d'{"username":"arturo","password":"nava","email":"arthurnavah@gmail.com"}' localhost:8080/user
 
 # DeleteUserByUsername
-# curl -XPOST -d'{"username":"cesar"}' localhost:8080/delete
+# curl -XDELETE -d'{"username":"arturo","password":"nava","email":"arthurnavah@gmail.com"}' localhost:8080/user
+

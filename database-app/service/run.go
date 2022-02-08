@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func RunServer(port string) {
+func Run(port string) {
 	svc := &serviceDB{}
 
 	err := svc.OpenDB(dbDriver, psqlInfo)
@@ -29,7 +29,7 @@ func RunServer(port string) {
 		encodeResponse,
 	)
 
-	/* getUserByUsernameAndPasswordHandler := httptransport.NewServer(
+	getUserByUsernameAndPasswordHandler := httptransport.NewServer(
 		makeGetUserByUsernameAndPasswordEndpoint(svc),
 		decodeGetUserByUsernameAndPasswordRequest,
 		encodeResponse,
@@ -47,22 +47,19 @@ func RunServer(port string) {
 		encodeResponse,
 	)
 
-	deleteUserByUsernameHandler := httptransport.NewServer(
-		makeDeleteUserByUsernameEndpoint(svc),
-		decodeDeleteUserByUsernameRequest,
+	deleteUserHandler := httptransport.NewServer(
+		makeDeleteUserEndpoint(svc),
+		decodeDeleteUserRequest,
 		encodeResponse,
-	) */
+	)
 
 	r := mux.NewRouter()
 	r.Methods("GET").Path("/users").Handler(getAllUsersHandler)
 	r.Methods("GET").Path("/user/{id:[0-9]+}").Handler(getUserByIDHandler)
-
-	// http.Handle("/users", getAllUsersHandler)
-	// http.Handle("/user/:id", getUserByIDHandler)
-	// http.Handle("/user/usernamepassword", getUserByUsernameAndPasswordHandler)
-	// http.Handle("/id/username", getIDByUsernameHandler)
-	// http.Handle("/user/insert", insertUserHandler)
-	// http.Handle("/user/delete", deleteUserByUsernameHandler)
+	r.Methods("GET").Path("/user/username_password").Handler(getUserByUsernameAndPasswordHandler)
+	r.Methods("GET").Path("/id/{username}").Handler(getIDByUsernameHandler)
+	r.Methods("POST").Path("/user").Handler(insertUserHandler)
+	r.Methods("DELETE").Path("/user").Handler(deleteUserHandler)
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
 	log.Fatal(http.ListenAndServe(":"+port, r))

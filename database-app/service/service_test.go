@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 
@@ -19,6 +20,8 @@ func TestOpenDB(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
+
+			log.Println(dbDriver, psqlInfo)
 
 			s := getServiceDB()
 			err := s.OpenDB(tt.inDriver, tt.inInfo)
@@ -68,7 +71,7 @@ func TestGetAllUsers(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				defer s.DeleteUserByUsername(tt.in.Username)
+				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			}
 
 			_, err = s.GetAllUsers()
@@ -105,7 +108,7 @@ func TestGetUserByID(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				defer s.DeleteUserByUsername(tt.in.Username)
+				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			}
 
 			id, err := s.GetIDByUsername(tt.in.Username)
@@ -148,7 +151,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				defer s.DeleteUserByUsername(tt.in.Username)
+				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			}
 
 			user, err := s.GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
@@ -204,7 +207,7 @@ func TestInsertUser(t *testing.T) {
 			if err != nil {
 				result = err.Error()
 			}
-			defer s.DeleteUserByUsername(tt.in.Username)
+			defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 
 			if !strings.Contains(result, tt.out) {
 				t.Errorf("want %v; got %v", tt.out, result)
@@ -213,7 +216,7 @@ func TestInsertUser(t *testing.T) {
 	}
 }
 
-func TestDeleteUserbByUsername(t *testing.T) {
+func TestDeleteUser(t *testing.T) {
 	for i, tt := range []struct {
 		in              models.User
 		outRowsAffected int
@@ -249,7 +252,7 @@ func TestDeleteUserbByUsername(t *testing.T) {
 				}
 			}
 
-			rowsAffected, err := s.DeleteUserByUsername(tt.in.Username)
+			rowsAffected, err := s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			if err != nil {
 				result = err.Error()
 			}
