@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func decodeGetAllUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -16,9 +19,16 @@ func decodeGetAllUsersRequest(_ context.Context, r *http.Request) (interface{}, 
 
 func decodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request getUserByIDRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+
+	idString := mux.Vars(r)["id"]
+
+	id, err := strconv.Atoi(idString)
+	if err != nil {
 		return nil, err
 	}
+
+	request.ID = id
+
 	return request, nil
 }
 

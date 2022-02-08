@@ -1,7 +1,11 @@
 package main
 
-import "github.com/cfabrica46/gokit-crud/database-app/service"
+import (
+	"os"
+
+	"github.com/cfabrica46/gokit-crud/database-app/service"
+)
 
 func main() {
-	service.RunServer()
+	service.RunServer(os.Getenv("PORT"))
 }

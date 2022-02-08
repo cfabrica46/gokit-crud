@@ -6,9 +6,10 @@ import (
 	"os"
 
 	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
 )
 
-func RunServer() {
+func RunServer(port string) {
 	svc := &serviceDB{}
 
 	err := svc.OpenDB(dbDriver, psqlInfo)
@@ -28,7 +29,7 @@ func RunServer() {
 		encodeResponse,
 	)
 
-	getUserByUsernameAndPasswordHandler := httptransport.NewServer(
+	/* getUserByUsernameAndPasswordHandler := httptransport.NewServer(
 		makeGetUserByUsernameAndPasswordEndpoint(svc),
 		decodeGetUserByUsernameAndPasswordRequest,
 		encodeResponse,
@@ -50,15 +51,19 @@ func RunServer() {
 		makeDeleteUserByUsernameEndpoint(svc),
 		decodeDeleteUserByUsernameRequest,
 		encodeResponse,
-	)
+	) */
 
-	http.Handle("/users", getAllUsersHandler)
-	http.Handle("/userByID", getUserByIDHandler)
-	http.Handle("/userByUsernameAndPassword", getUserByUsernameAndPasswordHandler)
-	http.Handle("/idByUsername", getIDByUsernameHandler)
-	http.Handle("/insert", insertUserHandler)
-	http.Handle("/delete", deleteUserByUsernameHandler)
+	r := mux.NewRouter()
+	r.Methods("GET").Path("/users").Handler(getAllUsersHandler)
+	r.Methods("GET").Path("/user/{id:[0-9]+}").Handler(getUserByIDHandler)
 
-	log.Println("ListenAndServe on localhost:8080")
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
+	// http.Handle("/users", getAllUsersHandler)
+	// http.Handle("/user/:id", getUserByIDHandler)
+	// http.Handle("/user/usernamepassword", getUserByUsernameAndPasswordHandler)
+	// http.Handle("/id/username", getIDByUsernameHandler)
+	// http.Handle("/user/insert", insertUserHandler)
+	// http.Handle("/user/delete", deleteUserByUsernameHandler)
+
+	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
