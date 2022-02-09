@@ -13,14 +13,13 @@ func TestOpenDB(t *testing.T) {
 		inDriver, inInfo string
 		out              string
 	}{
-		{dbDriver, psqlInfo, ""},
-		{"", psqlInfo, "unknown driver"},
-		{dbDriver, "", "connection refused"},
+		{DBDriver, PsqlInfo, ""},
+		{"", PsqlInfo, "unknown driver"},
+		{DBDriver, "", "connection refused"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-
-			s := getServiceDB()
+			s := GetServiceDB()
 			err := s.OpenDB(tt.inDriver, tt.inInfo)
 			if err != nil {
 				result = err.Error()
@@ -46,9 +45,9 @@ func TestGetAllUsers(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
 
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -68,7 +67,7 @@ func TestGetAllUsers(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				defer s.DeleteUserByUsername(tt.in.Username)
+				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			}
 
 			_, err = s.GetAllUsers()
@@ -92,9 +91,9 @@ func TestGetUserByID(t *testing.T) {
 		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -105,7 +104,7 @@ func TestGetUserByID(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				defer s.DeleteUserByUsername(tt.in.Username)
+				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			}
 
 			id, err := s.GetIDByUsername(tt.in.Username)
@@ -135,9 +134,9 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -148,7 +147,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				defer s.DeleteUserByUsername(tt.in.Username)
+				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			}
 
 			user, err := s.GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
@@ -176,9 +175,9 @@ func TestInsertUser(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
 
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -204,7 +203,7 @@ func TestInsertUser(t *testing.T) {
 			if err != nil {
 				result = err.Error()
 			}
-			defer s.DeleteUserByUsername(tt.in.Username)
+			defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 
 			if !strings.Contains(result, tt.out) {
 				t.Errorf("want %v; got %v", tt.out, result)
@@ -213,7 +212,7 @@ func TestInsertUser(t *testing.T) {
 	}
 }
 
-func TestDeleteUserbByUsername(t *testing.T) {
+func TestDeleteUser(t *testing.T) {
 	for i, tt := range []struct {
 		in              models.User
 		outRowsAffected int
@@ -225,9 +224,9 @@ func TestDeleteUserbByUsername(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
 
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -249,7 +248,7 @@ func TestDeleteUserbByUsername(t *testing.T) {
 				}
 			}
 
-			rowsAffected, err := s.DeleteUserByUsername(tt.in.Username)
+			rowsAffected, err := s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 			if err != nil {
 				result = err.Error()
 			}

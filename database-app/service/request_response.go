@@ -53,12 +53,14 @@ type insertUserResponse struct {
 	Err string `json:"err,omitempty"`
 }
 
-// DeleteUserByUsername
-type deleteUserByUsernameRequest struct {
+// DeleteUser
+type deleteUserRequest struct {
 	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
-type deleteUserByUsernameResponse struct {
+type deleteUserResponse struct {
 	RowsAffected int    `json:"rowsAffected"`
 	Err          string `json:"err,omitempty"`
 }
