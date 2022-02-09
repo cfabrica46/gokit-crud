@@ -9,12 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func decodeGetAllUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetAllUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request getAllUsersRequest
 	return request, nil
 }
 
-func decodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request getUserByIDRequest
 
 	idString := mux.Vars(r)["id"]
@@ -26,7 +26,7 @@ func decodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, 
 	return request, nil
 }
 
-func decodeGetUserByUsernameAndPasswordRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetUserByUsernameAndPasswordRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request getUserByUsernameAndPasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func decodeGetUserByUsernameAndPasswordRequest(_ context.Context, r *http.Reques
 	return request, nil
 }
 
-func decodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request getIDByUsernameRequest
 
 	username := mux.Vars(r)["username"]
@@ -43,7 +43,7 @@ func decodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface
 	return request, nil
 }
 
-func decodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request insertUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func decodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	return request, nil
 }
 
-func decodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request deleteUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
@@ -59,6 +59,6 @@ func decodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	return request, nil
 }
 
-func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	return json.NewEncoder(w).Encode(response)
 }

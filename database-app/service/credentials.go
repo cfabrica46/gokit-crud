@@ -16,7 +16,7 @@ func init() {
 		PSQLUser = os.Getenv("POSTGRES_USERNAME")
 		PSQLPassword = os.Getenv("POSTGRES_PASSWORD")
 		PSQLDBName = os.Getenv("POSTGRES_DB")
-		psqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)
+		PsqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)
 	}
 }
 
@@ -29,6 +29,6 @@ var (
 	PSQLSSL      = "disable"
 )
 
-const dbDriver = "postgres"
+const DBDriver = "postgres"
 
-var psqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)
+var PsqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)

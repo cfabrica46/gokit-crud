@@ -1,5 +1,5 @@
 # GetAllUsers
-# curl -XGET localhost:8080/users
+curl -XGET localhost:8080/users
 
 # GetUserByID
 # curl -XGET localhost:8080/user/1

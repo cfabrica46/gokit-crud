@@ -13,13 +13,13 @@ func TestOpenDB(t *testing.T) {
 		inDriver, inInfo string
 		out              string
 	}{
-		{dbDriver, psqlInfo, ""},
-		{"", psqlInfo, "unknown driver"},
-		{dbDriver, "", "connection refused"},
+		{DBDriver, PsqlInfo, ""},
+		{"", PsqlInfo, "unknown driver"},
+		{DBDriver, "", "connection refused"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-			s := getServiceDB()
+			s := GetServiceDB()
 			err := s.OpenDB(tt.inDriver, tt.inInfo)
 			if err != nil {
 				result = err.Error()
@@ -45,9 +45,9 @@ func TestGetAllUsers(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
 
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -91,9 +91,9 @@ func TestGetUserByID(t *testing.T) {
 		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -134,9 +134,9 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -175,9 +175,9 @@ func TestInsertUser(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
 
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}
@@ -224,9 +224,9 @@ func TestDeleteUser(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
 
-			s := getServiceDB()
+			s := GetServiceDB()
 
-			err := s.OpenDB(dbDriver, psqlInfo)
+			err := s.OpenDB(DBDriver, PsqlInfo)
 			if err != nil {
 				t.Error(err)
 			}

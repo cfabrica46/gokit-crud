@@ -19,7 +19,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 		{&http.Request{}, &getAllUsersRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := decodeGetAllUsersRequest(context.TODO(), tt.in)
+			result, err := DecodeGetAllUsersRequest(context.TODO(), tt.in)
 			if err != nil {
 				if err.Error() != tt.outError {
 					t.Errorf("want %v; got %v", tt.outError, err)
@@ -49,7 +49,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 		{req, &getUserByIDRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := decodeGetUserByIDRequest(context.TODO(), tt.in)
+			result, err := DecodeGetUserByIDRequest(context.TODO(), tt.in)
 			if err != nil {
 				if err.Error() != tt.outError {
 					t.Errorf("want %v; got %v", tt.outError, err)
@@ -95,7 +95,7 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := decodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
+			result, err := DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
 			if err != nil {
 				if err.Error() != tt.outError {
 					t.Errorf("want %v; got %v", tt.outError, err)
@@ -132,7 +132,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 		{req, &getIDByUsernameRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := decodeGetIDByUsernameRequest(context.TODO(), tt.in)
+			result, err := DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
 			if err != nil {
 				if err.Error() != tt.outError {
 					t.Errorf("want %v; got %v", tt.outError, err)
@@ -180,7 +180,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := decodeInsertUserRequest(context.TODO(), tt.in)
+			result, err := DecodeInsertUserRequest(context.TODO(), tt.in)
 			if err != nil {
 				if err.Error() != tt.outError {
 					t.Errorf("want %v; got %v", tt.outError, err)
@@ -235,7 +235,7 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := decodeDeleteUserRequest(context.TODO(), tt.in)
+			result, err := DecodeDeleteUserRequest(context.TODO(), tt.in)
 			if err != nil {
 				if err.Error() != tt.outError {
 					t.Errorf("want %v; got %v", tt.outError, err)
@@ -263,7 +263,7 @@ func TestEncodeResponse(t *testing.T) {
 		{"test", ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			err := encodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
+			err := EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
 			if err != nil {
 				if err.Error() == tt.outError {
 					t.Errorf("want %v; got %v", tt.outError, err)

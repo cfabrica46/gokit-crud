@@ -22,8 +22,8 @@ type serviceDB struct {
 	once sync.Once
 }
 
-func getServiceDB() serviceDB {
-	return serviceDB{once: sync.Once{}}
+func GetServiceDB() *serviceDB {
+	return &serviceDB{once: sync.Once{}}
 }
 
 func (s *serviceDB) OpenDB(dbDriver, psqlInfo string) (err error) {
