@@ -2,12 +2,14 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
 func init() {
+	log.SetFlags(log.Lshortfile)
 	if err := godotenv.Load("./../.env"); err == nil {
 		PSQLHost = os.Getenv("POSTGRES_HOST")
 		PSQLPort = os.Getenv("POSTGRES_PORT")

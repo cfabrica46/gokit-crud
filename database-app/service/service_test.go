@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -20,9 +19,6 @@ func TestOpenDB(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-
-			log.Println(dbDriver, psqlInfo)
-
 			s := getServiceDB()
 			err := s.OpenDB(tt.inDriver, tt.inInfo)
 			if err != nil {

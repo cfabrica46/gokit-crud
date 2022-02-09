@@ -1,26 +1,31 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
 func TestDecodeGetAllUsersRequest(t *testing.T) {
 	for i, tt := range []struct {
 		in       *http.Request
-		out      getAllUsersRequest
-		outError error
+		out      *getAllUsersRequest
+		outError string
 	}{
-		{&http.Request{}, getAllUsersRequest{}, nil},
+		{&http.Request{}, &getAllUsersRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			result, err := decodeGetAllUsersRequest(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				if err.Error() != tt.outError {
+					t.Errorf("want %v; got %v", tt.outError, err)
+				}
 			}
-			if result != tt.out {
+			if result != *tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
@@ -29,7 +34,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 
 func TestDecodeGetUserByIDRequest(t *testing.T) {
 	id := 1
-	url := fmt.Sprintf("loclahost:8080/user/%d", id)
+	url := fmt.Sprintf("localhost:8080/user/%d", id)
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -38,75 +43,233 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      getUserByIDRequest
-		outError error
+		out      *getUserByIDRequest
+		outError string
 	}{
-		{req, getUserByIDRequest{}, nil},
+		{req, &getUserByIDRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			result, err := decodeGetUserByIDRequest(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				if err.Error() != tt.outError {
+					t.Errorf("want %v; got %v", tt.outError, err)
+				}
 			}
-			if result != tt.out {
+			if result != *tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
 }
 
-/* func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
-	id := 1
-	url := fmt.Sprintf("loclahost:8080/user/%d", id)
+func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
+	url := "localhost:8080/user/username_password"
 
-	req, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
+	dataJSON, err := json.Marshal(struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}{
+		"cesar",
+		"01234",
+	})
 	if err != nil {
 		t.Error(err)
 	}
+
+	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		t.Error(err)
+	}
+
 	for i, tt := range []struct {
 		in       *http.Request
-		out      getUserByIDRequest
-		outError error
+		out      *getUserByUsernameAndPasswordRequest
+		outError string
 	}{
-		{req, getUserByIDRequest{}, nil},
+		{goodReq, &getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
+		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := decodeGetUserByIDRequest(context.TODO(), tt.in)
+			result, err := decodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				if err.Error() != tt.outError {
+					t.Errorf("want %v; got %v", tt.outError, err)
+				}
 			}
-			if result != tt.out {
+
+			if tt.out == nil {
+				if result != nil {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			} else {
+				if result != *tt.out {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			}
+		})
+	}
+}
+
+func TestDecodeGetIDByUsernameRequest(t *testing.T) {
+	username := "cesar"
+	url := fmt.Sprintf("localhost:8080/id/%s", username)
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, tt := range []struct {
+		in       *http.Request
+		out      *getIDByUsernameRequest
+		outError string
+	}{
+		{req, &getIDByUsernameRequest{}, ""},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			result, err := decodeGetIDByUsernameRequest(context.TODO(), tt.in)
+			if err != nil {
+				if err.Error() != tt.outError {
+					t.Errorf("want %v; got %v", tt.outError, err)
+				}
+			}
+			if result != *tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
-} */
-
-/* func decodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request getIDByUsernameRequest
-
-	username := mux.Vars(r)["username"]
-	request.Username = username
-
-	return request, nil
-} */
-
-/* func decodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request insertUserRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
-	}
-	return request, nil
-} */
-
-/* func decodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request deleteUserRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
-	}
-	return request, nil
 }
-*/
-/* func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	return json.NewEncoder(w).Encode(response)
-} */
+
+func TestDecodeInsertUserRequest(t *testing.T) {
+	url := "localhost:8080/user"
+
+	dataJSON, err := json.Marshal(struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		Email    string `json:"email"`
+	}{
+		"cesar",
+		"01234",
+		"cesar@gmail.com",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, tt := range []struct {
+		in       *http.Request
+		out      *insertUserRequest
+		outError string
+	}{
+		{goodReq, &insertUserRequest{"cesar", "01234", "cesar@gmail.com"}, ""},
+		{badReq, nil, "EOF"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			result, err := decodeInsertUserRequest(context.TODO(), tt.in)
+			if err != nil {
+				if err.Error() != tt.outError {
+					t.Errorf("want %v; got %v", tt.outError, err)
+				}
+			}
+
+			if tt.out == nil {
+				if result != nil {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			} else {
+				if result != *tt.out {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			}
+		})
+	}
+}
+
+func TestDecodeDeleteUserRequest(t *testing.T) {
+	url := "localhost:8080/user"
+
+	dataJSON, err := json.Marshal(struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		Email    string `json:"email"`
+	}{
+		"cesar",
+		"01234",
+		"cesar@gmail.com",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	goodReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, tt := range []struct {
+		in       *http.Request
+		out      *deleteUserRequest
+		outError string
+	}{
+		{goodReq, &deleteUserRequest{"cesar", "01234", "cesar@gmail.com"}, ""},
+		{badReq, nil, "EOF"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			result, err := decodeDeleteUserRequest(context.TODO(), tt.in)
+			if err != nil {
+				if err.Error() != tt.outError {
+					t.Errorf("want %v; got %v", tt.outError, err)
+				}
+			}
+
+			if tt.out == nil {
+				if result != nil {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			} else {
+				if result != *tt.out {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			}
+		})
+	}
+}
+
+func TestEncodeResponse(t *testing.T) {
+	for i, tt := range []struct {
+		in       string
+		outError string
+	}{
+		{"test", ""},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			err := encodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
+			if err != nil {
+				if err.Error() == tt.outError {
+					t.Errorf("want %v; got %v", tt.outError, err)
+				}
+			}
+
+		})
+	}
+}
