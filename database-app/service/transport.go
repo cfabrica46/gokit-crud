@@ -19,10 +19,8 @@ func decodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, 
 
 	idString := mux.Vars(r)["id"]
 
-	id, err := strconv.Atoi(idString)
-	if err != nil {
-		return nil, err
-	}
+	// router doesn't allow a non-integer value to be declared
+	id, _ := strconv.Atoi(idString)
 	request.ID = id
 
 	return request, nil

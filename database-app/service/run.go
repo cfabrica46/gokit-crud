@@ -54,12 +54,12 @@ func Run(port string) {
 	)
 
 	r := mux.NewRouter()
-	r.Methods("GET").Path("/users").Handler(getAllUsersHandler)
-	r.Methods("GET").Path("/user/{id:[0-9]+}").Handler(getUserByIDHandler)
-	r.Methods("GET").Path("/user/username_password").Handler(getUserByUsernameAndPasswordHandler)
-	r.Methods("GET").Path("/id/{username}").Handler(getIDByUsernameHandler)
-	r.Methods("POST").Path("/user").Handler(insertUserHandler)
-	r.Methods("DELETE").Path("/user").Handler(deleteUserHandler)
+	r.Methods(http.MethodGet).Path("/users").Handler(getAllUsersHandler)
+	r.Methods(http.MethodGet).Path("/user/{id:[0-9]+}").Handler(getUserByIDHandler)
+	r.Methods(http.MethodGet).Path("/user/username_password").Handler(getUserByUsernameAndPasswordHandler)
+	r.Methods(http.MethodGet).Path("/id/{username}").Handler(getIDByUsernameHandler)
+	r.Methods(http.MethodPost).Path("/user").Handler(insertUserHandler)
+	r.Methods(http.MethodDelete).Path("/user").Handler(deleteUserHandler)
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
 	log.Fatal(http.ListenAndServe(":"+port, r))
