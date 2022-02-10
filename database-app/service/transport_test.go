@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -19,12 +20,17 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 		{&http.Request{}, &getAllUsersRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
 			result, err := DecodeGetAllUsersRequest(context.TODO(), tt.in)
 			if err != nil {
-				if err.Error() != tt.outError {
-					t.Errorf("want %v; got %v", tt.outError, err)
-				}
+				resultErr = err.Error()
 			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			}
+
 			if result != *tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -49,12 +55,17 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 		{req, &getUserByIDRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
 			result, err := DecodeGetUserByIDRequest(context.TODO(), tt.in)
 			if err != nil {
-				if err.Error() != tt.outError {
-					t.Errorf("want %v; got %v", tt.outError, err)
-				}
+				resultErr = err.Error()
 			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			}
+
 			if result != *tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -95,11 +106,15 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			result, err := DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
+			var result interface{}
+			var resultErr string
+
+			result, err = DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
 			if err != nil {
-				if err.Error() != tt.outError {
-					t.Errorf("want %v; got %v", tt.outError, err)
-				}
+				resultErr = err.Error()
+			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
 
 			if tt.out == nil {
@@ -132,12 +147,17 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 		{req, &getIDByUsernameRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
 			result, err := DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
 			if err != nil {
-				if err.Error() != tt.outError {
-					t.Errorf("want %v; got %v", tt.outError, err)
-				}
+				resultErr = err.Error()
 			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			}
+
 			if result != *tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -180,11 +200,15 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
 			result, err := DecodeInsertUserRequest(context.TODO(), tt.in)
 			if err != nil {
-				if err.Error() != tt.outError {
-					t.Errorf("want %v; got %v", tt.outError, err)
-				}
+				resultErr = err.Error()
+			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
 
 			if tt.out == nil {
@@ -235,11 +259,15 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
 			result, err := DecodeDeleteUserRequest(context.TODO(), tt.in)
 			if err != nil {
-				if err.Error() != tt.outError {
-					t.Errorf("want %v; got %v", tt.outError, err)
-				}
+				resultErr = err.Error()
+			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, result)
 			}
 
 			if tt.out == nil {
@@ -263,13 +291,15 @@ func TestEncodeResponse(t *testing.T) {
 		{"test", ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var resultErr string
+
 			err := EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
 			if err != nil {
-				if err.Error() == tt.outError {
-					t.Errorf("want %v; got %v", tt.outError, err)
-				}
+				resultErr = err.Error()
 			}
-
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			}
 		})
 	}
 }
