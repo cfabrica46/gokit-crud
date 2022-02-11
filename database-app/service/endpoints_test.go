@@ -51,12 +51,12 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	}
 }
 
-/* func TestMakeGetUserByIDEndpoint(t *testing.T) {
+func TestMakeGetUserByIDEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  getUserByIDRequest
 		out string
 	}{
-		{getUserByIDRequest{}, ""},
+		{getUserByIDRequest{1}, ""},
 		{getUserByIDRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -93,14 +93,14 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			}
 		})
 	}
-} */
+}
 
-/* func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
+func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  getUserByUsernameAndPasswordRequest
 		out string
 	}{
-		{getUserByUsernameAndPasswordRequest{}, ""},
+		{getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
 		{getUserByUsernameAndPasswordRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -137,14 +137,14 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			}
 		})
 	}
-} */
+}
 
-/* func TestGetIDByUsernameEndpoint(t *testing.T) {
+func TestGetIDByUsernameEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  getIDByUsernameRequest
 		out string
 	}{
-		{getIDByUsernameRequest{}, ""},
+		{getIDByUsernameRequest{"cesar"}, ""},
 		{getIDByUsernameRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -181,9 +181,9 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			}
 		})
 	}
-} */
+}
 
-/* func TestMakeInsertUserEndpoint(t *testing.T) {
+func TestMakeInsertUserEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  insertUserRequest
 		out string
@@ -225,9 +225,9 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			}
 		})
 	}
-} */
+}
 
-/* func TestMakeDeleteUserEndpoint(t *testing.T) {
+func TestMakeDeleteUserEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  deleteUserRequest
 		out string
@@ -269,4 +269,4 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			}
 		})
 	}
-} */
+}
