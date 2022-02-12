@@ -20,7 +20,7 @@ func main() {
 }
 
 func runServer(port string) {
-	svc := service.GetServiceDB()
+	svc := service.GetService()
 
 	err := svc.OpenDB(service.DBDriver, service.PsqlInfo)
 	if err != nil {

@@ -1,23 +1,19 @@
 package main
 
 import (
+	"log"
 	"os"
 
-	"github.com/go-kit/kit/log"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-
-	logger := log.NewLogfmtLogger(os.Stderr)
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		// log.Println("unread .env")
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println(".env loaded")
 	}
 
-	portHTTP := os.Getenv("PORT")
-	portHTTPS := os.Getenv("PORTHTTPS")
+	runServer(os.Getenv("PORT"))
+}
 
-	// runServer(portHTTP, portHTTPS)
+func runServer(port string) {
 }

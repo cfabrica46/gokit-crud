@@ -10,7 +10,7 @@ import (
 
 func init() {
 	log.SetFlags(log.Lshortfile)
-	if err := godotenv.Load("./../.env"); err == nil {
+	if err := godotenv.Load(".env"); err == nil {
 		PSQLHost = os.Getenv("POSTGRES_HOST")
 		PSQLPort = os.Getenv("POSTGRES_PORT")
 		PSQLUser = os.Getenv("POSTGRES_USERNAME")

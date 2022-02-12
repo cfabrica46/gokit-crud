@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-func MakeGetAllUsersEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		users, err := svc.GetAllUsers()
 		if err != nil {
@@ -16,7 +16,7 @@ func MakeGetAllUsersEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeGetUserByIDEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(getUserByIDRequest)
 		user, err := svc.GetUserByID(req.ID)
@@ -27,7 +27,7 @@ func MakeGetUserByIDEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(getUserByUsernameAndPasswordRequest)
 		user, err := svc.GetUserByUsernameAndPassword(req.Username, req.Password)
@@ -38,7 +38,7 @@ func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceDBInterface) endpoint.E
 	}
 }
 
-func MakeGetIDByUsernameEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(getIDByUsernameRequest)
 		id, err := svc.GetIDByUsername(req.Username)
@@ -49,7 +49,7 @@ func MakeGetIDByUsernameEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeInsertUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(insertUserRequest)
 		err := svc.InsertUser(req.Username, req.Password, req.Email)
@@ -60,7 +60,7 @@ func MakeInsertUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeDeleteUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(deleteUserRequest)
 		rowsAffected, err := svc.DeleteUser(req.Username, req.Password, req.Email)

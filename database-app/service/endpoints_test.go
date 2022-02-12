@@ -17,7 +17,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
 			//OpenDB
 			err := svc.OpenDB(DBDriver, PsqlInfo)
@@ -61,7 +61,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
 			//OpenDB
 			err := svc.OpenDB(DBDriver, PsqlInfo)
@@ -105,7 +105,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
 			//OpenDB
 			err := svc.OpenDB(DBDriver, PsqlInfo)
@@ -149,7 +149,7 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
 			//OpenDB
 			err := svc.OpenDB(DBDriver, PsqlInfo)
@@ -193,7 +193,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
 			//OpenDB
 			err := svc.OpenDB(DBDriver, PsqlInfo)
@@ -237,7 +237,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
 			//OpenDB
 			err := svc.OpenDB(DBDriver, PsqlInfo)

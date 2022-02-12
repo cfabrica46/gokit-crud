@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type serviceDBInterface interface {
+type serviceInterface interface {
 	GetAllUsers() ([]models.User, error)
 	GetUserByID(int) (models.User, error)
 	GetUserByUsernameAndPassword(string, string) (models.User, error)
@@ -17,16 +17,16 @@ type serviceDBInterface interface {
 	DeleteUser(string, string, string) (int, error)
 }
 
-type serviceDB struct {
+type service struct {
 	db   *sql.DB
 	once sync.Once
 }
 
-func GetServiceDB() *serviceDB {
-	return &serviceDB{once: sync.Once{}}
+func GetService() *service {
+	return &service{once: sync.Once{}}
 }
 
-func (s *serviceDB) OpenDB(dbDriver, psqlInfo string) (err error) {
+func (s *service) OpenDB(dbDriver, psqlInfo string) (err error) {
 	s.once.Do(func() {
 		s.db, err = sql.Open(dbDriver, psqlInfo)
 		if err != nil {
@@ -40,7 +40,7 @@ func (s *serviceDB) OpenDB(dbDriver, psqlInfo string) (err error) {
 	return
 }
 
-func (s serviceDB) GetAllUsers() (users []models.User, err error) {
+func (s service) GetAllUsers() (users []models.User, err error) {
 	rows, err := s.db.Query("SELECT users.id,users.username,users.email FROM users")
 	if err != nil {
 		return
@@ -54,7 +54,7 @@ func (s serviceDB) GetAllUsers() (users []models.User, err error) {
 	return
 }
 
-func (s serviceDB) GetUserByID(id int) (user models.User, err error) {
+func (s service) GetUserByID(id int) (user models.User, err error) {
 	row := s.db.QueryRow("SELECT users.id,users.username,users.password,users.email FROM users WHERE users.id = $1", id)
 
 	var userBeta models.User
@@ -69,7 +69,7 @@ func (s serviceDB) GetUserByID(id int) (user models.User, err error) {
 	return
 }
 
-func (s serviceDB) GetUserByUsernameAndPassword(username, password string) (user models.User, err error) {
+func (s service) GetUserByUsernameAndPassword(username, password string) (user models.User, err error) {
 	row := s.db.QueryRow("SELECT users.id, users.email FROM users WHERE users.username = $1 AND users.password = $2", username, password)
 
 	var userBeta models.User
@@ -87,7 +87,7 @@ func (s serviceDB) GetUserByUsernameAndPassword(username, password string) (user
 	return
 }
 
-func (s serviceDB) GetIDByUsername(username string) (id int, err error) {
+func (s service) GetIDByUsername(username string) (id int, err error) {
 	row := s.db.QueryRow("SELECT users.id FROM users WHERE users.username = $1", username)
 
 	err = row.Scan(&id)
@@ -100,7 +100,7 @@ func (s serviceDB) GetIDByUsername(username string) (id int, err error) {
 	return
 }
 
-func (s *serviceDB) InsertUser(username, password, email string) (err error) {
+func (s *service) InsertUser(username, password, email string) (err error) {
 	stmt, err := s.db.Prepare("INSERT INTO users(username,password,email) VALUES ($1,$2,$3)")
 	if err != nil {
 		return
@@ -113,7 +113,7 @@ func (s *serviceDB) InsertUser(username, password, email string) (err error) {
 	return
 }
 
-func (s *serviceDB) DeleteUser(username, password, email string) (rowsAffected int, err error) {
+func (s *service) DeleteUser(username, password, email string) (rowsAffected int, err error) {
 	stmt, err := s.db.Prepare("DELETE FROM users WHERE username = $1 AND password = $2 AND email = $3")
 	if err != nil {
 		return
