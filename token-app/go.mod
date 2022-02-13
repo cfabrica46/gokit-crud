@@ -4,6 +4,8 @@ go 1.17
 
 require (
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/golang-jwt/jwt/v4 v4.3.0
+	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
 )
 
