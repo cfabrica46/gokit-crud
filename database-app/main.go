@@ -8,14 +8,9 @@ import (
 	"github.com/cfabrica46/gokit-crud/database-app/service"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println(".env loaded")
-	}
-
 	runServer(os.Getenv("PORT"))
 }
 
