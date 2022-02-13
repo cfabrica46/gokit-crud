@@ -1,7 +1,9 @@
 package service
 
 import (
-	_ "github.com/lib/pq"
+	"sync"
+
+	"github.com/go-redis/redis"
 )
 
 type serviceInterface interface {
@@ -9,10 +11,28 @@ type serviceInterface interface {
 	ExtractData(string) (int, string, string, error)
 }
 
-type service struct{}
+type service struct {
+	db   *redis.Client
+	once sync.Once
+}
 
 func GetService() *service {
 	return &service{}
+}
+
+func (s *service) OpenDB() (err error) {
+	s.once.Do(func() {
+
+		/* s.db, err = sql.Open(dbDriver, psqlInfo)
+		if err != nil {
+			return
+		}
+		err = s.db.Ping()
+		if err != nil {
+			return
+		} */
+	})
+	return
 }
 
 func (s service) GenerateToken(id int, username, email string) (token string, err error) {
