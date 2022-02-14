@@ -1,170 +1,29 @@
 package service
 
-/* func TestDecodeGetAllUsersRequest(t *testing.T) {
-	for i, tt := range []struct {
-		in       *http.Request
-		out      *getAllUsersRequest
-		outError string
-	}{
-		{&http.Request{}, &getAllUsersRequest{}, ""},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
-			var resultErr string
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+)
 
-			result, err := DecodeGetAllUsersRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
-			}
-
-			if result != *tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
-		})
-	}
-} */
-
-/* func TestDecodeGetUserByIDRequest(t *testing.T) {
-	id := 1
-	url := fmt.Sprintf("localhost:8080/user/%d", id)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	for i, tt := range []struct {
-		in       *http.Request
-		out      *getUserByIDRequest
-		outError string
-	}{
-		{req, &getUserByIDRequest{}, ""},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
-			var resultErr string
-
-			result, err := DecodeGetUserByIDRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
-			}
-
-			if result != *tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
-		})
-	}
-} */
-
-/* func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
-	url := "localhost:8080/user/username_password"
+func TestDecodeGenerateToken(t *testing.T) {
+	url := "localhost:8080/generate"
 
 	dataJSON, err := json.Marshal(struct {
+		ID       int    `json:"id"`
 		Username string `json:"username"`
-		Password string `json:"password"`
-	}{
-		"cesar",
-		"01234",
-	})
-	if err != nil {
-		t.Error(err)
-	}
-
-	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
-	if err != nil {
-		t.Error(err)
-	}
-
-	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		t.Error(err)
-	}
-
-	for i, tt := range []struct {
-		in       *http.Request
-		out      *getUserByUsernameAndPasswordRequest
-		outError string
-	}{
-		{goodReq, &getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{badReq, nil, "EOF"},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
-			var resultErr string
-
-			result, err = DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
-			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			}
-		})
-	}
-} */
-
-/* func TestDecodeGetIDByUsernameRequest(t *testing.T) {
-	username := "cesar"
-	url := fmt.Sprintf("localhost:8080/id/%s", username)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	for i, tt := range []struct {
-		in       *http.Request
-		out      *getIDByUsernameRequest
-		outError string
-	}{
-		{req, &getIDByUsernameRequest{}, ""},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
-			var resultErr string
-
-			result, err := DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
-			}
-
-			if result != *tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
-		})
-	}
-} */
-
-/* func TestDecodeInsertUserRequest(t *testing.T) {
-	url := "localhost:8080/user"
-
-	dataJSON, err := json.Marshal(struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
 		Email    string `json:"email"`
+		Secret   string `json:"secret"`
 	}{
+		1,
 		"cesar",
-		"01234",
-		"cesar@gmail.com",
+		"cesar@email.com",
+		"secret",
 	})
 	if err != nil {
 		t.Error(err)
@@ -182,17 +41,17 @@ package service
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *insertUserRequest
+		out      *generateTokenRequest
 		outError string
 	}{
-		{goodReq, &insertUserRequest{"cesar", "01234", "cesar@gmail.com"}, ""},
+		{goodReq, &generateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			result, err := DecodeInsertUserRequest(context.TODO(), tt.in)
+			result, err = DecodeGenerateTokenRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -211,19 +70,127 @@ package service
 			}
 		})
 	}
-} */
+}
 
-/* func TestDecodeDeleteUserRequest(t *testing.T) {
-	url := "localhost:8080/user"
+func TestDecodeExtractToken(t *testing.T) {
+	url := "localhost:8080/extract"
 
 	dataJSON, err := json.Marshal(struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-		Email    string `json:"email"`
+		Token  string `json:"token"`
+		Secret string `json:"secret"`
 	}{
-		"cesar",
-		"01234",
-		"cesar@gmail.com",
+		"token",
+		"secret",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, tt := range []struct {
+		in       *http.Request
+		out      *extractTokenRequest
+		outError string
+	}{
+		{goodReq, &extractTokenRequest{"token", "secret"}, ""},
+		{badReq, nil, "EOF"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
+			result, err = DecodeExtractTokenRequest(context.TODO(), tt.in)
+			if err != nil {
+				resultErr = err.Error()
+			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			}
+
+			if tt.out == nil {
+				if result != nil {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			} else {
+				if result != *tt.out {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			}
+		})
+	}
+}
+
+func TestDecodeSetToken(t *testing.T) {
+	url := "localhost:8080/token"
+
+	dataJSON, err := json.Marshal(struct {
+		Token string `json:"token"`
+	}{
+		"token",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, tt := range []struct {
+		in       *http.Request
+		out      *setTokenRequest
+		outError string
+	}{
+		{goodReq, &setTokenRequest{"token"}, ""},
+		{badReq, nil, "EOF"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
+			result, err = DecodeSetTokenRequest(context.TODO(), tt.in)
+			if err != nil {
+				resultErr = err.Error()
+			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			}
+
+			if tt.out == nil {
+				if result != nil {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			} else {
+				if result != *tt.out {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			}
+		})
+	}
+}
+
+func TestDecodeDeleteToken(t *testing.T) {
+	url := "localhost:8080/token"
+
+	dataJSON, err := json.Marshal(struct {
+		Token string `json:"token"`
+	}{
+		"token",
 	})
 	if err != nil {
 		t.Error(err)
@@ -241,22 +208,22 @@ package service
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *deleteUserRequest
+		out      *deleteTokenRequest
 		outError string
 	}{
-		{goodReq, &deleteUserRequest{"cesar", "01234", "cesar@gmail.com"}, ""},
+		{goodReq, &deleteTokenRequest{"token"}, ""},
 		{badReq, nil, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			result, err := DecodeDeleteUserRequest(context.TODO(), tt.in)
+			result, err = DecodeDeleteTokenRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, result)
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
 
 			if tt.out == nil {
@@ -270,9 +237,64 @@ package service
 			}
 		})
 	}
-} */
+}
 
-/* func TestEncodeResponse(t *testing.T) {
+func TestDecodeCheckToken(t *testing.T) {
+	url := "localhost:8080/Check"
+
+	dataJSON, err := json.Marshal(struct {
+		Token string `json:"token"`
+	}{
+		"token",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, tt := range []struct {
+		in       *http.Request
+		out      *checkTokenRequest
+		outError string
+	}{
+		{goodReq, &checkTokenRequest{"token"}, ""},
+		{badReq, nil, "EOF"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var result interface{}
+			var resultErr string
+
+			result, err = DecodeCheckTokenRequest(context.TODO(), tt.in)
+			if err != nil {
+				resultErr = err.Error()
+			}
+			if !strings.Contains(resultErr, tt.outError) {
+				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			}
+
+			if tt.out == nil {
+				if result != nil {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			} else {
+				if result != *tt.out {
+					t.Errorf("want %v; got %v", tt.out, result)
+				}
+			}
+		})
+	}
+}
+
+func TestEncodeResponse(t *testing.T) {
 	for i, tt := range []struct {
 		in       string
 		outError string
@@ -291,4 +313,4 @@ package service
 			}
 		})
 	}
-} */
+}
