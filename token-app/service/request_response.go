@@ -1,11 +1,5 @@
 package service
 
-/* GenerateToken(int, string, string) (string, error)
-ExtractData(string) (int, string, string, error)
-SetToken(string) error
-DeleteToken(string) error
-CheckToken(string) (bool, error) */
-
 // GenerateToken
 type generateTokenRequest struct {
 	ID       int    `json:"id"`
@@ -16,7 +10,6 @@ type generateTokenRequest struct {
 
 type generateTokenResponse struct {
 	Token string `json:"token"`
-	Err   string `json:"err,omitempty"`
 }
 
 // ExtractData

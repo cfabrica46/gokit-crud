@@ -1,66 +1,65 @@
 package service
 
-/* func MakeGetAllUsersEndpoint(svc serviceDBInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		users, err := svc.GetAllUsers()
-		if err != nil {
-			return getAllUsersResponse{users, err.Error()}, nil
-		}
-		return getAllUsersResponse{users, ""}, nil
-	}
-} */
+import (
+	"context"
 
-/* func MakeGetUserByIDEndpoint(svc serviceDBInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(getUserByIDRequest)
-		user, err := svc.GetUserByID(req.ID)
-		if err != nil {
-			return getUserByIDResponse{user, err.Error()}, nil
-		}
-		return getUserByIDResponse{user, ""}, nil
-	}
-} */
+	"github.com/go-kit/kit/endpoint"
+)
 
-/* func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceDBInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(getUserByUsernameAndPasswordRequest)
-		user, err := svc.GetUserByUsernameAndPassword(req.Username, req.Password)
-		if err != nil {
-			return getUserByUsernameAndPasswordResponse{user, err.Error()}, nil
-		}
-		return getUserByUsernameAndPasswordResponse{user, ""}, nil
-	}
-} */
+/* GenerateToken(int, string, string) (string, error)
+ExtractData(string) (int, string, string, error)
+SetToken(string) error
+DeleteToken(string) error
+CheckToken(string) (bool, error) */
 
-/* func MakeGetIDByUsernameEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeGenerateToken(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(getIDByUsernameRequest)
-		id, err := svc.GetIDByUsername(req.Username)
-		if err != nil {
-			return getIDByUsernameResponse{id, err.Error()}, nil
-		}
-		return getIDByUsernameResponse{id, ""}, nil
+		req := request.(generateTokenRequest)
+		token := svc.GenerateToken(req.ID, req.Username, req.Email, []byte(req.Secret))
+		return generateTokenResponse{token}, nil
 	}
-} */
+}
 
-/* func MakeInsertUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeExtractData(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(insertUserRequest)
-		err := svc.InsertUser(req.Username, req.Password, req.Email)
+		req := request.(extractDataRequest)
+		id, username, email, err := svc.ExtractData(req.Token, []byte(req.Secret))
 		if err != nil {
-			return insertUserResponse{err.Error()}, nil
+			return extractDataResponse{id, username, email, err.Error()}, nil
 		}
-		return insertUserResponse{""}, nil
+		return extractDataResponse{id, username, email, ""}, nil
 	}
-} */
+}
 
-/* func MakeDeleteUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+func MakeSetToken(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(deleteUserRequest)
-		rowsAffected, err := svc.DeleteUser(req.Username, req.Password, req.Email)
+		req := request.(setTokenRequest)
+		err := svc.SetToken(req.Token)
 		if err != nil {
-			return deleteUserResponse{rowsAffected, err.Error()}, nil
+			return setTokenResponse{err.Error()}, nil
 		}
-		return deleteUserResponse{rowsAffected, ""}, nil
+		return setTokenResponse{""}, nil
 	}
-} */
+}
+
+func MakeDeleteToken(svc serviceInterface) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(deleteTokenRequest)
+		err := svc.DeleteToken(req.Token)
+		if err != nil {
+			return deleteTokenResponse{err.Error()}, nil
+		}
+		return deleteTokenResponse{""}, nil
+	}
+}
+
+func MakeCheckToken(svc serviceInterface) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(checkTokenRequest)
+		check, err := svc.CheckToken(req.Token)
+		if err != nil {
+			return checkTokenResponse{check, err.Error()}, nil
+		}
+		return checkTokenResponse{check, ""}, nil
+	}
+}

@@ -11,7 +11,7 @@ import (
 )
 
 type serviceInterface interface {
-	GenerateToken(int, string, string, []byte) (string, error)
+	GenerateToken(int, string, string, []byte) string
 	ExtractData(string, []byte) (int, string, string, error)
 	SetToken(string) error
 	DeleteToken(string) error
@@ -39,7 +39,7 @@ func (s *service) OpenDB() (err error) {
 	return
 }
 
-func (service) GenerateToken(id int, username, email string, secret []byte) (token string, err error) {
+func (service) GenerateToken(id int, username, email string, secret []byte) (token string) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       id,
 		"username": username,
@@ -47,7 +47,7 @@ func (service) GenerateToken(id int, username, email string, secret []byte) (tok
 		"uuid":     uuid.NewString(),
 	})
 
-	token, err = t.SignedString(secret)
+	token, _ = t.SignedString(secret)
 	return
 }
 
