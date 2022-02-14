@@ -7,7 +7,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
@@ -49,19 +48,16 @@ func (service) GenerateToken(id int, username, email string, secret []byte) (tok
 	})
 
 	token, err = t.SignedString(secret)
-	if err != nil {
-		return
-	}
 	return
 }
 
-func (s service) ExtractData(token string, secret []byte) (id int, username, password string, err error) {
+func (s service) ExtractData(token string, secret []byte) (id int, username, email string, err error) {
 	t, err := jwt.Parse(token, keyFunc(secret))
 	if err != nil {
 		return
 	}
 
-	claims := token.Claims.(jwt.MapClaims)
+	claims := t.Claims.(jwt.MapClaims)
 	idAux := claims["id"].(float64)
 	id = int(idAux)
 	username = claims["username"].(string)
@@ -81,7 +77,7 @@ func (s *service) DeleteToken(token string) error {
 	return s.db.Del(token).Err()
 }
 
-func (s service) CheckToken(token string) (err error) {
+func (s service) CheckToken(token string) (check bool, err error) {
 	result, err := s.db.Get(token).Result()
 	if err != nil {
 		if err.Error() == redis.Nil.Error() {
@@ -99,7 +95,7 @@ func (s service) CheckToken(token string) (err error) {
 
 func keyFunc(secret []byte) func(token *jwt.Token) (interface{}, error) {
 	return func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHS256); !ok {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 

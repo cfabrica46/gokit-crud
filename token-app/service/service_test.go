@@ -1,68 +1,100 @@
 package service
 
-/* func TestOpenDB(t *testing.T) {
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+)
+
+func TestGenerateToken(t *testing.T) {
 	for i, tt := range []struct {
-		inDriver, inInfo string
-		out              string
+		inID                int
+		inUsername, inEmail string
+		inSecret            []byte
+		outToken, outErr    string
 	}{
-		{DBDriver, PsqlInfo, ""},
-		{"", PsqlInfo, "unknown driver"},
-		{DBDriver, "", "connection refused"},
+		{1, "cesar", "cesar@email.com", []byte("secret"), "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.", ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result string
-			s := GetServiceDB()
-			err := s.OpenDB(tt.inDriver, tt.inInfo)
+			var result, resultErr string
+
+			svc := GetService()
+
+			result, err := svc.GenerateToken(tt.inID, tt.inUsername, tt.inEmail, tt.inSecret)
 			if err != nil {
-				result = err.Error()
-			} else {
-				defer s.db.Close()
+				resultErr = err.Error()
 			}
 
-			if !strings.Contains(result, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result)
+			if !strings.Contains(result, tt.outToken) {
+				t.Errorf("want %v; got %v", tt.outToken, result)
+			}
+
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 		})
 	}
-} */
+}
 
-/* func TestGetAllUsers(t *testing.T) {
+func TestExtractData(t *testing.T) {
 	for i, tt := range []struct {
-		in  models.User
+		inToken                       string
+		inSecret                      []byte
+		outID                         int
+		outUsername, outEmail, outErr string
+	}{
+		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", []byte("secret"), 1, "cesar", "cesar@email.com", ""},
+		{"", nil, 0, "", "", ""},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var resultID int
+			var resultUsername, resultEmail, resultErr string
+			var err error
+
+			svc := GetService()
+			resultID, resultUsername, resultEmail, err = svc.ExtractData(tt.inToken, tt.inSecret)
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			if resultID != tt.outID && resultUsername != tt.outUsername && resultEmail != tt.outEmail {
+				t.Errorf("want %v %v %v; got %v %v %v", tt.outErr, tt.outUsername, tt.outEmail, resultID, resultUsername, resultEmail)
+			}
+
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			}
+		})
+	}
+}
+
+func TestSetToken(t *testing.T) {
+	for i, tt := range []struct {
+		in  string
 		out string
 	}{
-		{models.User{Username: "username", Password: "password", Email: "email"}, ""},
-		{models.User{}, "database is closed"},
+		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", ""},
+		{"", "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
+			svc := GetService()
 
-			s := GetServiceDB()
-
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			// OpenDB
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
-			defer s.db.Close()
 
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := s.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			// Generate Conflict
+			if tt.out == "close" {
+				svc.db.Close()
 			}
 
-			// insert user
-			if tt.out == "" {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					t.Error(err)
-				}
-				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
-			}
-
-			_, err = s.GetAllUsers()
+			err = svc.SetToken(tt.in)
 			if err != nil {
 				result = err.Error()
 			}
@@ -72,186 +104,117 @@ package service
 			}
 		})
 	}
-} */
+}
 
-/* func TestGetUserByID(t *testing.T) {
+func TestDeleteToken(t *testing.T) {
 	for i, tt := range []struct {
-		in  models.User
-		out models.User
-	}{
-		{models.User{ID: -1}, models.User{}},
-		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := GetServiceDB()
-
-			err := s.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer s.db.Close()
-
-			if tt.in.ID != -1 {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					t.Error(err)
-				}
-				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
-			}
-
-			id, err := s.GetIDByUsername(tt.in.Username)
-			if err != nil {
-				t.Error(err)
-			}
-
-			user, err := s.GetUserByID(id)
-			if err != nil {
-				t.Error(err)
-			}
-
-			if user.Username != tt.out.Username {
-				t.Errorf("want %v; got %v", tt.out, user)
-			}
-
-		})
-	}
-} */
-
-/* func TestGetUserByUsernameAndPassword(t *testing.T) {
-	for i, tt := range []struct {
-		in  models.User
-		out models.User
-	}{
-		{models.User{}, models.User{}},
-		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := GetServiceDB()
-
-			err := s.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer s.db.Close()
-
-			if tt.in.Username != "" {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					t.Error(err)
-				}
-				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
-			}
-
-			user, err := s.GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
-			if err != nil {
-				t.Error(err)
-			}
-
-			if user.Username != tt.out.Username {
-				t.Errorf("want %v; got %v", tt.out, user)
-			}
-
-		})
-	}
-} */
-
-/* func TestInsertUser(t *testing.T) {
-	for i, tt := range []struct {
-		in  models.User
+		in  string
 		out string
 	}{
-		{models.User{Username: "username", Password: "password", Email: "email"}, ""},
-		{models.User{}, "database is closed"},
-		{models.User{}, "duplicate key value"},
+		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
+			svc := GetService()
 
-			s := GetServiceDB()
-
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			// OpenDB
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
-			defer s.db.Close()
 
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := s.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			// generate duplicate
-			if tt.out == "duplicate key value" {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					result = err.Error()
-				}
-			}
-
-			err = s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+			err = svc.DeleteToken(tt.in)
 			if err != nil {
 				result = err.Error()
 			}
-			defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
 
 			if !strings.Contains(result, tt.out) {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
-} */
+}
 
-/* func TestDeleteUser(t *testing.T) {
+func TestCheckToken(t *testing.T) {
 	for i, tt := range []struct {
-		in              models.User
-		outRowsAffected int
-		outError        string
+		in       string
+		outCheck bool
+		outErr   string
 	}{
-		{models.User{Username: "username", Password: "password", Email: "email"}, 1, ""},
-		{models.User{}, 0, "database is closed"},
+		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", true, ""},
+		{"", false, ""},
+		{"", false, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result string
+			var resultCheck bool
+			var resultErr string
+			svc := GetService()
 
-			s := GetServiceDB()
-
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			// OpenDB
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
-			defer s.db.Close()
 
-			// generate confict closing db
-			if tt.outError == "database is closed" {
-				err := s.db.Close()
+			// insert
+			if tt.in != "" {
+				err = svc.SetToken(tt.in)
 				if err != nil {
 					t.Error(err)
 				}
 			}
 
-			// insert user
-			if tt.outRowsAffected == 1 {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					t.Error(err)
-				}
+			// Generate Conflict
+			if tt.outErr == "close" {
+				svc.db.Close()
 			}
 
-			rowsAffected, err := s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
+			resultCheck, err = svc.CheckToken(tt.in)
 			if err != nil {
-				result = err.Error()
+				resultErr = err.Error()
 			}
 
-			if !strings.Contains(result, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, result)
+			if resultCheck != tt.outCheck {
+				t.Errorf("want %v; got %v", tt.outCheck, resultCheck)
 			}
 
-			if rowsAffected != tt.outRowsAffected {
-				t.Errorf("want %v; got %v", tt.outRowsAffected, rowsAffected)
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 		})
 	}
-} */
+}
+
+func TestKeyFunc(t *testing.T) {
+	for i, tt := range []struct {
+		inSecret  []byte
+		outSecret []byte
+		outErr    string
+	}{
+		{[]byte("secret"), []byte("secret"), "Unexpected signing method"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			// var result []byte
+			var resultErr string
+
+			kf := keyFunc(tt.inSecret)
+
+			//generateToken
+			token := jwt.NewWithClaims(jwt.SigningMethodPS256, jwt.MapClaims{
+				"id":       1,
+				"username": "cesar",
+				"email":    "cesar@email.com",
+				"uuid":     uuid.NewString(),
+			})
+
+			_, err := kf(token)
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			}
+		})
+	}
+}
