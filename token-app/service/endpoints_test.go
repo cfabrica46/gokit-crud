@@ -1,38 +1,56 @@
 package service
 
-/* func TestMakeGetAllUsersEndpoint(t *testing.T) {
+import (
+	"context"
+	"fmt"
+	"strings"
+	"testing"
+)
+
+func TestMakeGenerateToken(t *testing.T) {
 	for i, tt := range []struct {
-		in  getAllUsersRequest
+		in  generateTokenRequest
 		out string
 	}{
-		{getAllUsersRequest{}, ""},
-		{getAllUsersRequest{}, "database is closed"},
+		{generateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.in)
+			r, err := MakeGenerateToken(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(getAllUsersResponse)
+			result, ok := r.(generateTokenResponse)
+			if !ok {
+				t.Error("response is not of the type indicated")
+			}
+
+			if result.Token == "" {
+				t.Error("token its empty")
+			}
+		})
+	}
+}
+
+func TestMakeExtractToken(t *testing.T) {
+	for i, tt := range []struct {
+		in  extractTokenRequest
+		out string
+	}{
+		{extractTokenRequest{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", "secret"}, ""},
+		{extractTokenRequest{"", "secret"}, "token contains an invalid number of segments"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			svc := GetService()
+
+			r, err := MakeExtractToken(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(extractTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -42,41 +60,36 @@ package service
 			}
 		})
 	}
-} */
+}
 
-/* func TestMakeGetUserByIDEndpoint(t *testing.T) {
+func TestMakeSetToken(t *testing.T) {
 	for i, tt := range []struct {
-		in  getUserByIDRequest
+		in  setTokenRequest
 		out string
 	}{
-		{getUserByIDRequest{1}, ""},
-		{getUserByIDRequest{}, "database is closed"},
+		{setTokenRequest{"token"}, ""},
+		{setTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.in)
+			// OpenDB
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(getUserByIDResponse)
+			// Generate Conflict
+			if tt.out == "close" {
+				svc.db.Close()
+			}
+
+			r, err := MakeSetToken(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(setTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -86,41 +99,36 @@ package service
 			}
 		})
 	}
-} */
+}
 
-/* func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
+func TestMakeDeleteToken(t *testing.T) {
 	for i, tt := range []struct {
-		in  getUserByUsernameAndPasswordRequest
+		in  deleteTokenRequest
 		out string
 	}{
-		{getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{getUserByUsernameAndPasswordRequest{}, "database is closed"},
+		{deleteTokenRequest{"token"}, ""},
+		{deleteTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeGetUserByUsernameAndPasswordEndpoint(svc)(context.TODO(), tt.in)
+			// OpenDB
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(getUserByUsernameAndPasswordResponse)
+			// Generate Conflict
+			if tt.out == "close" {
+				svc.db.Close()
+			}
+
+			r, err := MakeDeleteToken(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(deleteTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -130,41 +138,36 @@ package service
 			}
 		})
 	}
-} */
+}
 
-/* func TestGetIDByUsernameEndpoint(t *testing.T) {
+func TestMakeCheckToken(t *testing.T) {
 	for i, tt := range []struct {
-		in  getIDByUsernameRequest
+		in  checkTokenRequest
 		out string
 	}{
-		{getIDByUsernameRequest{"cesar"}, ""},
-		{getIDByUsernameRequest{}, "database is closed"},
+		{checkTokenRequest{"token"}, ""},
+		{checkTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
+			svc := GetService()
 
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.in)
+			// OpenDB
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(getIDByUsernameResponse)
+			// Generate Conflict
+			if tt.out == "close" {
+				svc.db.Close()
+			}
+
+			r, err := MakeCheckToken(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(checkTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -174,92 +177,4 @@ package service
 			}
 		})
 	}
-} */
-
-/* func TestMakeInsertUserEndpoint(t *testing.T) {
-	for i, tt := range []struct {
-		in  insertUserRequest
-		out string
-	}{
-		{insertUserRequest{}, ""},
-		{insertUserRequest{}, "database is closed"},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
-
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.in)
-			if err != nil {
-				t.Error(err)
-			}
-
-			result, ok := r.(insertUserResponse)
-			if !ok {
-				t.Error("response is not of the type indicated")
-			}
-
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
-		})
-	}
-} */
-
-/* func TestMakeDeleteUserEndpoint(t *testing.T) {
-	for i, tt := range []struct {
-		in  deleteUserRequest
-		out string
-	}{
-		{deleteUserRequest{}, ""},
-		{deleteUserRequest{}, "database is closed"},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
-
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.in)
-			if err != nil {
-				t.Error(err)
-			}
-
-			result, ok := r.(deleteUserResponse)
-			if !ok {
-				t.Error("response is not of the type indicated")
-			}
-
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
-		})
-	}
-} */
+}

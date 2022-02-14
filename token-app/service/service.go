@@ -12,7 +12,7 @@ import (
 
 type serviceInterface interface {
 	GenerateToken(int, string, string, []byte) string
-	ExtractData(string, []byte) (int, string, string, error)
+	ExtractToken(string, []byte) (int, string, string, error)
 	SetToken(string) error
 	DeleteToken(string) error
 	CheckToken(string) (bool, error)
@@ -51,7 +51,7 @@ func (service) GenerateToken(id int, username, email string, secret []byte) (tok
 	return
 }
 
-func (s service) ExtractData(token string, secret []byte) (id int, username, email string, err error) {
+func (s service) ExtractToken(token string, secret []byte) (id int, username, email string, err error) {
 	t, err := jwt.Parse(token, keyFunc(secret))
 	if err != nil {
 		return

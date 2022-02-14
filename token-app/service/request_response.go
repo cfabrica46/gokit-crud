@@ -13,12 +13,12 @@ type generateTokenResponse struct {
 }
 
 // ExtractData
-type extractDataRequest struct {
+type extractTokenRequest struct {
 	Token  string `json:"token"`
 	Secret string `json:"secret"`
 }
 
-type extractDataResponse struct {
+type extractTokenResponse struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`

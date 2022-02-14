@@ -19,27 +19,19 @@ func TestGenerateToken(t *testing.T) {
 		{1, "cesar", "cesar@email.com", []byte("secret"), "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.", ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result, resultErr string
-
+			var result string
 			svc := GetService()
 
-			result, err := svc.GenerateToken(tt.inID, tt.inUsername, tt.inEmail, tt.inSecret)
-			if err != nil {
-				resultErr = err.Error()
-			}
+			result = svc.GenerateToken(tt.inID, tt.inUsername, tt.inEmail, tt.inSecret)
 
 			if !strings.Contains(result, tt.outToken) {
 				t.Errorf("want %v; got %v", tt.outToken, result)
-			}
-
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 		})
 	}
 }
 
-func TestExtractData(t *testing.T) {
+func TestExtractToken(t *testing.T) {
 	for i, tt := range []struct {
 		inToken                       string
 		inSecret                      []byte
@@ -55,7 +47,7 @@ func TestExtractData(t *testing.T) {
 			var err error
 
 			svc := GetService()
-			resultID, resultUsername, resultEmail, err = svc.ExtractData(tt.inToken, tt.inSecret)
+			resultID, resultUsername, resultEmail, err = svc.ExtractToken(tt.inToken, tt.inSecret)
 			if err != nil {
 				resultErr = err.Error()
 			}

@@ -20,14 +20,14 @@ func MakeGenerateToken(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeExtractData(svc serviceInterface) endpoint.Endpoint {
+func MakeExtractToken(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(extractDataRequest)
-		id, username, email, err := svc.ExtractData(req.Token, []byte(req.Secret))
+		req := request.(extractTokenRequest)
+		id, username, email, err := svc.ExtractToken(req.Token, []byte(req.Secret))
 		if err != nil {
-			return extractDataResponse{id, username, email, err.Error()}, nil
+			return extractTokenResponse{id, username, email, err.Error()}, nil
 		}
-		return extractDataResponse{id, username, email, ""}, nil
+		return extractTokenResponse{id, username, email, ""}, nil
 	}
 }
 
