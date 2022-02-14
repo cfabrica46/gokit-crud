@@ -11,8 +11,8 @@ import (
 )
 
 type serviceInterface interface {
-	GenerateToken(int, string, string) (string, error)
-	ExtractData(string) (int, string, string, error)
+	GenerateToken(int, string, string, []byte) (string, error)
+	ExtractData(string, []byte) (int, string, string, error)
 	SetToken(string) error
 	DeleteToken(string) error
 	CheckToken(string) (bool, error)
