@@ -1,24 +1,18 @@
 version: "3.7"
 services:
     token:
-        image: postgres
-        environment:
-            - POSTGRES_USER=cfabrica46
-            - POSTGRES_PASSWORD=01234
-            - POSTGRES_DB=go_crud
+        image: redis
         ports:
             - "6378:6379"
-        volumes:
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
     api:
         build: .
         restart: always
         environment:
-            - PORT=6060
-            - POSTGRES_HOST=token
-            - POSTGRES_PORT=6379
+            - PORT=9090
+            - REDIS_HOST=token
+            - REDIS_PORT=6379
         depends_on:
-            - database-postgres
+            - token
         ports:
-            - "6060:6060"
+            - "9090:9090"

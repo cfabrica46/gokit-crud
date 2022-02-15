@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestMakeGenerateToken(t *testing.T) {
+func TestMakeGenerateTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  generateTokenRequest
 		out string
@@ -17,7 +17,7 @@ func TestMakeGenerateToken(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			svc := GetService()
 
-			r, err := MakeGenerateToken(svc)(context.TODO(), tt.in)
+			r, err := MakeGenerateTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
@@ -34,7 +34,7 @@ func TestMakeGenerateToken(t *testing.T) {
 	}
 }
 
-func TestMakeExtractToken(t *testing.T) {
+func TestMakeExtractTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  extractTokenRequest
 		out string
@@ -45,7 +45,7 @@ func TestMakeExtractToken(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			svc := GetService()
 
-			r, err := MakeExtractToken(svc)(context.TODO(), tt.in)
+			r, err := MakeExtractTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
@@ -62,7 +62,7 @@ func TestMakeExtractToken(t *testing.T) {
 	}
 }
 
-func TestMakeSetToken(t *testing.T) {
+func TestMakeSetTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  setTokenRequest
 		out string
@@ -84,7 +84,7 @@ func TestMakeSetToken(t *testing.T) {
 				svc.db.Close()
 			}
 
-			r, err := MakeSetToken(svc)(context.TODO(), tt.in)
+			r, err := MakeSetTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
@@ -101,7 +101,7 @@ func TestMakeSetToken(t *testing.T) {
 	}
 }
 
-func TestMakeDeleteToken(t *testing.T) {
+func TestMakeDeleteTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  deleteTokenRequest
 		out string
@@ -123,7 +123,7 @@ func TestMakeDeleteToken(t *testing.T) {
 				svc.db.Close()
 			}
 
-			r, err := MakeDeleteToken(svc)(context.TODO(), tt.in)
+			r, err := MakeDeleteTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
@@ -140,7 +140,7 @@ func TestMakeDeleteToken(t *testing.T) {
 	}
 }
 
-func TestMakeCheckToken(t *testing.T) {
+func TestMakeCheckTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
 		in  checkTokenRequest
 		out string
@@ -162,7 +162,7 @@ func TestMakeCheckToken(t *testing.T) {
 				svc.db.Close()
 			}
 
-			r, err := MakeCheckToken(svc)(context.TODO(), tt.in)
+			r, err := MakeCheckTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}

@@ -12,7 +12,7 @@ SetToken(string) error
 DeleteToken(string) error
 CheckToken(string) (bool, error) */
 
-func MakeGenerateToken(svc serviceInterface) endpoint.Endpoint {
+func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(generateTokenRequest)
 		token := svc.GenerateToken(req.ID, req.Username, req.Email, []byte(req.Secret))
@@ -20,7 +20,7 @@ func MakeGenerateToken(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeExtractToken(svc serviceInterface) endpoint.Endpoint {
+func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(extractTokenRequest)
 		id, username, email, err := svc.ExtractToken(req.Token, []byte(req.Secret))
@@ -31,7 +31,7 @@ func MakeExtractToken(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeSetToken(svc serviceInterface) endpoint.Endpoint {
+func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(setTokenRequest)
 		err := svc.SetToken(req.Token)
@@ -42,7 +42,7 @@ func MakeSetToken(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeDeleteToken(svc serviceInterface) endpoint.Endpoint {
+func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(deleteTokenRequest)
 		err := svc.DeleteToken(req.Token)
@@ -53,7 +53,7 @@ func MakeDeleteToken(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
-func MakeCheckToken(svc serviceInterface) endpoint.Endpoint {
+func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(checkTokenRequest)
 		check, err := svc.CheckToken(req.Token)
