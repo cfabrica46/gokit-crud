@@ -1,0 +1,64 @@
+version: "3.7"
+services:
+    # database-app
+    db-postgres:
+        image: postgres
+        environment:
+            - POSTGRES_USER=cfabrica46
+            - POSTGRES_PASSWORD=01234
+            - POSTGRES_DB=go_crud
+        ports:
+            - "5433:5432"
+        volumes:
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    db-app:
+        build: ./database-app
+        restart: always
+        environment:
+            - PORT=7070
+            - POSTGRES_HOST=db-postgres
+            - POSTGRES_PORT=5432
+            - POSTGRES_USERNAME=cfabrica46
+            - POSTGRES_PASSWORD=01234
+            - POSTGRES_DB=go_crud
+            - POSTGRES_SSLMODE=disable
+            - DB_DRIVER=postgres
+        depends_on:
+            - db-postgres
+        ports:
+            - "7070:7070"
+
+    # token-app
+    token-redis:
+        image: redis
+        ports:
+            - "6378:6379"
+
+    token-app:
+        build: ./token-app
+        restart: always
+        environment:
+            - PORT=9090
+            - REDIS_HOST=token-redis
+            - REDIS_PORT=6379
+        depends_on:
+            - token-redis
+        ports:
+            - "9090:9090"
+
+    # token-app
+    app:
+        build: ./app
+        restart: always
+        environment:
+            - PORT=8080
+            - DB_HOST=db-app
+            - DB_PORT=7070
+            - TOKEN_HOST=token-app
+            - TOKEN_PORT=9090
+        depends_on:
+            - db-app
+            - token-app
+        ports:
+            - "8080:8080"

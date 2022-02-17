@@ -21,6 +21,8 @@ services:
             - POSTGRES_USERNAME=cfabrica46
             - POSTGRES_PASSWORD=01234
             - POSTGRES_DB=go_crud
+            - POSTGRES_SSLMODE=disable
+            - DB_DRIVER=postgres
         depends_on:
             - database-postgres
         ports:

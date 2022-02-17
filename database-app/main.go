@@ -8,16 +8,20 @@ import (
 	"github.com/cfabrica46/gokit-crud/database-app/service"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	runServer(os.Getenv("PORT"))
+	if godotenv.Load(".env") == nil {
+		log.Println(".env loaded")
+	}
+	runServer(os.Getenv("PORT"), os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"), os.Getenv("POSTGRES_USERNAME"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_SSLMODE"), os.Getenv("DB_DRIVER"))
 }
 
-func runServer(port string) {
-	svc := service.GetService()
+func runServer(port, postgresHost, postgresPort, postgresUsername, postgresPassword, postgresDB, postgresSSL, postgresDriver string) {
+	svc := service.GetService(postgresHost, postgresPort, postgresUsername, postgresPassword, postgresDB, postgresSSL, postgresDriver)
 
-	err := svc.OpenDB(service.DBDriver, service.PsqlInfo)
+	err := svc.OpenDB()
 	if err != nil {
 		log.Fatal(err)
 	}

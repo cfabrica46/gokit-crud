@@ -10,18 +10,18 @@ import (
 
 func TestOpenDB(t *testing.T) {
 	for i, tt := range []struct {
-		inDriver, inInfo string
-		out              string
+		inHost, inPort, inUsername, inPassword, inDBName, inSSLMode, inDriver string
+		out                                                                   string
 	}{
-		{DBDriver, PsqlInfo, ""},
-		{"", PsqlInfo, "unknown driver"},
-		{DBDriver, "", "connection refused"},
+		{"localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres", ""},
+		{"localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "", "unknown driver"},
+		{"localhost", "0", "cfabrica46", "01234", "go_crud", "", "postgres", "connection refused"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-			s := GetService()
+			s := GetService(tt.inHost, tt.inPort, tt.inUsername, tt.inPassword, tt.inDBName, tt.inSSLMode, tt.inDriver)
 
-			err := s.OpenDB(tt.inDriver, tt.inInfo)
+			err := s.OpenDB()
 			if err != nil {
 				result = err.Error()
 			} else {
@@ -36,6 +36,8 @@ func TestOpenDB(t *testing.T) {
 }
 
 func TestGetAllUsers(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  models.User
 		out string
@@ -45,9 +47,9 @@ func TestGetAllUsers(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-			s := GetService()
+			s := GetService(host, port, username, password, dbName, sslMode, driver)
 
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			err := s.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -83,6 +85,8 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestGetUserByID(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  models.User
 		out models.User
@@ -91,9 +95,9 @@ func TestGetUserByID(t *testing.T) {
 		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := GetService()
+			s := GetService(host, port, username, password, dbName, sslMode, driver)
 
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			err := s.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -126,6 +130,8 @@ func TestGetUserByID(t *testing.T) {
 }
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  models.User
 		out models.User
@@ -134,9 +140,9 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := GetService()
+			s := GetService(host, port, username, password, dbName, sslMode, driver)
 
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			err := s.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -164,6 +170,8 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 }
 
 func TestInsertUser(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  models.User
 		out string
@@ -174,10 +182,9 @@ func TestInsertUser(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
+			s := GetService(host, port, username, password, dbName, sslMode, driver)
 
-			s := GetService()
-
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			err := s.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -213,6 +220,8 @@ func TestInsertUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in              models.User
 		outRowsAffected int
@@ -223,9 +232,9 @@ func TestDeleteUser(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-			s := GetService()
+			s := GetService(host, port, username, password, dbName, sslMode, driver)
 
-			err := s.OpenDB(DBDriver, PsqlInfo)
+			err := s.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}

@@ -8,6 +8,8 @@ import (
 )
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  getAllUsersRequest
 		out string
@@ -17,10 +19,10 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetService()
+			svc := GetService(host, port, username, password, dbName, sslMode, driver)
 
 			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -52,6 +54,8 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 }
 
 func TestMakeGetUserByIDEndpoint(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  getUserByIDRequest
 		out string
@@ -61,10 +65,10 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetService()
+			svc := GetService(host, port, username, password, dbName, sslMode, driver)
 
 			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -96,6 +100,8 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 }
 
 func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  getUserByUsernameAndPasswordRequest
 		out string
@@ -105,10 +111,10 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetService()
+			svc := GetService(host, port, username, password, dbName, sslMode, driver)
 
 			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -140,6 +146,8 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 }
 
 func TestGetIDByUsernameEndpoint(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  getIDByUsernameRequest
 		out string
@@ -149,10 +157,10 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetService()
+			svc := GetService(host, port, username, password, dbName, sslMode, driver)
 
 			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -184,6 +192,8 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 }
 
 func TestMakeInsertUserEndpoint(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  insertUserRequest
 		out string
@@ -193,10 +203,10 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetService()
+			svc := GetService(host, port, username, password, dbName, sslMode, driver)
 
 			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}
@@ -228,6 +238,8 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 }
 
 func TestMakeDeleteUserEndpoint(t *testing.T) {
+	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+
 	for i, tt := range []struct {
 		in  deleteUserRequest
 		out string
@@ -237,10 +249,10 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
-			svc := GetService()
+			svc := GetService(host, port, username, password, dbName, sslMode, driver)
 
 			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			err := svc.OpenDB()
 			if err != nil {
 				t.Error(err)
 			}

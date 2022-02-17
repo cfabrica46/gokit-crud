@@ -15,6 +15,10 @@ func GetService() *service {
 	return &service{}
 }
 
-func (s service) GetAllUsers(username, password string) (token string, err error) {
+func (serviceInterface) SignUp(username, password, email string) (token string, err error) {
+	return
+}
+
+func (serviceInterface) SignIn(username, password string) (token string, err error) {
 	return
 }

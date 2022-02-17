@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"fmt"
 	"sync"
 
 	"github.com/cfabrica46/gokit-crud/database-app/models"
@@ -20,15 +21,20 @@ type serviceInterface interface {
 type service struct {
 	db   *sql.DB
 	once sync.Once
+
+	// Data for DB
+	host, port, user, password, dbName, sslmode, driver string
 }
 
-func GetService() *service {
-	return &service{once: sync.Once{}}
+func GetService(host, port, user, password, dbName, sslmode, driver string) *service {
+	return &service{once: sync.Once{}, host: host, port: port, user: user, password: password, dbName: dbName, sslmode: sslmode, driver: driver}
 }
 
-func (s *service) OpenDB(dbDriver, psqlInfo string) (err error) {
+func (s *service) OpenDB() (err error) {
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", s.host, s.port, s.user, s.password, s.dbName, s.sslmode)
+
 	s.once.Do(func() {
-		s.db, err = sql.Open(dbDriver, psqlInfo)
+		s.db, err = sql.Open(s.driver, psqlInfo)
 		if err != nil {
 			return
 		}

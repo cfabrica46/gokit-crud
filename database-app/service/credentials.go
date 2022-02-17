@@ -1,14 +1,6 @@
 package service
 
-import (
-	"fmt"
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
-)
-
-func init() {
+/* func init() {
 	log.SetFlags(log.Lshortfile)
 	if err := godotenv.Load(".env"); err == nil {
 		log.Println(".env loaded")
@@ -22,17 +14,17 @@ func init() {
 	PsqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)
 
 	log.Println(PsqlInfo)
-}
+} */
 
-var (
+/* var (
 	PSQLHost     string
 	PSQLPort     string
 	PSQLUser     string
 	PSQLPassword string
 	PSQLDBName   string
 	PSQLSSL      = "disable"
-)
+) */
 
-const DBDriver = "postgres"
+// const DBDriver = "postgres"
 
-var PsqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)
+// var PsqlInfo = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)

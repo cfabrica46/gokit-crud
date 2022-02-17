@@ -8,9 +8,13 @@ import (
 	"github.com/cfabrica46/gokit-crud/token-app/service"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if godotenv.Load(".env") == nil {
+		log.Println(".env loaded")
+	}
 	runServer(os.Getenv("PORT"))
 }
 
