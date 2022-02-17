@@ -12,8 +12,8 @@ func main() {
 		log.Println(".env loaded")
 	}
 
-	runServer(os.Getenv("PORT"))
+	runServer(os.Getenv("PORT"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("TOKEN_HOST"), os.Getenv("TOKEN_PORT"))
 }
 
-func runServer(port string) {
+func runServer(port, dbHost, dbPort, tokenHost, tokenPort string) {
 }

@@ -9,10 +9,12 @@ type serviceInterface interface {
 	SignIn(string, string) (string, error)
 }
 
-type service struct{}
+type service struct {
+	dbHost, dbPort, tokenHost, tokenPort string
+}
 
-func GetService() *service {
-	return &service{}
+func GetService(dbHost, dbPort, tokenHost, tokenPort string) *service {
+	return &service{dbHost, dbPort, tokenHost, tokenPort}
 }
 
 func (serviceInterface) SignUp(username, password, email string) (token string, err error) {
