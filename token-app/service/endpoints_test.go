@@ -15,7 +15,7 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 		{generateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			r, err := MakeGenerateTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -43,7 +43,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 		{extractTokenRequest{"", "secret"}, "token contains an invalid number of segments"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			r, err := MakeExtractTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -71,7 +71,7 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 		{setTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			// OpenDB
 			err := svc.OpenDB()
@@ -110,7 +110,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 		{deleteTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			// OpenDB
 			err := svc.OpenDB()
@@ -149,7 +149,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 		{checkTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			// OpenDB
 			err := svc.OpenDB()

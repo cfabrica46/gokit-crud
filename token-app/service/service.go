@@ -21,16 +21,19 @@ type serviceInterface interface {
 type service struct {
 	db   *redis.Client
 	once sync.Once
+
+	// Data for DB
+	host, port string
 }
 
-func GetService() *service {
-	return &service{}
+func GetService(host, port string) *service {
+	return &service{once: sync.Once{}, host: host, port: port}
 }
 
 func (s *service) OpenDB() (err error) {
 	s.once.Do(func() {
 		options := &redis.Options{
-			Addr:     RedisHost + ":" + RedisPort,
+			Addr:     s.host + ":" + s.port,
 			Password: "",
 			DB:       0,
 		}

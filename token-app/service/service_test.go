@@ -20,7 +20,7 @@ func TestGenerateToken(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			result = svc.GenerateToken(tt.inID, tt.inUsername, tt.inEmail, tt.inSecret)
 
@@ -46,7 +46,7 @@ func TestExtractToken(t *testing.T) {
 			var resultUsername, resultEmail, resultErr string
 			var err error
 
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 			resultID, resultUsername, resultEmail, err = svc.ExtractToken(tt.inToken, tt.inSecret)
 			if err != nil {
 				resultErr = err.Error()
@@ -73,7 +73,7 @@ func TestSetToken(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			// OpenDB
 			err := svc.OpenDB()
@@ -107,7 +107,7 @@ func TestDeleteToken(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			// OpenDB
 			err := svc.OpenDB()
@@ -140,7 +140,7 @@ func TestCheckToken(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultCheck bool
 			var resultErr string
-			svc := GetService()
+			svc := GetService("localhost", "6379")
 
 			// OpenDB
 			err := svc.OpenDB()

@@ -15,11 +15,11 @@ func main() {
 	if godotenv.Load(".env") == nil {
 		log.Println(".env loaded")
 	}
-	runServer(os.Getenv("PORT"))
+	runServer(os.Getenv("PORT"), os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 }
 
-func runServer(port string) {
-	svc := service.GetService()
+func runServer(port, redisHost, redisPort string) {
+	svc := service.GetService(redisHost, redisPort)
 
 	err := svc.OpenDB()
 	if err != nil {
