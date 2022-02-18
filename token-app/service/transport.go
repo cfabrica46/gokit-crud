@@ -7,7 +7,7 @@ import (
 )
 
 func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request generateTokenRequest
+	var request GenerateTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
@@ -15,7 +15,7 @@ func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}
 }
 
 func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request extractTokenRequest
+	var request ExtractTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{},
 }
 
 func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request setTokenRequest
+	var request SetTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, err
 }
 
 func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request deleteTokenRequest
+	var request DeleteTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 }
 
 func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request checkTokenRequest
+	var request CheckTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}

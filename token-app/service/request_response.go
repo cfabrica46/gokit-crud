@@ -1,24 +1,24 @@
 package service
 
 // GenerateToken
-type generateTokenRequest struct {
+type GenerateTokenRequest struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Secret   string `json:"secret"`
 }
 
-type generateTokenResponse struct {
+type GenerateTokenResponse struct {
 	Token string `json:"token"`
 }
 
 // ExtractData
-type extractTokenRequest struct {
+type ExtractTokenRequest struct {
 	Token  string `json:"token"`
 	Secret string `json:"secret"`
 }
 
-type extractTokenResponse struct {
+type ExtractTokenResponse struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -26,29 +26,29 @@ type extractTokenResponse struct {
 }
 
 // SetToken
-type setTokenRequest struct {
+type SetTokenRequest struct {
 	Token string `json:"token"`
 }
 
-type setTokenResponse struct {
+type SetTokenResponse struct {
 	Err string `json:"err,omitempty"`
 }
 
 // DeleteToken
-type deleteTokenRequest struct {
+type DeleteTokenRequest struct {
 	Token string `json:"token"`
 }
 
-type deleteTokenResponse struct {
+type DeleteTokenResponse struct {
 	Err string `json:"err,omitempty"`
 }
 
 // CheckToken
-type checkTokenRequest struct {
+type CheckTokenRequest struct {
 	Token string `json:"token"`
 }
 
-type checkTokenResponse struct {
+type CheckTokenResponse struct {
 	Check bool   `json:"check"`
 	Err   string `json:"err,omitempty"`
 }

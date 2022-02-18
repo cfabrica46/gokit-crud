@@ -9,10 +9,10 @@ import (
 
 func TestMakeGenerateTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  generateTokenRequest
+		in  GenerateTokenRequest
 		out string
 	}{
-		{generateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
+		{GenerateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			svc := GetService("localhost", "6379")
@@ -22,7 +22,7 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(generateTokenResponse)
+			result, ok := r.(GenerateTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -36,11 +36,11 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 
 func TestMakeExtractTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  extractTokenRequest
+		in  ExtractTokenRequest
 		out string
 	}{
-		{extractTokenRequest{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", "secret"}, ""},
-		{extractTokenRequest{"", "secret"}, "token contains an invalid number of segments"},
+		{ExtractTokenRequest{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", "secret"}, ""},
+		{ExtractTokenRequest{"", "secret"}, "token contains an invalid number of segments"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			svc := GetService("localhost", "6379")
@@ -50,7 +50,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(extractTokenResponse)
+			result, ok := r.(ExtractTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -64,11 +64,11 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 func TestMakeSetTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  setTokenRequest
+		in  SetTokenRequest
 		out string
 	}{
-		{setTokenRequest{"token"}, ""},
-		{setTokenRequest{""}, "close"},
+		{SetTokenRequest{"token"}, ""},
+		{SetTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			svc := GetService("localhost", "6379")
@@ -89,7 +89,7 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(setTokenResponse)
+			result, ok := r.(SetTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -103,11 +103,11 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 
 func TestMakeDeleteTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  deleteTokenRequest
+		in  DeleteTokenRequest
 		out string
 	}{
-		{deleteTokenRequest{"token"}, ""},
-		{deleteTokenRequest{""}, "close"},
+		{DeleteTokenRequest{"token"}, ""},
+		{DeleteTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			svc := GetService("localhost", "6379")
@@ -128,7 +128,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(deleteTokenResponse)
+			result, ok := r.(DeleteTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -142,11 +142,11 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 
 func TestMakeCheckTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  checkTokenRequest
+		in  CheckTokenRequest
 		out string
 	}{
-		{checkTokenRequest{"token"}, ""},
-		{checkTokenRequest{""}, "close"},
+		{CheckTokenRequest{"token"}, ""},
+		{CheckTokenRequest{""}, "close"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			svc := GetService("localhost", "6379")
@@ -167,7 +167,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(checkTokenResponse)
+			result, ok := r.(CheckTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}

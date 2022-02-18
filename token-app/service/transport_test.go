@@ -14,17 +14,7 @@ import (
 func TestDecodeGenerateToken(t *testing.T) {
 	url := "localhost:8080/generate"
 
-	dataJSON, err := json.Marshal(struct {
-		ID       int    `json:"id"`
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Secret   string `json:"secret"`
-	}{
-		1,
-		"cesar",
-		"cesar@email.com",
-		"secret",
-	})
+	dataJSON, err := json.Marshal(GenerateTokenRequest{1, "cesar", "cesar@email.com", "secret"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -33,7 +23,6 @@ func TestDecodeGenerateToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -41,32 +30,30 @@ func TestDecodeGenerateToken(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *generateTokenRequest
+		out      GenerateTokenRequest
 		outError string
 	}{
-		{goodReq, &generateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, GenerateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
+		{badReq, GenerateTokenRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result GenerateTokenRequest
 			var resultErr string
 
-			result, err = DecodeGenerateTokenRequest(context.TODO(), tt.in)
+			r, err := DecodeGenerateTokenRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(GenerateTokenRequest)
+			if !ok {
+				t.Error("result is not of the type indicated")
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
@@ -75,13 +62,7 @@ func TestDecodeGenerateToken(t *testing.T) {
 func TestDecodeExtractToken(t *testing.T) {
 	url := "localhost:8080/extract"
 
-	dataJSON, err := json.Marshal(struct {
-		Token  string `json:"token"`
-		Secret string `json:"secret"`
-	}{
-		"token",
-		"secret",
-	})
+	dataJSON, err := json.Marshal(ExtractTokenRequest{"token", "secret"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -90,7 +71,6 @@ func TestDecodeExtractToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -98,32 +78,30 @@ func TestDecodeExtractToken(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *extractTokenRequest
+		out      ExtractTokenRequest
 		outError string
 	}{
-		{goodReq, &extractTokenRequest{"token", "secret"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, ExtractTokenRequest{"token", "secret"}, ""},
+		{badReq, ExtractTokenRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result ExtractTokenRequest
 			var resultErr string
 
-			result, err = DecodeExtractTokenRequest(context.TODO(), tt.in)
+			r, err := DecodeExtractTokenRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(ExtractTokenRequest)
+			if !ok {
+				t.Error("result is not of the type indicated")
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
@@ -132,11 +110,7 @@ func TestDecodeExtractToken(t *testing.T) {
 func TestDecodeSetToken(t *testing.T) {
 	url := "localhost:8080/token"
 
-	dataJSON, err := json.Marshal(struct {
-		Token string `json:"token"`
-	}{
-		"token",
-	})
+	dataJSON, err := json.Marshal(SetTokenRequest{"token"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -145,7 +119,6 @@ func TestDecodeSetToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -153,32 +126,30 @@ func TestDecodeSetToken(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *setTokenRequest
+		out      SetTokenRequest
 		outError string
 	}{
-		{goodReq, &setTokenRequest{"token"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, SetTokenRequest{"token"}, ""},
+		{badReq, SetTokenRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result SetTokenRequest
 			var resultErr string
 
-			result, err = DecodeSetTokenRequest(context.TODO(), tt.in)
+			r, err := DecodeSetTokenRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(SetTokenRequest)
+			if !ok {
+				t.Error("result is not of the type indicated")
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
@@ -187,11 +158,7 @@ func TestDecodeSetToken(t *testing.T) {
 func TestDecodeDeleteToken(t *testing.T) {
 	url := "localhost:8080/token"
 
-	dataJSON, err := json.Marshal(struct {
-		Token string `json:"token"`
-	}{
-		"token",
-	})
+	dataJSON, err := json.Marshal(DeleteTokenRequest{"token"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -200,7 +167,6 @@ func TestDecodeDeleteToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	badReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -208,32 +174,30 @@ func TestDecodeDeleteToken(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *deleteTokenRequest
+		out      DeleteTokenRequest
 		outError string
 	}{
-		{goodReq, &deleteTokenRequest{"token"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, DeleteTokenRequest{"token"}, ""},
+		{badReq, DeleteTokenRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result DeleteTokenRequest
 			var resultErr string
 
-			result, err = DecodeDeleteTokenRequest(context.TODO(), tt.in)
+			r, err := DecodeDeleteTokenRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(DeleteTokenRequest)
+			if !ok {
+				t.Error("result is not of the type indicated")
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
@@ -242,11 +206,7 @@ func TestDecodeDeleteToken(t *testing.T) {
 func TestDecodeCheckToken(t *testing.T) {
 	url := "localhost:8080/Check"
 
-	dataJSON, err := json.Marshal(struct {
-		Token string `json:"token"`
-	}{
-		"token",
-	})
+	dataJSON, err := json.Marshal(CheckTokenRequest{"token"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -255,7 +215,6 @@ func TestDecodeCheckToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -263,32 +222,30 @@ func TestDecodeCheckToken(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *checkTokenRequest
+		out      CheckTokenRequest
 		outError string
 	}{
-		{goodReq, &checkTokenRequest{"token"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, CheckTokenRequest{"token"}, ""},
+		{badReq, CheckTokenRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result CheckTokenRequest
 			var resultErr string
 
-			result, err = DecodeCheckTokenRequest(context.TODO(), tt.in)
+			r, err := DecodeCheckTokenRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(CheckTokenRequest)
+			if !ok {
+				t.Error("result is not of the type indicated")
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}

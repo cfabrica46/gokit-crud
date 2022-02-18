@@ -6,60 +6,54 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-/* GenerateToken(int, string, string) (string, error)
-ExtractData(string) (int, string, string, error)
-SetToken(string) error
-DeleteToken(string) error
-CheckToken(string) (bool, error) */
-
 func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(generateTokenRequest)
+		req := request.(GenerateTokenRequest)
 		token := svc.GenerateToken(req.ID, req.Username, req.Email, []byte(req.Secret))
-		return generateTokenResponse{token}, nil
+		return GenerateTokenResponse{token}, nil
 	}
 }
 
 func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(extractTokenRequest)
+		req := request.(ExtractTokenRequest)
 		id, username, email, err := svc.ExtractToken(req.Token, []byte(req.Secret))
 		if err != nil {
-			return extractTokenResponse{id, username, email, err.Error()}, nil
+			return ExtractTokenResponse{id, username, email, err.Error()}, nil
 		}
-		return extractTokenResponse{id, username, email, ""}, nil
+		return ExtractTokenResponse{id, username, email, ""}, nil
 	}
 }
 
 func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(setTokenRequest)
+		req := request.(SetTokenRequest)
 		err := svc.SetToken(req.Token)
 		if err != nil {
-			return setTokenResponse{err.Error()}, nil
+			return SetTokenResponse{err.Error()}, nil
 		}
-		return setTokenResponse{""}, nil
+		return SetTokenResponse{""}, nil
 	}
 }
 
 func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(deleteTokenRequest)
+		req := request.(DeleteTokenRequest)
 		err := svc.DeleteToken(req.Token)
 		if err != nil {
-			return deleteTokenResponse{err.Error()}, nil
+			return DeleteTokenResponse{err.Error()}, nil
 		}
-		return deleteTokenResponse{""}, nil
+		return DeleteTokenResponse{""}, nil
 	}
 }
 
 func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(checkTokenRequest)
+		req := request.(CheckTokenRequest)
 		check, err := svc.CheckToken(req.Token)
 		if err != nil {
-			return checkTokenResponse{check, err.Error()}, nil
+			return CheckTokenResponse{check, err.Error()}, nil
 		}
-		return checkTokenResponse{check, ""}, nil
+		return CheckTokenResponse{check, ""}, nil
 	}
 }

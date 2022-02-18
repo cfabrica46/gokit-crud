@@ -30,7 +30,6 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 			result, ok := r.(GetAllUsersRequest)
 			if !ok {
 				t.Error("result is not of the type indicated")
-
 			}
 
 			if !strings.Contains(resultErr, tt.outError) {
