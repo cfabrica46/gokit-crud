@@ -11,11 +11,11 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  getAllUsersRequest
+		in  GetAllUsersRequest
 		out string
 	}{
-		{getAllUsersRequest{}, ""},
-		{getAllUsersRequest{}, "database is closed"},
+		{GetAllUsersRequest{}, ""},
+		{GetAllUsersRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
@@ -41,7 +41,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(getAllUsersResponse)
+			result, ok := r.(GetAllUsersResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -57,11 +57,11 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  getUserByIDRequest
+		in  GetUserByIDRequest
 		out string
 	}{
-		{getUserByIDRequest{1}, ""},
-		{getUserByIDRequest{}, "database is closed"},
+		{GetUserByIDRequest{1}, ""},
+		{GetUserByIDRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
@@ -87,7 +87,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(getUserByIDResponse)
+			result, ok := r.(GetUserByIDResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -103,11 +103,11 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  getUserByUsernameAndPasswordRequest
+		in  GetUserByUsernameAndPasswordRequest
 		out string
 	}{
-		{getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{getUserByUsernameAndPasswordRequest{}, "database is closed"},
+		{GetUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
+		{GetUserByUsernameAndPasswordRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
@@ -133,7 +133,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(getUserByUsernameAndPasswordResponse)
+			result, ok := r.(GetUserByUsernameAndPasswordResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -149,11 +149,11 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  getIDByUsernameRequest
+		in  GetIDByUsernameRequest
 		out string
 	}{
-		{getIDByUsernameRequest{"cesar"}, ""},
-		{getIDByUsernameRequest{}, "database is closed"},
+		{GetIDByUsernameRequest{"cesar"}, ""},
+		{GetIDByUsernameRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
@@ -179,7 +179,7 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(getIDByUsernameResponse)
+			result, ok := r.(GetIDByUsernameResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -195,11 +195,11 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  insertUserRequest
+		in  InsertUserRequest
 		out string
 	}{
-		{insertUserRequest{}, ""},
-		{insertUserRequest{}, "database is closed"},
+		{InsertUserRequest{}, ""},
+		{InsertUserRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
@@ -225,7 +225,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(insertUserResponse)
+			result, ok := r.(InsertUserResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -241,11 +241,11 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  deleteUserRequest
+		in  DeleteUserRequest
 		out string
 	}{
-		{deleteUserRequest{}, ""},
-		{deleteUserRequest{}, "database is closed"},
+		{DeleteUserRequest{}, ""},
+		{DeleteUserRequest{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			// var resultErr string
@@ -271,7 +271,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(deleteUserResponse)
+			result, ok := r.(DeleteUserResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
