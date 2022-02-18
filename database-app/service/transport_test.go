@@ -14,24 +14,29 @@ import (
 func TestDecodeGetAllUsersRequest(t *testing.T) {
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *getAllUsersRequest
+		out      getAllUsersRequest
 		outError string
 	}{
-		{&http.Request{}, &getAllUsersRequest{}, ""},
+		{&http.Request{}, getAllUsersRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result getAllUsersRequest
 			var resultErr string
 
-			result, err := DecodeGetAllUsersRequest(context.TODO(), tt.in)
+			r, err := DecodeGetAllUsersRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(getAllUsersRequest)
+			if !ok {
+				t.Error("result is not of the type indicated")
+
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if result != *tt.out {
+			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
@@ -49,24 +54,28 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *getUserByIDRequest
+		out      getUserByIDRequest
 		outError string
 	}{
-		{req, &getUserByIDRequest{}, ""},
+		{req, getUserByIDRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result getUserByIDRequest
 			var resultErr string
 
-			result, err := DecodeGetUserByIDRequest(context.TODO(), tt.in)
+			r, err := DecodeGetUserByIDRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(getUserByIDRequest)
+			if !ok {
+				t.Error("result is not of the type indicated")
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if result != *tt.out {
+			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
@@ -75,14 +84,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 	url := "localhost:8080/user/username_password"
-
-	dataJSON, err := json.Marshal(struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}{
-		"cesar",
-		"01234",
-	})
+	dataJSON, err := json.Marshal(User{Username: "cesar", Password: "01234"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -91,7 +93,6 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -99,32 +100,32 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *getUserByUsernameAndPasswordRequest
+		out      getUserByUsernameAndPasswordRequest
 		outError string
 	}{
-		{goodReq, &getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
+		{badReq, getUserByUsernameAndPasswordRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result getUserByUsernameAndPasswordRequest
 			var resultErr string
 
-			result, err = DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
+			r, err := DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(getUserByUsernameAndPasswordRequest)
+			if !ok {
+				if (tt.out != getUserByUsernameAndPasswordRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
@@ -141,24 +142,30 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *getIDByUsernameRequest
+		out      getIDByUsernameRequest
 		outError string
 	}{
-		{req, &getIDByUsernameRequest{}, ""},
+		{req, getIDByUsernameRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result getIDByUsernameRequest
 			var resultErr string
 
-			result, err := DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
+			r, err := DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(getIDByUsernameRequest)
+			if !ok {
+				if (tt.out != getIDByUsernameRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if result != *tt.out {
+			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
@@ -168,15 +175,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 func TestDecodeInsertUserRequest(t *testing.T) {
 	url := "localhost:8080/user"
 
-	dataJSON, err := json.Marshal(struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-		Email    string `json:"email"`
-	}{
-		"cesar",
-		"01234",
-		"cesar@gmail.com",
-	})
+	dataJSON, err := json.Marshal(User{Username: "cesar", Password: "01234", Email: "cesar@email.com"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -193,32 +192,32 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *insertUserRequest
+		out      insertUserRequest
 		outError string
 	}{
-		{goodReq, &insertUserRequest{"cesar", "01234", "cesar@gmail.com"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, insertUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{badReq, insertUserRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result insertUserRequest
 			var resultErr string
 
-			result, err := DecodeInsertUserRequest(context.TODO(), tt.in)
+			r, err := DecodeInsertUserRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(insertUserRequest)
+			if !ok {
+				if (tt.out != insertUserRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, resultErr)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
@@ -227,15 +226,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 func TestDecodeDeleteUserRequest(t *testing.T) {
 	url := "localhost:8080/user"
 
-	dataJSON, err := json.Marshal(struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-		Email    string `json:"email"`
-	}{
-		"cesar",
-		"01234",
-		"cesar@gmail.com",
-	})
+	dataJSON, err := json.Marshal(User{Username: "cesar", Password: "01234", Email: "cesar@email.com"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -252,32 +243,32 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      *deleteUserRequest
+		out      deleteUserRequest
 		outError string
 	}{
-		{goodReq, &deleteUserRequest{"cesar", "01234", "cesar@gmail.com"}, ""},
-		{badReq, nil, "EOF"},
+		{goodReq, deleteUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{badReq, deleteUserRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result interface{}
+			var result deleteUserRequest
 			var resultErr string
 
-			result, err := DecodeDeleteUserRequest(context.TODO(), tt.in)
+			r, err := DecodeDeleteUserRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+			result, ok := r.(deleteUserRequest)
+			if !ok {
+				if (tt.out != deleteUserRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
+			}
+
 			if !strings.Contains(resultErr, tt.outError) {
 				t.Errorf("want %v; got %v", tt.outError, result)
 			}
-
-			if tt.out == nil {
-				if result != nil {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
-			} else {
-				if result != *tt.out {
-					t.Errorf("want %v; got %v", tt.out, result)
-				}
+			if result != tt.out {
+				t.Errorf("want %v; got %v", tt.out, result)
 			}
 		})
 	}
