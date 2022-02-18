@@ -1,14 +1,12 @@
 package service
 
-import "github.com/cfabrica46/gokit-crud/database-app/models"
-
 // GetAllUsers
 type getAllUsersRequest struct {
 }
 
 type getAllUsersResponse struct {
-	Users []models.User `json:"users"`
-	Err   string        `json:"err,omitempty"`
+	Users []User `json:"users"`
+	Err   string `json:"err,omitempty"`
 }
 
 // GetUserByID
@@ -17,8 +15,8 @@ type getUserByIDRequest struct {
 }
 
 type getUserByIDResponse struct {
-	User models.User `json:"user"`
-	Err  string      `json:"err,omitempty"`
+	User User   `json:"user"`
+	Err  string `json:"err,omitempty"`
 }
 
 // GetUserByUsernameAndPassword
@@ -28,8 +26,8 @@ type getUserByUsernameAndPasswordRequest struct {
 }
 
 type getUserByUsernameAndPasswordResponse struct {
-	User models.User `json:"user"`
-	Err  string      `json:"err,omitempty"`
+	User User   `json:"user"`
+	Err  string `json:"err,omitempty"`
 }
 
 // GetIDByUsername

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	"github.com/cfabrica46/gokit-crud/database-app/models"
 )
 
 func TestOpenDB(t *testing.T) {
@@ -39,11 +37,11 @@ func TestGetAllUsers(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  models.User
+		in  User
 		out string
 	}{
-		{models.User{Username: "username", Password: "password", Email: "email"}, ""},
-		{models.User{}, "database is closed"},
+		{User{Username: "username", Password: "password", Email: "email"}, ""},
+		{User{}, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
@@ -88,11 +86,11 @@ func TestGetUserByID(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  models.User
-		out models.User
+		in  User
+		out User
 	}{
-		{models.User{ID: -1}, models.User{}},
-		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
+		{User{ID: -1}, User{}},
+		{User{Username: "username", Password: "password", Email: "email"}, User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			s := GetService(host, port, username, password, dbName, sslMode, driver)
@@ -133,11 +131,11 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  models.User
-		out models.User
+		in  User
+		out User
 	}{
-		{models.User{}, models.User{}},
-		{models.User{Username: "username", Password: "password", Email: "email"}, models.User{Username: "username", Password: "password", Email: "email"}},
+		{User{}, User{}},
+		{User{Username: "username", Password: "password", Email: "email"}, User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			s := GetService(host, port, username, password, dbName, sslMode, driver)
@@ -173,12 +171,12 @@ func TestInsertUser(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in  models.User
+		in  User
 		out string
 	}{
-		{models.User{Username: "username", Password: "password", Email: "email"}, ""},
-		{models.User{}, "database is closed"},
-		{models.User{}, "duplicate key value"},
+		{User{Username: "username", Password: "password", Email: "email"}, ""},
+		{User{}, "database is closed"},
+		{User{}, "duplicate key value"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string
@@ -223,12 +221,12 @@ func TestDeleteUser(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
-		in              models.User
+		in              User
 		outRowsAffected int
 		outError        string
 	}{
-		{models.User{Username: "username", Password: "password", Email: "email"}, 1, ""},
-		{models.User{}, 0, "database is closed"},
+		{User{Username: "username", Password: "password", Email: "email"}, 1, ""},
+		{User{}, 0, "database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result string

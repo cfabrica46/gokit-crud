@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cfabrica46/gokit-crud/database-app/models"
 	_ "github.com/lib/pq"
 )
 
 type serviceInterface interface {
-	GetAllUsers() ([]models.User, error)
-	GetUserByID(int) (models.User, error)
-	GetUserByUsernameAndPassword(string, string) (models.User, error)
+	GetAllUsers() ([]User, error)
+	GetUserByID(int) (User, error)
+	GetUserByUsernameAndPassword(string, string) (User, error)
 	GetIDByUsername(string) (int, error)
 	InsertUser(string, string, string) error
 	DeleteUser(string, string, string) (int, error)
@@ -46,24 +45,24 @@ func (s *service) OpenDB() (err error) {
 	return
 }
 
-func (s service) GetAllUsers() (users []models.User, err error) {
+func (s service) GetAllUsers() (users []User, err error) {
 	rows, err := s.db.Query("SELECT users.id,users.username,users.email FROM users")
 	if err != nil {
 		return
 	}
 
 	for rows.Next() {
-		var userBeta models.User
+		var userBeta User
 		rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
 		users = append(users, userBeta)
 	}
 	return
 }
 
-func (s service) GetUserByID(id int) (user models.User, err error) {
+func (s service) GetUserByID(id int) (user User, err error) {
 	row := s.db.QueryRow("SELECT users.id,users.username,users.password,users.email FROM users WHERE users.id = $1", id)
 
-	var userBeta models.User
+	var userBeta User
 	err = row.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Password, &userBeta.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -75,10 +74,10 @@ func (s service) GetUserByID(id int) (user models.User, err error) {
 	return
 }
 
-func (s service) GetUserByUsernameAndPassword(username, password string) (user models.User, err error) {
+func (s service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
 	row := s.db.QueryRow("SELECT users.id, users.email FROM users WHERE users.username = $1 AND users.password = $2", username, password)
 
-	var userBeta models.User
+	var userBeta User
 
 	err = row.Scan(&userBeta.ID, &userBeta.Email)
 	if err != nil {
