@@ -18,27 +18,34 @@ func GetService(dbHost, dbPort, tokenHost, tokenPort string) *service {
 }
 
 /* func (s service) SignUp(username, password, email string) (token string, err error) {
+	var response dbapp.InsertUserResponse
 	//convert password to Sha256
 	password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 
+	// make request
 	url := fmt.Sprintf("%s:%s/user", s.dbHost, s.dbPort)
-
-	dataJSON, err := json.Marshal(struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}{
-		username,
-		password,
-	})
+	dataReq, err := json.Marshal(dbapp.InsertUserRequest{username, password, email})
 	if err != nil {
 		return
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(dataJSON))
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(dataReq))
 	if err != nil {
 		return
 	}
-	// goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
+	defer resp.Body.Close()
+
+	// recive response
+	dataResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(dataReq, &response)
+	if err != nil {
+		return
+	}
+
 	return
 } */
 

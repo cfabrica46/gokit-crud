@@ -46,7 +46,9 @@ func TestDecodeGenerateToken(t *testing.T) {
 			}
 			result, ok := r.(GenerateTokenRequest)
 			if !ok {
-				t.Error("result is not of the type indicated")
+				if (tt.out != GenerateTokenRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
 			}
 
 			if !strings.Contains(resultErr, tt.outError) {
@@ -94,7 +96,9 @@ func TestDecodeExtractToken(t *testing.T) {
 			}
 			result, ok := r.(ExtractTokenRequest)
 			if !ok {
-				t.Error("result is not of the type indicated")
+				if (tt.out != ExtractTokenRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
 			}
 
 			if !strings.Contains(resultErr, tt.outError) {
@@ -142,7 +146,9 @@ func TestDecodeSetToken(t *testing.T) {
 			}
 			result, ok := r.(SetTokenRequest)
 			if !ok {
-				t.Error("result is not of the type indicated")
+				if (tt.out != SetTokenRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
 			}
 
 			if !strings.Contains(resultErr, tt.outError) {
@@ -190,7 +196,9 @@ func TestDecodeDeleteToken(t *testing.T) {
 			}
 			result, ok := r.(DeleteTokenRequest)
 			if !ok {
-				t.Error("result is not of the type indicated")
+				if (tt.out != DeleteTokenRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
 			}
 
 			if !strings.Contains(resultErr, tt.outError) {
@@ -238,7 +246,9 @@ func TestDecodeCheckToken(t *testing.T) {
 			}
 			result, ok := r.(CheckTokenRequest)
 			if !ok {
-				t.Error("result is not of the type indicated")
+				if (tt.out != CheckTokenRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
 			}
 
 			if !strings.Contains(resultErr, tt.outError) {
