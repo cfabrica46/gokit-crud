@@ -21,7 +21,7 @@ func GetService(dbHost, dbPort, tokenHost, tokenPort string) *service {
 	//convert password to Sha256
 	password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 
-	url := fmt.Sprintf("%s:%s/user/username_password", s.dbHost, s.dbPort)
+	url := fmt.Sprintf("%s:%s/user", s.dbHost, s.dbPort)
 
 	dataJSON, err := json.Marshal(struct {
 		Username string `json:"username"`
@@ -34,11 +34,15 @@ func GetService(dbHost, dbPort, tokenHost, tokenPort string) *service {
 		return
 	}
 
-	http.Post(url, "application/json", bytes.NewBuffer(nil))
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(dataJSON))
+	if err != nil {
+		return
+	}
 	// goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
 	return
-}
-*/
+} */
+
 /* func (serviceInterface) SignIn(username, password string) (token string, err error) {
+	url := fmt.Sprintf("%s:%s/user/username_password", s.dbHost, s.dbPort)
 	return
 } */
