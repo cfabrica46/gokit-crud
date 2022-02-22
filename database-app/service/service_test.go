@@ -9,33 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-/* func TestOpenDB(t *testing.T) {
-	for i, tt := range []struct {
-		inHost, inPort, inUsername, inPassword, inDBName, inSSLMode, inDriver string
-		out                                                                   string
-	}{
-		{"localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres", ""},
-		{"localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "", "unknown driver"},
-		{"localhost", "0", "cfabrica46", "01234", "go_crud", "", "postgres", "connection refused"},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result string
-			s := GetService(tt.inHost, tt.inPort, tt.inUsername, tt.inPassword, tt.inDBName, tt.inSSLMode, tt.inDriver)
-
-			err := s.OpenDB()
-			if err != nil {
-				result = err.Error()
-			} else {
-				defer s.db.Close()
-			}
-
-			if !strings.Contains(result, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
-		})
-	}
-} */
-
 var u = User{
 	ID:       1,
 	Username: "cesar",
@@ -45,11 +18,8 @@ var u = User{
 
 func TestGetAllUsers(t *testing.T) {
 	for i, tt := range []struct {
-		// in  User
-		// out    []User
 		outErr string
 	}{
-		// {User{Username: "username", Password: "password", Email: "email"}, ""},
 		{""},
 		{"sql: database is closed"},
 	} {
@@ -83,139 +53,223 @@ func TestGetAllUsers(t *testing.T) {
 	}
 }
 
-/* func TestGetAllUsers(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
+func TestGetUserByID(t *testing.T) {
 	for i, tt := range []struct {
-		in  User
-		out string
+		outErr    string
+		condition string
 	}{
-		{User{Username: "username", Password: "password", Email: "email"}, ""},
-		{User{}, "database is closed"},
+		{"", ""},
+		{"", "no rows"},
+		{"sql: database is closed", "close db"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result string
-			s := GetService(host, port, username, password, dbName, sslMode, driver)
+			log.SetFlags(log.Lshortfile)
+			var resultErr string
 
-			err := s.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer s.db.Close()
+			defer db.Close()
 
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := s.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			if tt.condition == "close db" {
+				db.Close()
 			}
 
-			// insert user
-			if tt.out == "" {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					t.Error(err)
-				}
-				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(u.ID, u.Username, u.Password, u.Email)
+
+			if tt.condition == "no rows" {
+				rows = sqlmock.NewRows([]string{"id", "username", "password", "email"})
 			}
 
-			_, err = s.GetAllUsers()
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(u.ID).WillReturnRows(rows)
+
+			_, err = svc.GetUserByID(u.ID)
 			if err != nil {
-				result = err.Error()
+				resultErr = err.Error()
 			}
 
-			if !strings.Contains(result, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
 		})
 	}
-} */
+}
 
-/* func TestGetUserByID(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
+func TestGetUserByUsernameAndPassword(t *testing.T) {
 	for i, tt := range []struct {
-		in  User
-		out User
+		outErr    string
+		condition string
 	}{
-		{User{ID: -1}, User{}},
-		{User{Username: "username", Password: "password", Email: "email"}, User{Username: "username", Password: "password", Email: "email"}},
+		{"", ""},
+		{"", "no rows"},
+		{"sql: database is closed", "close db"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := GetService(host, port, username, password, dbName, sslMode, driver)
+			log.SetFlags(log.Lshortfile)
+			var resultErr string
 
-			err := s.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer s.db.Close()
+			defer db.Close()
 
-			if tt.in.ID != -1 {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					t.Error(err)
-				}
-				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
+			if tt.condition == "close db" {
+				db.Close()
 			}
 
-			id, err := s.GetIDByUsername(tt.in.Username)
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(u.ID, u.Username, u.Password, u.Email)
+
+			if tt.condition == "no rows" {
+				rows = sqlmock.NewRows([]string{"id", "username", "password", "email"})
+			}
+
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(u.Username, u.Password).WillReturnRows(rows)
+
+			_, err = svc.GetUserByUsernameAndPassword(u.Username, u.Password)
 			if err != nil {
-				t.Error(err)
+				resultErr = err.Error()
 			}
 
-			user, err := s.GetUserByID(id)
-			if err != nil {
-				t.Error(err)
-			}
-
-			if user.Username != tt.out.Username {
-				t.Errorf("want %v; got %v", tt.out, user)
-			}
-
+			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
 		})
 	}
-} */
+}
 
-/* func TestGetUserByUsernameAndPassword(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
+func TestGetIDByUsername(t *testing.T) {
 	for i, tt := range []struct {
-		in  User
-		out User
+		outErr    string
+		condition string
 	}{
-		{User{}, User{}},
-		{User{Username: "username", Password: "password", Email: "email"}, User{Username: "username", Password: "password", Email: "email"}},
+		{"", ""},
+		{"", "no rows"},
+		{"sql: database is closed", "close db"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			s := GetService(host, port, username, password, dbName, sslMode, driver)
+			log.SetFlags(log.Lshortfile)
+			var resultErr string
 
-			err := s.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer s.db.Close()
+			defer db.Close()
 
-			if tt.in.Username != "" {
-				err := s.InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
-				if err != nil {
-					t.Error(err)
-				}
-				defer s.DeleteUser(tt.in.Username, tt.in.Password, tt.in.Email)
+			if tt.condition == "close db" {
+				db.Close()
 			}
 
-			user, err := s.GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id"}).AddRow(u.ID)
+
+			if tt.condition == "no rows" {
+				rows = sqlmock.NewRows([]string{"id"})
+			}
+
+			mock.ExpectQuery("^SELECT id FROM users").WithArgs(u.Username).WillReturnRows(rows)
+
+			_, err = svc.GetIDByUsername(u.Username)
 			if err != nil {
-				t.Error(err)
+				resultErr = err.Error()
 			}
 
-			if user.Username != tt.out.Username {
-				t.Errorf("want %v; got %v", tt.out, user)
-			}
-
+			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
 		})
 	}
-} */
+}
+
+func TestInsertUser(t *testing.T) {
+	for i, tt := range []struct {
+		outErr    string
+		condition string
+	}{
+		{"", ""},
+		{"", "duplicate key"},
+		{"sql: database is closed", "close db"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			log.SetFlags(log.Lshortfile)
+			var resultErr string
+
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Error(err)
+			}
+			defer db.Close()
+
+			if tt.condition == "close db" {
+				db.Close()
+			}
+
+			svc := GetService(db)
+
+			/* if tt.condition == "duplicate key" {
+				rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(u.ID, u.Username, u.Password, u.Email)
+				mock.ExpectQuery("").WillReturnRows(rows)
+			} */
+
+			mock.ExpectPrepare("^INSERT INTO users").ExpectExec().WithArgs(u.Username, u.Password, u.Email).WillReturnResult(sqlmock.NewResult(0, 1))
+
+			// .WithArgs(u.Username, u.Password, u.Email).WillReturnRows(rows)
+
+			if tt.condition == "duplicate key" {
+				rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(u.ID, u.Username, u.Password, u.Email)
+				mock.ExpectPrepare("^INSERT INTO users").ExpectQuery().WillReturnRows(rows)
+				/* err = svc.InsertUser(u.Username, u.Password, u.Email)
+				if err != nil {
+					resultErr = err.Error()
+				} */
+			}
+
+			err = svc.InsertUser(u.Username, u.Password, u.Email)
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+		})
+	}
+}
+
+func TestDeleteUser(t *testing.T) {
+	for i, tt := range []struct {
+		outErr    string
+		condition string
+	}{
+		{"", ""},
+		{"sql: database is closed", "close db"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			log.SetFlags(log.Lshortfile)
+			var resultErr string
+
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Error(err)
+			}
+			defer db.Close()
+
+			if tt.condition == "close db" {
+				db.Close()
+			}
+
+			svc := GetService(db)
+
+			mock.ExpectPrepare("^DELETE FROM users").ExpectExec().WithArgs(u.Username, u.Password, u.Email).WillReturnResult(sqlmock.NewResult(0, 1))
+
+			_, err = svc.DeleteUser(u.Username, u.Password, u.Email)
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+		})
+	}
+}
 
 /* func TestInsertUser(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"

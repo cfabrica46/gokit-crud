@@ -63,7 +63,7 @@ func (s service) GetAllUsers() (users []User, err error) {
 }
 
 func (s service) GetUserByID(id int) (user User, err error) {
-	row := s.db.QueryRow("SELECT users.id,users.username,users.password,users.email FROM users WHERE users.id = $1", id)
+	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE id = $1", id)
 
 	var userBeta User
 	err = row.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Password, &userBeta.Email)
@@ -78,11 +78,11 @@ func (s service) GetUserByID(id int) (user User, err error) {
 }
 
 func (s service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
-	row := s.db.QueryRow("SELECT users.id, users.email FROM users WHERE users.username = $1 AND users.password = $2", username, password)
+	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2", username, password)
 
 	var userBeta User
 
-	err = row.Scan(&userBeta.ID, &userBeta.Email)
+	err = row.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Password, &userBeta.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = nil
@@ -90,13 +90,11 @@ func (s service) GetUserByUsernameAndPassword(username, password string) (user U
 		return
 	}
 	user = userBeta
-	user.Username = username
-	user.Password = password
 	return
 }
 
 func (s service) GetIDByUsername(username string) (id int, err error) {
-	row := s.db.QueryRow("SELECT users.id FROM users WHERE users.username = $1", username)
+	row := s.db.QueryRow("SELECT id FROM users WHERE username = $1", username)
 
 	err = row.Scan(&id)
 	if err != nil {
@@ -109,7 +107,7 @@ func (s service) GetIDByUsername(username string) (id int, err error) {
 }
 
 func (s *service) InsertUser(username, password, email string) (err error) {
-	stmt, err := s.db.Prepare("INSERT INTO users(username,password,email) VALUES ($1,$2,$3)")
+	stmt, err := s.db.Prepare("INSERT INTO users(username, password, email) VALUES ($1,$2,$3)")
 	if err != nil {
 		return
 	}
