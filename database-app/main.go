@@ -1,17 +1,6 @@
 package main
 
-import (
-	"log"
-	"net/http"
-	"os"
-
-	"github.com/cfabrica46/gokit-crud/database-app/service"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-)
-
-func main() {
+/* func main() {
 	if godotenv.Load(".env") == nil {
 		log.Println(".env loaded")
 	}
@@ -72,4 +61,4 @@ func runServer(port, postgresHost, postgresPort, postgresUsername, postgresPassw
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
 	log.Fatal(http.ListenAndServe(":"+port, r))
-}
+} */

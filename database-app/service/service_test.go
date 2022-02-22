@@ -2,11 +2,14 @@ package service
 
 import (
 	"fmt"
-	"strings"
+	"log"
 	"testing"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestOpenDB(t *testing.T) {
+/* func TestOpenDB(t *testing.T) {
 	for i, tt := range []struct {
 		inHost, inPort, inUsername, inPassword, inDBName, inSSLMode, inDriver string
 		out                                                                   string
@@ -31,9 +34,56 @@ func TestOpenDB(t *testing.T) {
 			}
 		})
 	}
+} */
+
+var u = User{
+	ID:       1,
+	Username: "cesar",
+	Password: "01234",
+	Email:    "cesar@email.com",
 }
 
 func TestGetAllUsers(t *testing.T) {
+	for i, tt := range []struct {
+		// in  User
+		// out    []User
+		outErr string
+	}{
+		// {User{Username: "username", Password: "password", Email: "email"}, ""},
+		{""},
+		{"sql: database is closed"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			log.SetFlags(log.Lshortfile)
+			var resultErr string
+
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Error(err)
+			}
+			defer db.Close()
+
+			if tt.outErr == "sql: database is closed" {
+				db.Close()
+			}
+
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(u.ID, u.Username, u.Password, u.Email)
+
+			mock.ExpectQuery("SELECT id, username, email FROM users").WillReturnRows(rows)
+
+			_, err = svc.GetAllUsers()
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+		})
+	}
+}
+
+/* func TestGetAllUsers(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
@@ -80,9 +130,9 @@ func TestGetAllUsers(t *testing.T) {
 			}
 		})
 	}
-}
+} */
 
-func TestGetUserByID(t *testing.T) {
+/* func TestGetUserByID(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
@@ -125,9 +175,9 @@ func TestGetUserByID(t *testing.T) {
 
 		})
 	}
-}
+} */
 
-func TestGetUserByUsernameAndPassword(t *testing.T) {
+/* func TestGetUserByUsernameAndPassword(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
@@ -165,9 +215,9 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 
 		})
 	}
-}
+} */
 
-func TestInsertUser(t *testing.T) {
+/* func TestInsertUser(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
@@ -215,9 +265,9 @@ func TestInsertUser(t *testing.T) {
 			}
 		})
 	}
-}
+} */
 
-func TestDeleteUser(t *testing.T) {
+/* func TestDeleteUser(t *testing.T) {
 	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
 
 	for i, tt := range []struct {
@@ -268,4 +318,4 @@ func TestDeleteUser(t *testing.T) {
 			}
 		})
 	}
-}
+} */

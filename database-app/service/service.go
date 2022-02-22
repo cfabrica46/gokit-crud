@@ -2,7 +2,6 @@ package service
 
 import (
 	"database/sql"
-	"fmt"
 	"sync"
 
 	_ "github.com/lib/pq"
@@ -25,11 +24,15 @@ type service struct {
 	host, port, user, password, dbName, sslmode, driver string
 }
 
-func GetService(host, port, user, password, dbName, sslmode, driver string) *service {
-	return &service{once: sync.Once{}, host: host, port: port, user: user, password: password, dbName: dbName, sslmode: sslmode, driver: driver}
+func GetService(db *sql.DB) *service {
+	return &service{db: db}
 }
 
-func (s *service) OpenDB() (err error) {
+/* func GetService(host, port, user, password, dbName, sslmode, driver string) *service {
+	return &service{once: sync.Once{}, host: host, port: port, user: user, password: password, dbName: dbName, sslmode: sslmode, driver: driver}
+} */
+
+/* func (s *service) OpenDB() (err error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", s.host, s.port, s.user, s.password, s.dbName, s.sslmode)
 
 	s.once.Do(func() {
@@ -43,10 +46,10 @@ func (s *service) OpenDB() (err error) {
 		}
 	})
 	return
-}
+} */
 
 func (s service) GetAllUsers() (users []User, err error) {
-	rows, err := s.db.Query("SELECT users.id,users.username,users.email FROM users")
+	rows, err := s.db.Query("SELECT id, username, email FROM users")
 	if err != nil {
 		return
 	}
