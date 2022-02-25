@@ -1,19 +1,45 @@
 package main
 
-/* func main() {
-	if godotenv.Load(".env") == nil {
-		log.Println(".env loaded")
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/cfabrica46/gokit-crud/database-app/service"
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	log.SetFlags(log.Lshortfile)
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println(err)
 	}
-	runServer(os.Getenv("PORT"), os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"), os.Getenv("POSTGRES_USERNAME"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_SSLMODE"), os.Getenv("DB_DRIVER"))
-}
 
-func runServer(port, postgresHost, postgresPort, postgresUsername, postgresPassword, postgresDB, postgresSSL, postgresDriver string) {
-	svc := service.GetService(postgresHost, postgresPort, postgresUsername, postgresPassword, postgresDB, postgresSSL, postgresDriver)
+	dbInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
 
-	err := svc.OpenDB()
+	fmt.Println(dbInfo)
+
+	db, err := sql.Open(os.Getenv("DB_DRIVER"), dbInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	runServer(os.Getenv("PORT"), db)
+}
+
+func runServer(port string, db *sql.DB) {
+
+	svc := service.GetService(db)
 
 	getAllUsersHandler := httptransport.NewServer(
 		service.MakeGetAllUsersEndpoint(svc),
@@ -61,4 +87,4 @@ func runServer(port, postgresHost, postgresPort, postgresUsername, postgresPassw
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
 	log.Fatal(http.ListenAndServe(":"+port, r))
-} */
+}

@@ -1,33 +1,39 @@
 package service
 
-/* func TestMakeGetAllUsersEndpoint(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
+import (
+	"context"
+	"fmt"
+	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  GetAllUsersRequest
-		out string
+		in     GetAllUsersRequest
+		outErr string
 	}{
 		{GetAllUsersRequest{}, ""},
-		{GetAllUsersRequest{}, "database is closed"},
+		{GetAllUsersRequest{}, "sql: database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetService(host, port, username, password, dbName, sslMode, driver)
-
-			//OpenDB
-			err := svc.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
+			defer db.Close()
 
 			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			if tt.outErr == "sql: database is closed" {
+				db.Close()
 			}
+
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(userTest.ID, userTest.Username, userTest.Password, userTest.Email)
+
+			mock.ExpectQuery("^SELECT id, username, email FROM users").WillReturnRows(rows)
 
 			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -39,41 +45,36 @@ package service
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestMakeGetUserByIDEndpoint(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
 	for i, tt := range []struct {
-		in  GetUserByIDRequest
-		out string
+		in     GetUserByIDRequest
+		outErr string
 	}{
 		{GetUserByIDRequest{1}, ""},
-		{GetUserByIDRequest{}, "database is closed"},
+		{GetUserByIDRequest{}, "sql: database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetService(host, port, username, password, dbName, sslMode, driver)
-
-			//OpenDB
-			err := svc.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
+			defer db.Close()
 
 			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			if tt.outErr == "sql: database is closed" {
+				db.Close()
 			}
+
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(userTest.ID, userTest.Username, userTest.Password, userTest.Email)
+
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(userTest.ID).WillReturnRows(rows)
 
 			r, err := MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -85,41 +86,36 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
 	for i, tt := range []struct {
-		in  GetUserByUsernameAndPasswordRequest
-		out string
+		in     GetUserByUsernameAndPasswordRequest
+		outErr string
 	}{
 		{GetUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{GetUserByUsernameAndPasswordRequest{}, "database is closed"},
+		{GetUserByUsernameAndPasswordRequest{}, "sql: database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetService(host, port, username, password, dbName, sslMode, driver)
-
-			//OpenDB
-			err := svc.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
+			defer db.Close()
 
 			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			if tt.outErr == "sql: database is closed" {
+				db.Close()
 			}
+
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(userTest.ID, userTest.Username, userTest.Password, userTest.Email)
+
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(userTest.Username, userTest.Password).WillReturnRows(rows)
 
 			r, err := MakeGetUserByUsernameAndPasswordEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -131,41 +127,36 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestGetIDByUsernameEndpoint(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
 	for i, tt := range []struct {
-		in  GetIDByUsernameRequest
-		out string
+		in     GetIDByUsernameRequest
+		outErr string
 	}{
 		{GetIDByUsernameRequest{"cesar"}, ""},
-		{GetIDByUsernameRequest{}, "database is closed"},
+		{GetIDByUsernameRequest{}, "sql: database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetService(host, port, username, password, dbName, sslMode, driver)
-
-			//OpenDB
-			err := svc.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
+			defer db.Close()
 
 			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			if tt.outErr == "sql: database is closed" {
+				db.Close()
 			}
+
+			svc := GetService(db)
+
+			rows := sqlmock.NewRows([]string{"id"}).AddRow(userTest.ID)
+
+			mock.ExpectQuery("^SELECT id FROM users").WithArgs(userTest.Username).WillReturnRows(rows)
 
 			r, err := MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -177,41 +168,34 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestMakeInsertUserEndpoint(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
 	for i, tt := range []struct {
-		in  InsertUserRequest
-		out string
+		in     InsertUserRequest
+		outErr string
 	}{
-		{InsertUserRequest{}, ""},
-		{InsertUserRequest{}, "database is closed"},
+		{InsertUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{InsertUserRequest{}, "sql: database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetService(host, port, username, password, dbName, sslMode, driver)
-
-			//OpenDB
-			err := svc.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
+			defer db.Close()
 
 			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			if tt.outErr == "sql: database is closed" {
+				db.Close()
 			}
+
+			svc := GetService(db)
+
+			mock.ExpectPrepare("^INSERT INTO users").ExpectExec().WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -223,41 +207,34 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestMakeDeleteUserEndpoint(t *testing.T) {
-	host, port, username, password, dbName, sslMode, driver := "localhost", "5431", "cfabrica46", "01234", "go_crud", "disable", "postgres"
-
 	for i, tt := range []struct {
-		in  DeleteUserRequest
-		out string
+		in     DeleteUserRequest
+		outErr string
 	}{
-		{DeleteUserRequest{}, ""},
-		{DeleteUserRequest{}, "database is closed"},
+		{DeleteUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{DeleteUserRequest{}, "sql: database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetService(host, port, username, password, dbName, sslMode, driver)
-
-			//OpenDB
-			err := svc.OpenDB()
+			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
+			defer db.Close()
 
 			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			if tt.outErr == "sql: database is closed" {
+				db.Close()
 			}
+
+			svc := GetService(db)
+
+			mock.ExpectPrepare("^DELETE FROM users").ExpectExec().WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -269,9 +246,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
-} */
+}

@@ -16,12 +16,12 @@ services:
         restart: always
         environment:
             - PORT=7070
-            - POSTGRES_HOST=database-postgres
-            - POSTGRES_PORT=5432
-            - POSTGRES_USERNAME=cfabrica46
-            - POSTGRES_PASSWORD=01234
-            - POSTGRES_DB=go_crud
-            - POSTGRES_SSLMODE=disable
+            - DB_HOST=database-postgres
+            - DB_PORT=5432
+            - DB_USERNAME=cfabrica46
+            - DB_PASSWORD=01234
+            - DB_NAME=go_crud
+            - DB_SSLMODE=disable
             - DB_DRIVER=postgres
         depends_on:
             - database-postgres

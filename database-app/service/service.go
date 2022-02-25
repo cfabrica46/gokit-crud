@@ -28,26 +28,6 @@ func GetService(db *sql.DB) *service {
 	return &service{db: db}
 }
 
-/* func GetService(host, port, user, password, dbName, sslmode, driver string) *service {
-	return &service{once: sync.Once{}, host: host, port: port, user: user, password: password, dbName: dbName, sslmode: sslmode, driver: driver}
-} */
-
-/* func (s *service) OpenDB() (err error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", s.host, s.port, s.user, s.password, s.dbName, s.sslmode)
-
-	s.once.Do(func() {
-		s.db, err = sql.Open(s.driver, psqlInfo)
-		if err != nil {
-			return
-		}
-		err = s.db.Ping()
-		if err != nil {
-			return
-		}
-	})
-	return
-} */
-
 func (s service) GetAllUsers() (users []User, err error) {
 	rows, err := s.db.Query("SELECT id, username, email FROM users")
 	if err != nil {
