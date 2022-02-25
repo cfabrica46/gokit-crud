@@ -7,24 +7,28 @@ import (
 
 	"github.com/cfabrica46/gokit-crud/token-app/service"
 	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	if godotenv.Load(".env") == nil {
-		log.Println(".env loaded")
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println(err)
 	}
-	runServer(os.Getenv("PORT"), os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+
+	options := &redis.Options{
+		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+		Password: "",
+		DB:       0,
+	}
+	db := redis.NewClient(options)
+
+	runServer(os.Getenv("PORT"), db)
 }
 
-func runServer(port, redisHost, redisPort string) {
-	svc := service.GetService(redisHost, redisPort)
-
-	err := svc.OpenDB()
-	if err != nil {
-		log.Fatal(err)
-	}
+func runServer(port string, db *redis.Client) {
+	svc := service.GetService(db)
 
 	getGenerateTokenHandler := httptransport.NewServer(
 		service.MakeGenerateTokenEndpoint(svc),

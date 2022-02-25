@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
+
+	"github.com/alicebob/miniredis"
+	"github.com/go-redis/redis"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMakeGenerateTokenEndpoint(t *testing.T) {
@@ -15,7 +18,14 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 		{GenerateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService("localhost", "6379")
+			mr, err := miniredis.Run()
+			if err != nil {
+				t.Error(err)
+			}
+
+			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+
+			svc := GetService(client)
 
 			r, err := MakeGenerateTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -30,20 +40,29 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 			if result.Token == "" {
 				t.Error("token its empty")
 			}
+
+			assert.NotEqual(t, tt.out, result.Token, "they shouldn't be equal")
 		})
 	}
 }
 
 func TestMakeExtractTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  ExtractTokenRequest
-		out string
+		in     ExtractTokenRequest
+		outErr string
 	}{
 		{ExtractTokenRequest{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", "secret"}, ""},
 		{ExtractTokenRequest{"", "secret"}, "token contains an invalid number of segments"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService("localhost", "6379")
+			mr, err := miniredis.Run()
+			if err != nil {
+				t.Error(err)
+			}
+
+			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+
+			svc := GetService(client)
 
 			r, err := MakeExtractTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -55,32 +74,31 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestMakeSetTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  SetTokenRequest
-		out string
+		in     SetTokenRequest
+		outErr string
 	}{
 		{SetTokenRequest{"token"}, ""},
-		{SetTokenRequest{""}, "close"},
+		{SetTokenRequest{""}, "redis: client is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService("localhost", "6379")
-
-			// OpenDB
-			err := svc.OpenDB()
+			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
 			}
 
+			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+
+			svc := GetService(client)
+
 			// Generate Conflict
-			if tt.out == "close" {
+			if tt.outErr == "redis: client is closed" {
 				svc.db.Close()
 			}
 
@@ -94,32 +112,31 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestMakeDeleteTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  DeleteTokenRequest
-		out string
+		in     DeleteTokenRequest
+		outErr string
 	}{
 		{DeleteTokenRequest{"token"}, ""},
-		{DeleteTokenRequest{""}, "close"},
+		{DeleteTokenRequest{""}, "redis: client is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService("localhost", "6379")
-
-			// OpenDB
-			err := svc.OpenDB()
+			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
 			}
 
+			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+
+			svc := GetService(client)
+
 			// Generate Conflict
-			if tt.out == "close" {
+			if tt.outErr == "redis: client is closed" {
 				svc.db.Close()
 			}
 
@@ -133,32 +150,31 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }
 
 func TestMakeCheckTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  CheckTokenRequest
-		out string
+		in     CheckTokenRequest
+		outErr string
 	}{
 		{CheckTokenRequest{"token"}, ""},
-		{CheckTokenRequest{""}, "close"},
+		{CheckTokenRequest{""}, "redis: client is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			svc := GetService("localhost", "6379")
-
-			// OpenDB
-			err := svc.OpenDB()
+			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
 			}
 
+			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+
+			svc := GetService(client)
+
 			// Generate Conflict
-			if tt.out == "close" {
+			if tt.outErr == "redis: client is closed" {
 				svc.db.Close()
 			}
 
@@ -172,9 +188,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
 }

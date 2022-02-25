@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -19,28 +18,24 @@ type serviceInterface interface {
 }
 
 type service struct {
-	db   *redis.Client
-	once sync.Once
-
-	// Data for DB
-	host, port string
+	db *redis.Client
 }
 
-func GetService(host, port string) *service {
-	return &service{once: sync.Once{}, host: host, port: port}
+func GetService(db *redis.Client) *service {
+	return &service{db}
 }
 
-func (s *service) OpenDB() (err error) {
-	s.once.Do(func() {
-		options := &redis.Options{
-			Addr:     s.host + ":" + s.port,
-			Password: "",
-			DB:       0,
-		}
-		s.db = redis.NewClient(options)
-	})
-	return
-}
+// func (s *service) OpenDB() (err error) {
+// 	s.once.Do(func() {
+// 		options := &redis.Options{
+// 			Addr:     s.host + ":" + s.port,
+// 			Password: "",
+// 			DB:       0,
+// 		}
+// 		s.db = redis.NewClient(options)
+// 	})
+// 	return
+// }
 
 func (service) GenerateToken(id int, username, email string, secret []byte) (token string) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -99,7 +94,7 @@ func (s service) CheckToken(token string) (check bool, err error) {
 func keyFunc(secret []byte) func(token *jwt.Token) (interface{}, error) {
 	return func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
 		return secret, nil
