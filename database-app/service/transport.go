@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func DecodeGetAllUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	var request GetAllUsersRequest
 	return request, nil
 }

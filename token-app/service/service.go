@@ -25,18 +25,6 @@ func GetService(db *redis.Client) *service {
 	return &service{db}
 }
 
-// func (s *service) OpenDB() (err error) {
-// 	s.once.Do(func() {
-// 		options := &redis.Options{
-// 			Addr:     s.host + ":" + s.port,
-// 			Password: "",
-// 			DB:       0,
-// 		}
-// 		s.db = redis.NewClient(options)
-// 	})
-// 	return
-// }
-
 func (service) GenerateToken(id int, username, email string, secret []byte) (token string) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       id,
