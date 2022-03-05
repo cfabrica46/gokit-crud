@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
+	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 	_ "github.com/lib/pq"
 )
 
@@ -15,8 +16,8 @@ type serviceInterface interface {
 	SignUp(string, string, string, string) (string, error)
 	SignIn(string, string, string) (string, error)
 	LogOut(string) error
-	ViewEveryUsers() ([]dbapp.User, error)
-	DeleteAccount(string) error
+	GetAllUsers() ([]dbapp.User, error)
+	DeleteAccount(string, string) error
 }
 
 type service struct {
@@ -32,7 +33,7 @@ func (s service) SignUp(username, password, email, secret string) (token string,
 	var dbURL = s.dbHost + ":" + s.dbPort
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 
-	err = petitionInsertUser(s.client, dbURL+"/user", username, password, email)
+	err = petitionInsertUser(s.client, dbURL+"/user", dbapp.InsertUserRequest{Username: username, Password: password, Email: email})
 	if err != nil {
 		return
 	}
@@ -42,12 +43,12 @@ func (s service) SignUp(username, password, email, secret string) (token string,
 		return
 	}
 
-	token, err = petitionGenerateToken(s.client, tokenURL+"/token", id, username, email, secret)
+	token, err = petitionGenerateToken(s.client, tokenURL+"/token", tokenapp.GenerateTokenRequest{ID: id, Username: username, Email: email, Secret: secret})
 	if err != nil {
 		return
 	}
 
-	err = petitionSetToken(s.client, tokenURL+"/token", token)
+	err = petitionSetToken(s.client, tokenURL+"/token", tokenapp.DeleteTokenRequest{Token: token})
 	if err != nil {
 		return
 	}
@@ -58,12 +59,12 @@ func (s service) SignIn(username, password, secret string) (token string, err er
 	var dbURL = s.dbHost + ":" + s.dbPort
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 
-	user, err := petitionGetUserByUsernameAndPassword(s.client, dbURL+"/user/username_password", username, password)
+	user, err := petitionGetUserByUsernameAndPassword(s.client, dbURL+"/user/username_password", dbapp.GetUserByUsernameAndPasswordRequest{Username: username, Password: password})
 	if err != nil {
 		return
 	}
 
-	token, err = petitionGenerateToken(s.client, tokenURL+"/token", user.ID, user.Username, user.Password, user.Email)
+	token, err = petitionGenerateToken(s.client, tokenURL+"/token", tokenapp.GenerateTokenRequest{ID: user.ID, Username: user.Username, Email: user.Email, Secret: secret})
 	if err != nil {
 		return
 	}
@@ -73,14 +74,43 @@ func (s service) SignIn(username, password, secret string) (token string, err er
 func (s service) LogOut(token string) (err error) {
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 
-	err = petitionCheckToken(s.client, tokenURL+"/check", token)
+	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
 		return
 	}
 
-	err = petitionDeleteToken(s.client, tokenURL+"/token", token)
+	err = petitionDeleteToken(s.client, tokenURL+"/token", tokenapp.DeleteTokenRequest{Token: token})
 	if err != nil {
 		return
 	}
+	return
+}
+
+func (s service) GetAllUsers() (users []dbapp.User, err error) {
+	var dbURL = s.dbHost + ":" + s.dbPort
+
+	users, err = petitionGetAllUsers(s.client, dbURL+"/users")
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (s service) DeleteAccount(token, secret string) (err error) {
+	var dbURL = s.dbHost + ":" + s.dbPort
+	var tokenURL = s.tokenHost + ":" + s.tokenPort
+
+	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
+	if err != nil {
+		return
+	}
+
+	id, username, email, err := petitionExtractToken(s.client, tokenURL+"/extract", tokenapp.ExtractTokenRequest{Token: token, Secret: secret})
+	if err != nil {
+		return
+	}
+
+	// petitionDeleteUser(s.client, dbURL+"/user",dbapp.DeleteUserRequest{}
+
 	return
 }
