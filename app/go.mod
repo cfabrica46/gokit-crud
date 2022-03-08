@@ -3,8 +3,8 @@ module github.com/cfabrica46/gokit-crud/app
 go 1.17
 
 require (
-	github.com/cfabrica46/gokit-crud/database-app v0.0.0-20220225033412-6dc8461db9ea
-	github.com/cfabrica46/gokit-crud/token-app v0.0.0-20220225033412-6dc8461db9ea
+	github.com/cfabrica46/gokit-crud/database-app v0.0.0-20220308145001-547f8686e469
+	github.com/cfabrica46/gokit-crud/token-app v0.0.0-20220227015946-803cde86d239
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.4
 	github.com/stretchr/testify v1.7.0

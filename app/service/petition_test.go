@@ -65,7 +65,7 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
 			})
 
-			_, err := petitionGetIDByUsername(mock, tt.inURL, tt.inUsername)
+			_, err := petitionGetIDByUsername(mock, tt.inURL)
 			if err != nil {
 				resultErr = err.Error()
 			}

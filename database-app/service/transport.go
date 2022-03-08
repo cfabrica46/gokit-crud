@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, error) {
@@ -16,13 +13,9 @@ func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, 
 
 func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GetUserByIDRequest
-
-	idString := mux.Vars(r)["id"]
-
-	// router doesn't allow a non-integer value to be declared
-	id, _ := strconv.Atoi(idString)
-	request.ID = id
-
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
 	return request, nil
 }
 
@@ -36,10 +29,9 @@ func DecodeGetUserByUsernameAndPasswordRequest(_ context.Context, r *http.Reques
 
 func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GetIDByUsernameRequest
-
-	username := mux.Vars(r)["username"]
-	request.Username = username
-
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
 	return request, nil
 }
 

@@ -7,7 +7,7 @@ import (
 )
 
 func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		users, err := svc.GetAllUsers()
 		if err != nil {
 			return GetAllUsersResponse{users, err.Error()}, nil

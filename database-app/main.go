@@ -79,9 +79,9 @@ func runServer(port string, db *sql.DB) {
 
 	r := mux.NewRouter()
 	r.Methods(http.MethodGet).Path("/users").Handler(getAllUsersHandler)
-	r.Methods(http.MethodGet).Path("/user/{id:[0-9]+}").Handler(getUserByIDHandler)
+	r.Methods(http.MethodGet).Path("/user/id").Handler(getUserByIDHandler)
 	r.Methods(http.MethodGet).Path("/user/username_password").Handler(getUserByUsernameAndPasswordHandler)
-	r.Methods(http.MethodGet).Path("/id/{username}").Handler(getIDByUsernameHandler)
+	r.Methods(http.MethodGet).Path("/id/username").Handler(getIDByUsernameHandler)
 	r.Methods(http.MethodPost).Path("/user").Handler(insertUserHandler)
 	r.Methods(http.MethodDelete).Path("/user").Handler(deleteUserHandler)
 

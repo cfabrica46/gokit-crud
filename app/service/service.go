@@ -110,8 +110,6 @@ func (s service) DeleteAccount(token, secret string) (err error) {
 		return
 	}
 
-	//crear getPasswordByToken
-
 	err = petitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: id})
 	if err != nil {
 		return

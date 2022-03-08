@@ -43,10 +43,16 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 }
 
 func TestDecodeGetUserByIDRequest(t *testing.T) {
-	id := 1
-	url := fmt.Sprintf("localhost:8080/user/%d", id)
+	dataJSON, err := json.Marshal(GetUserByIDRequest{ID: 1})
+	if err != nil {
+		t.Error(err)
+	}
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	goodReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+	badReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
 	}
@@ -56,7 +62,8 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 		out      GetUserByIDRequest
 		outError string
 	}{
-		{req, GetUserByIDRequest{}, ""},
+		{goodReq, GetUserByIDRequest{ID: 1}, ""},
+		{badReq, GetUserByIDRequest{ID: 0}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result GetUserByIDRequest
@@ -66,9 +73,12 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 			if err != nil {
 				resultErr = err.Error()
 			}
+
 			result, ok := r.(GetUserByIDRequest)
 			if !ok {
-				t.Error("result is not of the type indicated")
+				if (tt.out != GetUserByIDRequest{}) {
+					t.Error("result is not of the type indicated")
+				}
 			}
 
 			if !strings.Contains(resultErr, tt.outError) {
@@ -131,10 +141,17 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 }
 
 func TestDecodeGetIDByUsernameRequest(t *testing.T) {
-	username := "cesar"
-	url := fmt.Sprintf("localhost:8080/id/%s", username)
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	dataJSON, err := json.Marshal(GetIDByUsernameRequest{Username: "cesar"})
+	if err != nil {
+		t.Error(err)
+	}
+
+	goodReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer(dataJSON))
+	if err != nil {
+		t.Error(err)
+	}
+	badReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
 	}
@@ -144,7 +161,8 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 		out      GetIDByUsernameRequest
 		outError string
 	}{
-		{req, GetIDByUsernameRequest{}, ""},
+		{goodReq, GetIDByUsernameRequest{Username: "cesar"}, ""},
+		{badReq, GetIDByUsernameRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result GetIDByUsernameRequest
