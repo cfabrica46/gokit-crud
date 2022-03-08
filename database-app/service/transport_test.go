@@ -224,7 +224,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 func TestDecodeDeleteUserRequest(t *testing.T) {
 	url := "localhost:8080/user"
 
-	dataJSON, err := json.Marshal(DeleteUserRequest{"cesar", "01234", "cesar@email.com"})
+	dataJSON, err := json.Marshal(DeleteUserRequest{1})
 	if err != nil {
 		t.Error(err)
 	}
@@ -244,7 +244,7 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 		out      DeleteUserRequest
 		outError string
 	}{
-		{goodReq, DeleteUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{goodReq, DeleteUserRequest{1}, ""},
 		{badReq, DeleteUserRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {

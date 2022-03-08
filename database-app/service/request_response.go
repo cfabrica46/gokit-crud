@@ -53,9 +53,7 @@ type InsertUserResponse struct {
 
 // DeleteUser
 type DeleteUserRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
+	ID int `json:"id"`
 }
 
 type DeleteUserResponse struct {

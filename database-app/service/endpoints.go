@@ -63,7 +63,7 @@ func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(DeleteUserRequest)
-		rowsAffected, err := svc.DeleteUser(req.Username, req.Password, req.Email)
+		rowsAffected, err := svc.DeleteUser(req.ID)
 		if err != nil {
 			return DeleteUserResponse{rowsAffected, err.Error()}, nil
 		}

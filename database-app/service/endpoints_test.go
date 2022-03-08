@@ -217,7 +217,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 		in     DeleteUserRequest
 		outErr string
 	}{
-		{DeleteUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{DeleteUserRequest{1}, ""},
 		{DeleteUserRequest{}, "sql: database is closed"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -234,7 +234,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectPrepare("^DELETE FROM users").ExpectExec().WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectPrepare("^DELETE FROM users").ExpectExec().WithArgs(userTest.ID).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {

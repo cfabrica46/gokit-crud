@@ -13,7 +13,7 @@ type serviceInterface interface {
 	GetUserByUsernameAndPassword(string, string) (User, error)
 	GetIDByUsername(string) (int, error)
 	InsertUser(string, string, string) error
-	DeleteUser(string, string, string) (int, error)
+	DeleteUser(int) (int, error)
 }
 
 type service struct {
@@ -99,13 +99,13 @@ func (s *service) InsertUser(username, password, email string) (err error) {
 	return
 }
 
-func (s *service) DeleteUser(username, password, email string) (rowsAffected int, err error) {
-	stmt, err := s.db.Prepare("DELETE FROM users WHERE username = $1 AND password = $2 AND email = $3")
+func (s *service) DeleteUser(id int) (rowsAffected int, err error) {
+	stmt, err := s.db.Prepare("DELETE FROM users WHERE id = $1")
 	if err != nil {
 		return
 	}
 
-	r, _ := stmt.Exec(username, password, email)
+	r, _ := stmt.Exec(id)
 	count, _ := r.RowsAffected()
 	rowsAffected = int(count)
 	return

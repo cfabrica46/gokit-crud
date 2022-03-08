@@ -48,7 +48,7 @@ func (s service) SignUp(username, password, email, secret string) (token string,
 		return
 	}
 
-	err = petitionSetToken(s.client, tokenURL+"/token", tokenapp.DeleteTokenRequest{Token: token})
+	err = petitionSetToken(s.client, tokenURL+"/token", tokenapp.SetTokenRequest{Token: token})
 	if err != nil {
 		return
 	}
@@ -105,12 +105,17 @@ func (s service) DeleteAccount(token, secret string) (err error) {
 		return
 	}
 
-	id, username, email, err := petitionExtractToken(s.client, tokenURL+"/extract", tokenapp.ExtractTokenRequest{Token: token, Secret: secret})
+	id, _, _, err := petitionExtractToken(s.client, tokenURL+"/extract", tokenapp.ExtractTokenRequest{Token: token, Secret: secret})
 	if err != nil {
 		return
 	}
 
-	// petitionDeleteUser(s.client, dbURL+"/user",dbapp.DeleteUserRequest{}
+	//crear getPasswordByToken
+
+	err = petitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: id})
+	if err != nil {
+		return
+	}
 
 	return
 }
