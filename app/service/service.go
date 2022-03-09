@@ -14,10 +14,10 @@ type httpClient interface {
 
 type serviceInterface interface {
 	SignUp(string, string, string) (string, error)
-	SignIn(string, string, string) (string, error)
+	SignIn(string, string) (string, error)
 	LogOut(string) error
 	GetAllUsers() ([]dbapp.User, error)
-	DeleteAccount(string, string) error
+	DeleteAccount(string) error
 }
 
 type service struct {
