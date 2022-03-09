@@ -80,10 +80,10 @@ func petitionGetUserByUsernameAndPassword(client httpClient, url string, body db
 	return
 }
 
-func petitionGetIDByUsername(client httpClient, url string) (id int, err error) {
+func petitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUsernameRequest) (id int, err error) {
 	var response dbapp.GetIDByUsernameResponse
 
-	dataResp, err := makePetition(client, url, http.MethodGet)
+	dataResp, err := makePetition(client, url, http.MethodGet, body)
 	if err != nil {
 		return
 	}
