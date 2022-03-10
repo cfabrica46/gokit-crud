@@ -6,6 +6,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
+// MakeGenerateTokenEndpoint ...
 func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(GenerateTokenRequest)
@@ -14,6 +15,7 @@ func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeExtractTokenEndpoint ...
 func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(ExtractTokenRequest)
@@ -25,6 +27,7 @@ func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeSetTokenEndpoint ...
 func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetTokenRequest)
@@ -36,6 +39,7 @@ func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeDeleteTokenEndpoint ...
 func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(DeleteTokenRequest)
@@ -47,6 +51,7 @@ func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeCheckTokenEndpoint ...
 func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(CheckTokenRequest)

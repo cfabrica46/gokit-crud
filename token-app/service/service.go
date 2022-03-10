@@ -17,15 +17,18 @@ type serviceInterface interface {
 	CheckToken(string) (bool, error)
 }
 
-type service struct {
+//Service ...
+type Service struct {
 	db *redis.Client
 }
 
-func GetService(db *redis.Client) *service {
-	return &service{db}
+//GetService ...
+func GetService(db *redis.Client) *Service {
+	return &Service{db}
 }
 
-func (service) GenerateToken(id int, username, email string, secret []byte) (token string) {
+//GenerateToken ...
+func (Service) GenerateToken(id int, username, email string, secret []byte) (token string) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       id,
 		"username": username,
@@ -37,7 +40,8 @@ func (service) GenerateToken(id int, username, email string, secret []byte) (tok
 	return
 }
 
-func (s service) ExtractToken(token string, secret []byte) (id int, username, email string, err error) {
+//ExtractToken ...
+func (s Service) ExtractToken(token string, secret []byte) (id int, username, email string, err error) {
 	t, err := jwt.Parse(token, keyFunc(secret))
 	if err != nil {
 		return
@@ -51,7 +55,8 @@ func (s service) ExtractToken(token string, secret []byte) (id int, username, em
 	return
 }
 
-func (s *service) SetToken(token string) (err error) {
+//SetToken ...
+func (s *Service) SetToken(token string) (err error) {
 	err = s.db.Set(token, true, time.Minute*10).Err()
 	if err != nil {
 		return
@@ -59,11 +64,13 @@ func (s *service) SetToken(token string) (err error) {
 	return
 }
 
-func (s *service) DeleteToken(token string) error {
+//DeleteToken ...
+func (s *Service) DeleteToken(token string) error {
 	return s.db.Del(token).Err()
 }
 
-func (s service) CheckToken(token string) (check bool, err error) {
+//CheckToken ...
+func (s Service) CheckToken(token string) (check bool, err error) {
 	result, err := s.db.Get(token).Result()
 	if err != nil {
 		if err.Error() == redis.Nil.Error() {
