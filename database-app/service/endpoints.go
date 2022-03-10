@@ -6,6 +6,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
+// MakeGetAllUsersEndpoint ...
 func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		users, err := svc.GetAllUsers()
@@ -16,6 +17,7 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeGetUserByIDEndpoint ...
 func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetUserByIDRequest)
@@ -27,6 +29,7 @@ func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeGetUserByUsernameAndPasswordEndpoint ...
 func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetUserByUsernameAndPasswordRequest)
@@ -38,6 +41,7 @@ func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.End
 	}
 }
 
+// MakeGetIDByUsernameEndpoint ...
 func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetIDByUsernameRequest)
@@ -49,6 +53,7 @@ func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeInsertUserEndpoint ...
 func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(InsertUserRequest)
@@ -60,6 +65,7 @@ func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
+// MakeDeleteUserEndpoint ...
 func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(DeleteUserRequest)

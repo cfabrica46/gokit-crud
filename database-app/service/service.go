@@ -2,9 +2,6 @@ package service
 
 import (
 	"database/sql"
-	"sync"
-
-	_ "github.com/lib/pq"
 )
 
 type serviceInterface interface {
@@ -16,19 +13,21 @@ type serviceInterface interface {
 	DeleteUser(int) (int, error)
 }
 
-type service struct {
-	db   *sql.DB
-	once sync.Once
+// Service ...
+type Service struct {
+	db *sql.DB
 
 	// Data for DB
 	host, port, user, password, dbName, sslmode, driver string
 }
 
-func GetService(db *sql.DB) *service {
-	return &service{db: db}
+//GetService ...
+func GetService(db *sql.DB) *Service {
+	return &Service{db: db}
 }
 
-func (s service) GetAllUsers() (users []User, err error) {
+//GetAllUsers ...
+func (s Service) GetAllUsers() (users []User, err error) {
 	rows, err := s.db.Query("SELECT id, username, email FROM users")
 	if err != nil {
 		return
@@ -42,7 +41,8 @@ func (s service) GetAllUsers() (users []User, err error) {
 	return
 }
 
-func (s service) GetUserByID(id int) (user User, err error) {
+//GetUserByID ...
+func (s Service) GetUserByID(id int) (user User, err error) {
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE id = $1", id)
 
 	var userBeta User
@@ -57,7 +57,8 @@ func (s service) GetUserByID(id int) (user User, err error) {
 	return
 }
 
-func (s service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
+//GetUserByUsernameAndPassword ...
+func (s Service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2", username, password)
 
 	var userBeta User
@@ -73,7 +74,8 @@ func (s service) GetUserByUsernameAndPassword(username, password string) (user U
 	return
 }
 
-func (s service) GetIDByUsername(username string) (id int, err error) {
+//GetIDByUsername ...
+func (s Service) GetIDByUsername(username string) (id int, err error) {
 	row := s.db.QueryRow("SELECT id FROM users WHERE username = $1", username)
 
 	err = row.Scan(&id)
@@ -86,7 +88,8 @@ func (s service) GetIDByUsername(username string) (id int, err error) {
 	return
 }
 
-func (s *service) InsertUser(username, password, email string) (err error) {
+//InsertUser ...
+func (s *Service) InsertUser(username, password, email string) (err error) {
 	stmt, err := s.db.Prepare("INSERT INTO users(username, password, email) VALUES ($1,$2,$3)")
 	if err != nil {
 		return
@@ -99,7 +102,8 @@ func (s *service) InsertUser(username, password, email string) (err error) {
 	return
 }
 
-func (s *service) DeleteUser(id int) (rowsAffected int, err error) {
+//DeleteUser ...
+func (s *Service) DeleteUser(id int) (rowsAffected int, err error) {
 	stmt, err := s.db.Prepare("DELETE FROM users WHERE id = $1")
 	if err != nil {
 		return

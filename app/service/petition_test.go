@@ -105,6 +105,35 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 	}
 }
 
+func TestPetitionGetUserByID(t *testing.T) {
+	for i, tt := range []struct {
+		inURL  string
+		inID   int
+		inResp []byte
+		outErr string
+	}{
+		{"localhost:8080", 1, []byte("{}"), ""},
+		{"%%", 1, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{"localhost:8080", 1, []byte(""), "unexpected end of JSON input"},
+		{"localhost:8080", 1, []byte(`{"err":"error"}`), "error"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var resultErr string
+
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+			})
+
+			_, err := petitionGetUserByID(mock, tt.inURL, dbapp.GetUserByIDRequest{ID: tt.inID})
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			assert.Equal(t, tt.outErr, resultErr)
+		})
+	}
+}
+
 func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 	for i, tt := range []struct {
 		inURL, inUsername, inPassword string

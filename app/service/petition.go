@@ -57,6 +57,30 @@ func petitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err 
 	return
 }
 
+func petitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRequest) (user dbapp.User, err error) {
+	var response dbapp.GetUserByIDResponse
+
+	//convert password to Sha256
+	//in ENDPOINT
+	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
+
+	dataResp, err := makePetition(client, url, http.MethodPost, body)
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(dataResp, &response)
+	if err != nil {
+		return
+	}
+	if response.Err != "" {
+		err = errors.New(response.Err)
+		return
+	}
+	user = response.User
+	return
+}
+
 func petitionGetUserByUsernameAndPassword(client httpClient, url string, body dbapp.GetUserByUsernameAndPasswordRequest) (user dbapp.User, err error) {
 	var response dbapp.GetUserByUsernameAndPasswordResponse
 

@@ -164,8 +164,8 @@ func TestGetAllUsers(t *testing.T) {
 			var resultErr string
 
 			testResp := struct {
-				User []dbapp.User
-				Err  string `json:"err"`
+				User []dbapp.User `json:"user"`
+				Err  string       `json:"err"`
 			}{
 				User: []dbapp.User{{
 					ID:       1,
@@ -188,6 +188,57 @@ func TestGetAllUsers(t *testing.T) {
 			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
 
 			_, err = svc.GetAllUsers()
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			assert.Equal(t, tt.outErr, resultErr)
+		})
+	}
+}
+
+func TestProfile(t *testing.T) {
+	for i, tt := range []struct {
+		inToken string
+		outErr  string
+	}{
+		{"token", ""},
+		{"token", "Error from web server"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var resultErr string
+
+			testResp := struct {
+				User     dbapp.User `json:"user"`
+				ID       int        `json:"id"`
+				Username string     `json:"username"`
+				Email    string     `json:"email"`
+				Err      string     `json:"err"`
+			}{
+				User: dbapp.User{
+					ID:       1,
+					Username: "cesar",
+					Password: "01234",
+					Email:    "cesar@email.com",
+				},
+				ID:       1,
+				Username: "cesar",
+				Email:    "cesar@email.com",
+				Err:      tt.outErr,
+			}
+
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
+
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+			})
+
+			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
+
+			_, err = svc.Profile(tt.inToken)
 			if err != nil {
 				resultErr = err.Error()
 			}

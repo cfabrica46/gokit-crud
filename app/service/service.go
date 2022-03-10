@@ -5,7 +5,6 @@ import (
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
-	_ "github.com/lib/pq"
 )
 
 type httpClient interface {
@@ -17,6 +16,7 @@ type serviceInterface interface {
 	SignIn(string, string) (string, error)
 	LogOut(string) error
 	GetAllUsers() ([]dbapp.User, error)
+	Profile(string) (dbapp.User, error)
 	DeleteAccount(string) error
 }
 
@@ -25,6 +25,7 @@ type service struct {
 	client                                       httpClient
 }
 
+// GetService ...
 func GetService(dbHost, dbPort, tokenHost, tokenPort, secret string, client httpClient) *service {
 	return &service{dbHost, dbPort, tokenHost, tokenPort, secret, client}
 }
@@ -101,6 +102,27 @@ func (s service) GetAllUsers() (users []dbapp.User, err error) {
 	return
 }
 
+func (s service) Profile(token string) (user dbapp.User, err error) {
+	var dbURL = s.dbHost + ":" + s.dbPort
+	var tokenURL = s.tokenHost + ":" + s.tokenPort
+
+	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
+	if err != nil {
+		return
+	}
+
+	id, _, _, err := petitionExtractToken(s.client, tokenURL+"/extract", tokenapp.ExtractTokenRequest{Token: token, Secret: s.secret})
+	if err != nil {
+		return
+	}
+
+	user, err = petitionGetUserByID(s.client, dbURL+"/user/id", dbapp.GetUserByIDRequest{ID: id})
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (s service) DeleteAccount(token string) (err error) {
 	var dbURL = s.dbHost + ":" + s.dbPort
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
@@ -119,6 +141,5 @@ func (s service) DeleteAccount(token string) (err error) {
 	if err != nil {
 		return
 	}
-
 	return
 }
