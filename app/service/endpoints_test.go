@@ -1,265 +1,299 @@
 package service
 
-/* func TestMakeGetAllUsersEndpoint(t *testing.T) {
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"testing"
+
+	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestSignUpEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  getAllUsersRequest
-		out string
+		in     SignUpRequest
+		outErr string
 	}{
-		{getAllUsersRequest{}, ""},
-		{getAllUsersRequest{}, "database is closed"},
+		{SignUpRequest{Username: "cesar", Password: "01234", Email: "cesar@email.com"}, ""},
+		{SignUpRequest{}, "Error from web server"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
+			testResp := struct {
+				ID    int    `json:"id"`
+				Token string `json:"token"`
+				Err   string `json:"err"`
+			}{
+				ID:    1,
+				Token: "token",
+				Err:   tt.outErr,
+			}
 
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			jsonData, err := json.Marshal(testResp)
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
 
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+			})
+
+			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
+
+			r, err := MakeSignUpEndpoint(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
 			}
+
+			result, ok := r.(SignUpResponse)
+			if !ok {
+				t.Error("response is not of the type indicated")
+			}
+
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+		})
+	}
+}
+
+func TestSignInEndpoint(t *testing.T) {
+	for i, tt := range []struct {
+		in     SignInRequest
+		outErr string
+	}{
+		{SignInRequest{Username: "cesar", Password: "01234"}, ""},
+		{SignInRequest{}, "Error from web server"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			testResp := struct {
+				User  dbapp.User
+				Token string `json:"token"`
+				Err   string `json:"err"`
+			}{
+				User: dbapp.User{
+					ID:       1,
+					Username: "cesar",
+					Password: "01234",
+					Email:    "cesar@email.com",
+				},
+				Token: "token",
+				Err:   tt.outErr,
+			}
+
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
+
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+			})
+
+			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
+
+			r, err := MakeSignInEndpoint(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(SignInResponse)
+			if !ok {
+				t.Error("response is not of the type indicated")
+			}
+
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+		})
+	}
+}
+
+func TestLogOutEndpoint(t *testing.T) {
+	for i, tt := range []struct {
+		in     LogOutRequest
+		outErr string
+	}{
+		{LogOutRequest{Token: "token"}, ""},
+		{LogOutRequest{}, "Error from web server"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			testResp := struct {
+				Err string `json:"err"`
+			}{
+				Err: tt.outErr,
+			}
+
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
+
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+			})
+
+			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
+
+			r, err := MakeLogOutEndpoint(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(LogOutResponse)
+			if !ok {
+				t.Error("response is not of the type indicated")
+			}
+
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+		})
+	}
+}
+
+func TestGetAllUsersEndpoint(t *testing.T) {
+	for i, tt := range []struct {
+		in     GetAllUsersRequest
+		outErr string
+	}{
+		{GetAllUsersRequest{}, ""},
+		{GetAllUsersRequest{}, "Error from web server"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			testResp := struct {
+				User []dbapp.User `json:"user"`
+				Err  string       `json:"err"`
+			}{
+				User: []dbapp.User{{
+					ID:       1,
+					Username: "cesar",
+					Password: "01234",
+					Email:    "cesar@email.com",
+				}},
+				Err: tt.outErr,
+			}
+
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
+
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+			})
+
+			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
 
 			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(getAllUsersResponse)
+			result, ok := r.(GetAllUsersResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
-} */
+}
 
-/* func TestMakeGetUserByIDEndpoint(t *testing.T) {
+func TestProfileEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  getUserByIDRequest
-		out string
+		in     ProfileRequest
+		outErr string
 	}{
-		{getUserByIDRequest{1}, ""},
-		{getUserByIDRequest{}, "database is closed"},
+		{ProfileRequest{}, ""},
+		{ProfileRequest{}, "Error from web server"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
+			testResp := struct {
+				User     dbapp.User `json:"user"`
+				ID       int        `json:"id"`
+				Username string     `json:"username"`
+				Email    string     `json:"email"`
+				Err      string     `json:"err"`
+			}{
+				User: dbapp.User{
+					ID:       1,
+					Username: "cesar",
+					Password: "01234",
+					Email:    "cesar@email.com",
+				},
+				ID:       1,
+				Username: "cesar",
+				Email:    "cesar@email.com",
+				Err:      tt.outErr,
+			}
 
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
+			jsonData, err := json.Marshal(testResp)
 			if err != nil {
 				t.Error(err)
 			}
-			defer svc.db.Close()
 
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+			})
 
-			r, err := MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.in)
+			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
+
+			r, err := MakeProfileEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(getUserByIDResponse)
+			result, ok := r.(ProfileResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
-} */
+}
 
-/* func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
+func TestDeleteAccountEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  getUserByUsernameAndPasswordRequest
-		out string
+		in     DeleteAccountRequest
+		outErr string
 	}{
-		{getUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{getUserByUsernameAndPasswordRequest{}, "database is closed"},
+		{DeleteAccountRequest{}, ""},
+		{DeleteAccountRequest{}, "Error from web server"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
-
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
+			testResp := struct {
+				ID       int    `json:"id"`
+				Username string `json:"username"`
+				Email    string `json:"email"`
+				Err      string `json:"err"`
+			}{
+				ID:       1,
+				Username: "cesar",
+				Email:    "cesar@email.com",
+				Err:      tt.outErr,
 			}
 
-			r, err := MakeGetUserByUsernameAndPasswordEndpoint(svc)(context.TODO(), tt.in)
+			jsonData, err := json.Marshal(testResp)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(getUserByUsernameAndPasswordResponse)
+			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+			})
+
+			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
+
+			r, err := MakeDeleteAccountEndpoint(svc)(context.TODO(), tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(DeleteAccountResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
 
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
+			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
 		})
 	}
-} */
-
-/* func TestGetIDByUsernameEndpoint(t *testing.T) {
-	for i, tt := range []struct {
-		in  getIDByUsernameRequest
-		out string
-	}{
-		{getIDByUsernameRequest{"cesar"}, ""},
-		{getIDByUsernameRequest{}, "database is closed"},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
-
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.in)
-			if err != nil {
-				t.Error(err)
-			}
-
-			result, ok := r.(getIDByUsernameResponse)
-			if !ok {
-				t.Error("response is not of the type indicated")
-			}
-
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
-		})
-	}
-} */
-
-/* func TestMakeInsertUserEndpoint(t *testing.T) {
-	for i, tt := range []struct {
-		in  insertUserRequest
-		out string
-	}{
-		{insertUserRequest{}, ""},
-		{insertUserRequest{}, "database is closed"},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
-
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.in)
-			if err != nil {
-				t.Error(err)
-			}
-
-			result, ok := r.(insertUserResponse)
-			if !ok {
-				t.Error("response is not of the type indicated")
-			}
-
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
-		})
-	}
-} */
-
-/* func TestMakeDeleteUserEndpoint(t *testing.T) {
-	for i, tt := range []struct {
-		in  deleteUserRequest
-		out string
-	}{
-		{deleteUserRequest{}, ""},
-		{deleteUserRequest{}, "database is closed"},
-	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			// var resultErr string
-			svc := GetServiceDB()
-
-			//OpenDB
-			err := svc.OpenDB(DBDriver, PsqlInfo)
-			if err != nil {
-				t.Error(err)
-			}
-			defer svc.db.Close()
-
-			// generate confict closing db
-			if tt.out == "database is closed" {
-				err := svc.db.Close()
-				if err != nil {
-					t.Error(err)
-				}
-			}
-
-			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.in)
-			if err != nil {
-				t.Error(err)
-			}
-
-			result, ok := r.(deleteUserResponse)
-			if !ok {
-				t.Error("response is not of the type indicated")
-			}
-
-			if !strings.Contains(result.Err, tt.out) {
-				t.Errorf("want %v; got %v", tt.out, result.Err)
-			}
-		})
-	}
-} */
+}
