@@ -1,66 +1,79 @@
 package service
 
-/* func MakeGetAllUsersEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+import (
+	"context"
+
+	"github.com/go-kit/kit/endpoint"
+)
+
+// MakeSignUpEndpoint ...
+func MakeSignUpEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(SignUpRequest)
+		token, err := svc.SignUp(req.Username, req.Password, req.Email)
+		if err != nil {
+			return SignUpResponse{token, err.Error()}, nil
+		}
+		return SignUpResponse{token, ""}, nil
+	}
+}
+
+// MakeSignInEndpoint ...
+func MakeSignInEndpoint(svc serviceInterface) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(SignInRequest)
+		token, err := svc.SignIn(req.Username, req.Password)
+		if err != nil {
+			return SignInResponse{token, err.Error()}, nil
+		}
+		return SignInResponse{token, ""}, nil
+	}
+}
+
+// MakeLogOutEndpoint ...
+func MakeLogOutEndpoint(svc serviceInterface) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(LogOutRequest)
+		err := svc.LogOut(req.Token)
+		if err != nil {
+			return LogOutResponse{err.Error()}, nil
+		}
+		return LogOutResponse{""}, nil
+	}
+}
+
+// MakeGetAllUsersEndpoint ...
+func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
+	return func(_ context.Context, _ interface{}) (interface{}, error) {
+		// req := request.(GetAllUsersRequest)
 		users, err := svc.GetAllUsers()
 		if err != nil {
-			return getAllUsersResponse{users, err.Error()}, nil
+			return GetAllUsersResponse{users, err.Error()}, nil
 		}
-		return getAllUsersResponse{users, ""}, nil
+		return GetAllUsersResponse{users, ""}, nil
 	}
-} */
+}
 
-/* func MakeGetUserByIDEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+// MakeProfileEndpoint ...
+func MakeProfileEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(getUserByIDRequest)
-		user, err := svc.GetUserByID(req.ID)
+		req := request.(ProfileRequest)
+		user, err := svc.Profile(req.Token)
 		if err != nil {
-			return getUserByIDResponse{user, err.Error()}, nil
+			return ProfileResponse{user, err.Error()}, nil
 		}
-		return getUserByIDResponse{user, ""}, nil
+		return ProfileResponse{user, ""}, nil
 	}
-} */
+}
 
-/* func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceDBInterface) endpoint.Endpoint {
+// MakeDeleteAccountEndpoint ...
+func MakeDeleteAccountEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(getUserByUsernameAndPasswordRequest)
-		user, err := svc.GetUserByUsernameAndPassword(req.Username, req.Password)
+		req := request.(DeleteAccountRequest)
+		err := svc.DeleteAccount(req.Token)
 		if err != nil {
-			return getUserByUsernameAndPasswordResponse{user, err.Error()}, nil
+			return DeleteAccountResponse{err.Error()}, nil
 		}
-		return getUserByUsernameAndPasswordResponse{user, ""}, nil
+		return DeleteAccountResponse{""}, nil
 	}
-} */
-
-/* func MakeGetIDByUsernameEndpoint(svc serviceDBInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(getIDByUsernameRequest)
-		id, err := svc.GetIDByUsername(req.Username)
-		if err != nil {
-			return getIDByUsernameResponse{id, err.Error()}, nil
-		}
-		return getIDByUsernameResponse{id, ""}, nil
-	}
-} */
-
-/* func MakeInsertUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(insertUserRequest)
-		err := svc.InsertUser(req.Username, req.Password, req.Email)
-		if err != nil {
-			return insertUserResponse{err.Error()}, nil
-		}
-		return insertUserResponse{""}, nil
-	}
-} */
-
-/* func MakeDeleteUserEndpoint(svc serviceDBInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(deleteUserRequest)
-		rowsAffected, err := svc.DeleteUser(req.Username, req.Password, req.Email)
-		if err != nil {
-			return deleteUserResponse{rowsAffected, err.Error()}, nil
-		}
-		return deleteUserResponse{rowsAffected, ""}, nil
-	}
-} */
+}

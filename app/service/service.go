@@ -20,17 +20,19 @@ type serviceInterface interface {
 	DeleteAccount(string) error
 }
 
-type service struct {
+// Service ...
+type Service struct {
 	dbHost, dbPort, tokenHost, tokenPort, secret string
 	client                                       httpClient
 }
 
 // GetService ...
-func GetService(dbHost, dbPort, tokenHost, tokenPort, secret string, client httpClient) *service {
-	return &service{dbHost, dbPort, tokenHost, tokenPort, secret, client}
+func GetService(dbHost, dbPort, tokenHost, tokenPort, secret string, client httpClient) *Service {
+	return &Service{dbHost, dbPort, tokenHost, tokenPort, secret, client}
 }
 
-func (s service) SignUp(username, password, email string) (token string, err error) {
+// SignUp ...
+func (s Service) SignUp(username, password, email string) (token string, err error) {
 	var dbURL = s.dbHost + ":" + s.dbPort
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 
@@ -56,7 +58,8 @@ func (s service) SignUp(username, password, email string) (token string, err err
 	return
 }
 
-func (s service) SignIn(username, password string) (token string, err error) {
+// SignIn ...
+func (s Service) SignIn(username, password string) (token string, err error) {
 	var dbURL = s.dbHost + ":" + s.dbPort
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 
@@ -77,7 +80,8 @@ func (s service) SignIn(username, password string) (token string, err error) {
 	return
 }
 
-func (s service) LogOut(token string) (err error) {
+// LogOut ...
+func (s Service) LogOut(token string) (err error) {
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 
 	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
@@ -92,7 +96,8 @@ func (s service) LogOut(token string) (err error) {
 	return
 }
 
-func (s service) GetAllUsers() (users []dbapp.User, err error) {
+//GetAllUsers  ...
+func (s Service) GetAllUsers() (users []dbapp.User, err error) {
 	var dbURL = s.dbHost + ":" + s.dbPort
 
 	users, err = petitionGetAllUsers(s.client, dbURL+"/users")
@@ -102,7 +107,8 @@ func (s service) GetAllUsers() (users []dbapp.User, err error) {
 	return
 }
 
-func (s service) Profile(token string) (user dbapp.User, err error) {
+//Profile  ...
+func (s Service) Profile(token string) (user dbapp.User, err error) {
 	var dbURL = s.dbHost + ":" + s.dbPort
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 
@@ -123,7 +129,8 @@ func (s service) Profile(token string) (user dbapp.User, err error) {
 	return
 }
 
-func (s service) DeleteAccount(token string) (err error) {
+//DeleteAccount  ...
+func (s Service) DeleteAccount(token string) (err error) {
 	var dbURL = s.dbHost + ":" + s.dbPort
 	var tokenURL = s.tokenHost + ":" + s.tokenPort
 

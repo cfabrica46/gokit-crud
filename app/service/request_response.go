@@ -47,6 +47,17 @@ type GetAllUsersResponse struct {
 	Err   string       `json:"err,omitempty"`
 }
 
+// ProfileRequest (string) (dbapp.User, error)
+type ProfileRequest struct {
+	Token string `json:"token"`
+}
+
+// ProfileResponse () (dbapp.User, error)
+type ProfileResponse struct {
+	User dbapp.User `json:"user"`
+	Err  string     `json:"err,omitempty"`
+}
+
 // DeleteAccountRequest (string) error
 type DeleteAccountRequest struct {
 	Token string `json:"token"`
