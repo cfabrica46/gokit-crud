@@ -57,6 +57,7 @@ services:
             - DB_PORT=7070
             - TOKEN_HOST=token-app
             - TOKEN_PORT=9090
+            - SECRET=secret
         depends_on:
             - db-app
             - token-app

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -310,6 +311,26 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 
 			assert.Equal(t, tt.outErr, resultErr)
 			assert.Equal(t, tt.out, result)
+		})
+	}
+}
+
+func TestEncodeResponse(t *testing.T) {
+	for i, tt := range []struct {
+		in     string
+		outErr string
+	}{
+		{"test", ""},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			var resultErr string
+
+			err := EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			assert.Equal(t, tt.outErr, resultErr)
 		})
 	}
 }
