@@ -2,9 +2,9 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE IF NOT EXISTS users(
     id SERIAL PRIMARY KEY,
-    username VARCHAR(32) NOT NULL UNIQUE,
-    password  VARCHAR(32) NOT NULL,
-    email VARCHAR(32) NOT NULL UNIQUE
+    username VARCHAR(64) NOT NULL UNIQUE,
+    password  VARCHAR(64) NOT NULL,
+    email VARCHAR(64) NOT NULL UNIQUE
 );
 
 INSERT INTO users(username, password,email)

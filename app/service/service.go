@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"net/http"
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
@@ -33,8 +34,8 @@ func GetService(dbHost, dbPort, tokenHost, tokenPort, secret string, client http
 
 // SignUp ...
 func (s Service) SignUp(username, password, email string) (token string, err error) {
-	var dbURL = s.dbHost + ":" + s.dbPort
-	var tokenURL = s.tokenHost + ":" + s.tokenPort
+	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
+	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
 
 	err = petitionInsertUser(s.client, dbURL+"/user", dbapp.InsertUserRequest{Username: username, Password: password, Email: email})
 	if err != nil {
@@ -60,15 +61,15 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 
 // SignIn ...
 func (s Service) SignIn(username, password string) (token string, err error) {
-	var dbURL = s.dbHost + ":" + s.dbPort
-	var tokenURL = s.tokenHost + ":" + s.tokenPort
+	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
+	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
 
 	user, err := petitionGetUserByUsernameAndPassword(s.client, dbURL+"/user/username_password", dbapp.GetUserByUsernameAndPasswordRequest{Username: username, Password: password})
 	if err != nil {
 		return
 	}
 
-	token, err = petitionGenerateToken(s.client, tokenURL+"/token", tokenapp.GenerateTokenRequest{ID: user.ID, Username: user.Username, Email: user.Email, Secret: s.secret})
+	token, err = petitionGenerateToken(s.client, tokenURL+"/generate", tokenapp.GenerateTokenRequest{ID: user.ID, Username: user.Username, Email: user.Email, Secret: s.secret})
 	if err != nil {
 		return
 	}
@@ -82,7 +83,7 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 
 // LogOut ...
 func (s Service) LogOut(token string) (err error) {
-	var tokenURL = s.tokenHost + ":" + s.tokenPort
+	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
 
 	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
@@ -98,7 +99,7 @@ func (s Service) LogOut(token string) (err error) {
 
 //GetAllUsers  ...
 func (s Service) GetAllUsers() (users []dbapp.User, err error) {
-	var dbURL = s.dbHost + ":" + s.dbPort
+	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
 
 	users, err = petitionGetAllUsers(s.client, dbURL+"/users")
 	if err != nil {
@@ -109,30 +110,36 @@ func (s Service) GetAllUsers() (users []dbapp.User, err error) {
 
 //Profile  ...
 func (s Service) Profile(token string) (user dbapp.User, err error) {
-	var dbURL = s.dbHost + ":" + s.dbPort
-	var tokenURL = s.tokenHost + ":" + s.tokenPort
+	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
+	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
+	log.Println(token)
 
 	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
 	id, _, _, err := petitionExtractToken(s.client, tokenURL+"/extract", tokenapp.ExtractTokenRequest{Token: token, Secret: s.secret})
 	if err != nil {
+		log.Println(err)
 		return
 	}
+	log.Println(id)
 
 	user, err = petitionGetUserByID(s.client, dbURL+"/user/id", dbapp.GetUserByIDRequest{ID: id})
 	if err != nil {
+		log.Println(err)
 		return
 	}
+	log.Println(user)
 	return
 }
 
 //DeleteAccount  ...
 func (s Service) DeleteAccount(token string) (err error) {
-	var dbURL = s.dbHost + ":" + s.dbPort
-	var tokenURL = s.tokenHost + ":" + s.tokenPort
+	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
+	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
 
 	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {

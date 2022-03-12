@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Lshortfile)
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println(".env loaded")
 	}

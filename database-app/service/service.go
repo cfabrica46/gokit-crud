@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"log"
 )
 
 type serviceInterface interface {
@@ -28,6 +29,7 @@ func GetService(db *sql.DB) *Service {
 
 //GetAllUsers ...
 func (s Service) GetAllUsers() (users []User, err error) {
+	log.SetFlags(log.Lshortfile)
 	rows, err := s.db.Query("SELECT id, username, email FROM users")
 	if err != nil {
 		return
@@ -45,15 +47,13 @@ func (s Service) GetAllUsers() (users []User, err error) {
 func (s Service) GetUserByID(id int) (user User, err error) {
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE id = $1", id)
 
-	var userBeta User
-	err = row.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Password, &userBeta.Email)
+	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = nil
 		}
 		return
 	}
-	user = userBeta
 	return
 }
 
@@ -61,16 +61,13 @@ func (s Service) GetUserByID(id int) (user User, err error) {
 func (s Service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2", username, password)
 
-	var userBeta User
-
-	err = row.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Password, &userBeta.Email)
+	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = nil
 		}
 		return
 	}
-	user = userBeta
 	return
 }
 

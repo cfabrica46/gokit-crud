@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
@@ -98,8 +99,10 @@ func petitionGetUserByUsernameAndPassword(client httpClient, url string, body db
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
+		log.Println(err)
 		return
 	}
+
 	user = response.User
 	return
 }
