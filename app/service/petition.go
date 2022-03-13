@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
@@ -65,7 +64,7 @@ func petitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRe
 	//in ENDPOINT
 	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 
-	dataResp, err := makePetition(client, url, http.MethodPost, body)
+	dataResp, err := makePetition(client, url, http.MethodGet, body)
 	if err != nil {
 		return
 	}
@@ -99,7 +98,6 @@ func petitionGetUserByUsernameAndPassword(client httpClient, url string, body db
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
-		log.Println(err)
 		return
 	}
 
@@ -254,8 +252,8 @@ func petitionDeleteToken(client httpClient, url string, body tokenapp.DeleteToke
 	return
 }
 
-func petitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenRequest) (err error) {
-	var response tokenapp.CheckTokenRequest
+func petitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenRequest) (check bool, err error) {
+	var response tokenapp.CheckTokenResponse
 
 	dataResp, err := makePetition(client, url, http.MethodPost, body)
 	if err != nil {
@@ -266,5 +264,12 @@ func petitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenR
 	if err != nil {
 		return
 	}
+
+	if response.Err != "" {
+		err = errors.New(response.Err)
+		return
+	}
+
+	check = response.Check
 	return
 }

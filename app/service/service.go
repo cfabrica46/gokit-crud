@@ -1,7 +1,7 @@
 package service
 
 import (
-	"log"
+	"errors"
 	"net/http"
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
@@ -85,8 +85,13 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 func (s Service) LogOut(token string) (err error) {
 	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
 
-	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
+	check, err := petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
+		return
+	}
+
+	if !check {
+		err = errors.New("token not validate")
 		return
 	}
 
@@ -112,27 +117,25 @@ func (s Service) GetAllUsers() (users []dbapp.User, err error) {
 func (s Service) Profile(token string) (user dbapp.User, err error) {
 	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
 	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
-	log.Println(token)
 
-	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
+	check, err := petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
-		log.Println(err)
+		return
+	}
+	if !check {
+		err = errors.New("token not validate")
 		return
 	}
 
 	id, _, _, err := petitionExtractToken(s.client, tokenURL+"/extract", tokenapp.ExtractTokenRequest{Token: token, Secret: s.secret})
 	if err != nil {
-		log.Println(err)
 		return
 	}
-	log.Println(id)
 
 	user, err = petitionGetUserByID(s.client, dbURL+"/user/id", dbapp.GetUserByIDRequest{ID: id})
 	if err != nil {
-		log.Println(err)
 		return
 	}
-	log.Println(user)
 	return
 }
 
@@ -141,8 +144,12 @@ func (s Service) DeleteAccount(token string) (err error) {
 	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
 	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
 
-	err = petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
+	check, err := petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
+		return
+	}
+	if !check {
+		err = errors.New("token not validate")
 		return
 	}
 

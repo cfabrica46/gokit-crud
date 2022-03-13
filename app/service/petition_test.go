@@ -349,7 +349,7 @@ func TestPetitionCheckToken(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
 			})
 
-			err := petitionCheckToken(mock, tt.inURL, tokenapp.CheckTokenRequest{Token: tt.inToken})
+			_, err := petitionCheckToken(mock, tt.inURL, tokenapp.CheckTokenRequest{Token: tt.inToken})
 			if err != nil {
 				resultErr = err.Error()
 			}

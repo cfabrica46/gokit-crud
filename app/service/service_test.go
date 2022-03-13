@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"testing"
 
@@ -12,21 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type myDoFunc func(req *http.Request) (*http.Response, error)
-
-type mockClient struct {
-	doFunc myDoFunc
-}
-
-func getMockClient(d myDoFunc) *mockClient {
-	return &mockClient{d}
-}
-
-func (m *mockClient) Do(req *http.Request) (*http.Response, error) {
-	return m.doFunc(req)
-}
-
 func TestSignUp(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		inUsername, inPassword, inEmail string
 		outErr                          string
@@ -69,6 +57,7 @@ func TestSignUp(t *testing.T) {
 }
 
 func TestSignIn(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		inUsername, inPassword string
 		outErr                 string
@@ -116,20 +105,29 @@ func TestSignIn(t *testing.T) {
 }
 
 func TestLogOut(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		inToken string
-		outErr  string
+		inToken  string
+		outCheck bool
+		outErr   string
 	}{
-		{"token", ""},
-		{"token", "Error from web server"},
+		{"token", true, ""},
+		{"token", true, "Error from web server"},
+		{"token", false, "token not validate"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
 
 			testResp := struct {
-				Err string `json:"err"`
+				Check bool   `json:"check"`
+				Err   string `json:"err"`
 			}{
-				Err: tt.outErr,
+				Check: tt.outCheck,
+				Err:   tt.outErr,
+			}
+
+			if tt.outErr == "token not validate" {
+				testResp.Err = ""
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -154,6 +152,7 @@ func TestLogOut(t *testing.T) {
 }
 
 func TestGetAllUsers(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		outErr string
 	}{
@@ -198,12 +197,15 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestProfile(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		inToken string
-		outErr  string
+		inToken  string
+		outCheck bool
+		outErr   string
 	}{
-		{"token", ""},
-		{"token", "Error from web server"},
+		{"token", true, ""},
+		{"token", true, "Error from web server"},
+		{"token", false, "token not validate"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -213,6 +215,7 @@ func TestProfile(t *testing.T) {
 				ID       int        `json:"id"`
 				Username string     `json:"username"`
 				Email    string     `json:"email"`
+				Check    bool       `json:"check"`
 				Err      string     `json:"err"`
 			}{
 				User: dbapp.User{
@@ -224,7 +227,12 @@ func TestProfile(t *testing.T) {
 				ID:       1,
 				Username: "cesar",
 				Email:    "cesar@email.com",
+				Check:    tt.outCheck,
 				Err:      tt.outErr,
+			}
+
+			if tt.outErr == "token not validate" {
+				testResp.Err = ""
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -243,18 +251,25 @@ func TestProfile(t *testing.T) {
 				resultErr = err.Error()
 			}
 
+			// if tt.outErr == "token not validate" {
+			// 	testResp.Err = tt.outErr
+			// }
+
 			assert.Equal(t, tt.outErr, resultErr)
 		})
 	}
 }
 
 func TestDeleteAccount(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		inToken string
-		outErr  string
+		inToken  string
+		outCheck bool
+		outErr   string
 	}{
-		{"token", ""},
-		{"token", "Error from web server"},
+		{"token", true, ""},
+		{"token", true, "Error from web server"},
+		{"token", false, "token not validate"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -263,12 +278,18 @@ func TestDeleteAccount(t *testing.T) {
 				ID       int    `json:"id"`
 				Username string `json:"username"`
 				Email    string `json:"email"`
+				Check    bool   `json:"check"`
 				Err      string `json:"err"`
 			}{
 				ID:       1,
 				Username: "cesar",
 				Email:    "cesar@email.com",
+				Check:    tt.outCheck,
 				Err:      tt.outErr,
+			}
+
+			if tt.outErr == "token not validate" {
+				testResp.Err = ""
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -286,6 +307,10 @@ func TestDeleteAccount(t *testing.T) {
 			if err != nil {
 				resultErr = err.Error()
 			}
+
+			// if tt.outErr == "token not validate" {
+			// 	testResp.Err = tt.outErr
+			// }
 
 			assert.Equal(t, tt.outErr, resultErr)
 		})

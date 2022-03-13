@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"testing"
 
@@ -14,6 +15,7 @@ import (
 )
 
 func TestSignUpEndpoint(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		in     SignUpRequest
 		outErr string
@@ -59,6 +61,7 @@ func TestSignUpEndpoint(t *testing.T) {
 }
 
 func TestSignInEndpoint(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		in     SignInRequest
 		outErr string
@@ -109,6 +112,7 @@ func TestSignInEndpoint(t *testing.T) {
 }
 
 func TestLogOutEndpoint(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		in     LogOutRequest
 		outErr string
@@ -118,9 +122,11 @@ func TestLogOutEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
-				Err string `json:"err"`
+				Check bool   `json:"check"`
+				Err   string `json:"err"`
 			}{
-				Err: tt.outErr,
+				Check: true,
+				Err:   tt.outErr,
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -150,6 +156,7 @@ func TestLogOutEndpoint(t *testing.T) {
 }
 
 func TestGetAllUsersEndpoint(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		in     GetAllUsersRequest
 		outErr string
@@ -198,6 +205,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 }
 
 func TestProfileEndpoint(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		in     ProfileRequest
 		outErr string
@@ -211,6 +219,7 @@ func TestProfileEndpoint(t *testing.T) {
 				ID       int        `json:"id"`
 				Username string     `json:"username"`
 				Email    string     `json:"email"`
+				Check    bool       `json:"check"`
 				Err      string     `json:"err"`
 			}{
 				User: dbapp.User{
@@ -222,6 +231,7 @@ func TestProfileEndpoint(t *testing.T) {
 				ID:       1,
 				Username: "cesar",
 				Email:    "cesar@email.com",
+				Check:    true,
 				Err:      tt.outErr,
 			}
 
@@ -252,6 +262,7 @@ func TestProfileEndpoint(t *testing.T) {
 }
 
 func TestDeleteAccountEndpoint(t *testing.T) {
+	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
 		in     DeleteAccountRequest
 		outErr string
@@ -264,11 +275,13 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				ID       int    `json:"id"`
 				Username string `json:"username"`
 				Email    string `json:"email"`
+				Check    bool   `json:"check"`
 				Err      string `json:"err"`
 			}{
 				ID:       1,
 				Username: "cesar",
 				Email:    "cesar@email.com",
+				Check:    true,
 				Err:      tt.outErr,
 			}
 
