@@ -17,9 +17,9 @@ echo "$token"
 
 #Profile
 # curl -X POST -Lk http://localhost:8080/profile -d {"token":"${token}"}
-# curl -X POST -k http://localhost:8081/api/v1/user -H "Authorization: $token"
+curl -X POST -k http://localhost:8080/profile -H "Authorization: $token"
 
 #Delete
 # curl -X DELETE -k http://localhost:8080/profile -d "{'token':$(token)}" 
-# curl -X DELETE -Lk http://localhost:8080/api/v1/user -H "Authorization: $token"
+# curl -X DELETE -Lk http://localhost:8080/profile -H "Authorization: $token"
 

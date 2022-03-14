@@ -139,18 +139,12 @@ func TestDecodeLogOutRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		t.Error(err)
-	}
-
 	for i, tt := range []struct {
 		in     *http.Request
 		out    LogOutRequest
 		outErr string
 	}{
-		{goodReq, LogOutRequest{"token"}, ""},
-		{badReq, LogOutRequest{}, "EOF"},
+		{goodReq, LogOutRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result interface{}
@@ -228,18 +222,12 @@ func TestDecodeProfileRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		t.Error(err)
-	}
-
 	for i, tt := range []struct {
 		in     *http.Request
 		out    ProfileRequest
 		outErr string
 	}{
-		{goodReq, ProfileRequest{"token"}, ""},
-		{badReq, ProfileRequest{}, "EOF"},
+		{goodReq, ProfileRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result interface{}
@@ -280,18 +268,12 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		t.Error(err)
-	}
-
 	for i, tt := range []struct {
 		in     *http.Request
 		out    DeleteAccountRequest
 		outErr string
 	}{
-		{goodReq, DeleteAccountRequest{"token"}, ""},
-		{badReq, DeleteAccountRequest{}, "EOF"},
+		{goodReq, DeleteAccountRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var result interface{}
