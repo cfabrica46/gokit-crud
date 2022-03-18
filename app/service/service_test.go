@@ -66,7 +66,7 @@ func TestSignUp(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService("db", "8080", "token", "8080", "secret", mock)
+			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
 
 			_, err = svc.SignUp(tt.inUsername, tt.inPassword, tt.inEmail)
 			if err != nil {
@@ -132,7 +132,7 @@ func TestSignIn(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService("db", "8080", "token", "8080", "secret", mock)
+			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
 
 			_, err = svc.SignIn(tt.inUsername, tt.inPassword)
 			if err != nil {
@@ -211,7 +211,7 @@ func TestLogOut(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService("db", "8080", "token", "8080", "secret", mock)
+			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
 
 			err = svc.LogOut(tt.inToken)
 			if err != nil {
@@ -257,7 +257,7 @@ func TestGetAllUsers(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService("localhost", "8080", "localhost", "8080", "secret", mock)
+			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			_, err = svc.GetAllUsers()
 			if err != nil {
@@ -350,7 +350,7 @@ func TestProfile(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService("db", "8080", "token", "8080", "secret", mock)
+			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
 
 			_, err = svc.Profile(tt.inToken)
 			if err != nil {
@@ -443,7 +443,7 @@ func TestDeleteAccount(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService("db", "8080", "token", "8080", "secret", mock)
+			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
 
 			err = svc.DeleteAccount(tt.inToken)
 			if err != nil {

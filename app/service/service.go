@@ -23,13 +23,13 @@ type serviceInterface interface {
 
 // Service ...
 type Service struct {
-	dbHost, dbPort, tokenHost, tokenPort, secret string
 	client                                       httpClient
+	dbHost, dbPort, tokenHost, tokenPort, secret string
 }
 
 // GetService ...
-func GetService(dbHost, dbPort, tokenHost, tokenPort, secret string, client httpClient) *Service {
-	return &Service{dbHost, dbPort, tokenHost, tokenPort, secret, client}
+func GetService(client httpClient, dbHost, dbPort, tokenHost, tokenPort, secret string) *Service {
+	return &Service{client, dbHost, dbPort, tokenHost, tokenPort, secret}
 }
 
 // SignUp ...

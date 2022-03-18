@@ -22,7 +22,7 @@ func main() {
 
 func runServer(port, dbHost, dbPort, tokenHost, tokenPort, secret string) {
 
-	svc := service.GetService(dbHost, dbPort, tokenHost, tokenPort, secret, &http.Client{})
+	svc := service.GetService(&http.Client{}, dbHost, dbPort, tokenHost, tokenPort, secret)
 
 	getSignUpHandler := httptransport.NewServer(
 		service.MakeSignUpEndpoint(svc),
