@@ -172,7 +172,11 @@ func petitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequ
 }
 
 func petitionGenerateToken(client httpClient, url string, body tokenapp.GenerateTokenRequest) (token string, err error) {
-	var response tokenapp.GenerateTokenResponse
+	// var response tokenapp.GenerateTokenResponse
+	var response struct {
+		Err string
+		tokenapp.GenerateTokenResponse
+	}
 
 	dataResp, err := makePetition(client, url, http.MethodPost, body)
 	if err != nil {
@@ -181,6 +185,10 @@ func petitionGenerateToken(client httpClient, url string, body tokenapp.Generate
 
 	err = json.Unmarshal(dataResp, &response)
 	if err != nil {
+		return
+	}
+	if response.Err != "" {
+		err = errors.New(response.Err)
 		return
 	}
 
@@ -264,12 +272,12 @@ func petitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenR
 	if err != nil {
 		return
 	}
-
 	if response.Err != "" {
 		err = errors.New(response.Err)
 		return
 	}
 
 	check = response.Check
+	// log.Println(check)
 	return
 }

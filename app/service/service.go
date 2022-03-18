@@ -39,6 +39,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 
 	err = petitionInsertUser(s.client, dbURL+"/user", dbapp.InsertUserRequest{Username: username, Password: password, Email: email})
 	if err != nil {
+		// log.Println(err)
 		return
 	}
 
@@ -47,7 +48,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 		return
 	}
 
-	token, err = petitionGenerateToken(s.client, tokenURL+"/token", tokenapp.GenerateTokenRequest{ID: id, Username: username, Email: email, Secret: s.secret})
+	token, err = petitionGenerateToken(s.client, tokenURL+"/generate", tokenapp.GenerateTokenRequest{ID: id, Username: username, Email: email, Secret: s.secret})
 	if err != nil {
 		return
 	}
@@ -89,7 +90,6 @@ func (s Service) LogOut(token string) (err error) {
 	if err != nil {
 		return
 	}
-
 	if !check {
 		err = errors.New("token not validate")
 		return

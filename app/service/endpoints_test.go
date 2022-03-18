@@ -39,7 +39,7 @@ func TestSignUpEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
@@ -90,7 +90,7 @@ func TestSignInEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
@@ -134,7 +134,7 @@ func TestLogOutEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
@@ -183,7 +183,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
@@ -240,7 +240,7 @@ func TestProfileEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
@@ -290,7 +290,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := getMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 

@@ -8,7 +8,7 @@ type mockClient struct {
 	doFunc myDoFunc
 }
 
-func getMockClient(d myDoFunc) *mockClient {
+func newMockClient(d myDoFunc) *mockClient {
 	return &mockClient{d}
 }
 
