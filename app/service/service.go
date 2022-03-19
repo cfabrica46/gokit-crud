@@ -21,6 +21,7 @@ type serviceInterface interface {
 	DeleteAccount(string) error
 }
 
+//xd
 // Service ...
 type Service struct {
 	client                                       httpClient
