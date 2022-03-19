@@ -87,26 +87,21 @@ func (s Service) GetIDByUsername(username string) (id int, err error) {
 
 //InsertUser ...
 func (s *Service) InsertUser(username, password, email string) (err error) {
-	stmt, err := s.db.Prepare("INSERT INTO users(username, password, email) VALUES ($1,$2,$3)")
+	_, err = s.db.Exec("INSERT INTO users(username, password, email) VALUES ($1,$2,$3)", username, password, email)
 	if err != nil {
 		return
 	}
 
-	_, err = stmt.Exec(username, password, email)
-	if err != nil {
-		return
-	}
 	return
 }
 
 //DeleteUser ...
 func (s *Service) DeleteUser(id int) (rowsAffected int, err error) {
-	stmt, err := s.db.Prepare("DELETE FROM users WHERE id = $1")
+	r, err := s.db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {
 		return
 	}
 
-	r, _ := stmt.Exec(id)
 	count, _ := r.RowsAffected()
 	rowsAffected = int(count)
 	return

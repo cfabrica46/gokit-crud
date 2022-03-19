@@ -195,7 +195,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectPrepare("^INSERT INTO users").ExpectExec().WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^INSERT INTO users").WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -234,7 +234,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectPrepare("^DELETE FROM users").ExpectExec().WithArgs(userTest.ID).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^DELETE FROM users").WithArgs(userTest.ID).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {

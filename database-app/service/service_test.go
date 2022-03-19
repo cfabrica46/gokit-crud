@@ -206,7 +206,7 @@ func TestInsertUser(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectPrepare("^INSERT INTO users").ExpectExec().WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^INSERT INTO users").WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			err = svc.InsertUser(userTest.Username, userTest.Password, userTest.Email)
 			if err != nil {
@@ -242,7 +242,7 @@ func TestDeleteUser(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectPrepare("^DELETE FROM users").ExpectExec().WithArgs(userTest.ID).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^DELETE FROM users").WithArgs(userTest.ID).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			_, err = svc.DeleteUser(userTest.ID)
 			if err != nil {
