@@ -21,26 +21,24 @@ type serviceInterface interface {
 	DeleteAccount(string) error
 }
 
-//xd
 // Service ...
 type Service struct {
 	client                                       httpClient
 	dbHost, dbPort, tokenHost, tokenPort, secret string
 }
 
-// GetService ...
-func GetService(client httpClient, dbHost, dbPort, tokenHost, tokenPort, secret string) *Service {
+// NewService ...
+func NewService(client httpClient, dbHost, dbPort, tokenHost, tokenPort, secret string) *Service {
 	return &Service{client, dbHost, dbPort, tokenHost, tokenPort, secret}
 }
 
 // SignUp ...
 func (s Service) SignUp(username, password, email string) (token string, err error) {
-	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
-	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
+	dbURL := "http://" + s.dbHost + ":" + s.dbPort
+	tokenURL := "http://" + s.tokenHost + ":" + s.tokenPort
 
 	err = petitionInsertUser(s.client, dbURL+"/user", dbapp.InsertUserRequest{Username: username, Password: password, Email: email})
 	if err != nil {
-		// log.Println(err)
 		return
 	}
 
@@ -63,8 +61,8 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 
 // SignIn ...
 func (s Service) SignIn(username, password string) (token string, err error) {
-	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
-	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
+	dbURL := "http://" + s.dbHost + ":" + s.dbPort
+	tokenURL := "http://" + s.tokenHost + ":" + s.tokenPort
 
 	user, err := petitionGetUserByUsernameAndPassword(s.client, dbURL+"/user/username_password", dbapp.GetUserByUsernameAndPasswordRequest{Username: username, Password: password})
 	if err != nil {
@@ -85,7 +83,7 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 
 // LogOut ...
 func (s Service) LogOut(token string) (err error) {
-	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
+	tokenURL := "http://" + s.tokenHost + ":" + s.tokenPort
 
 	check, err := petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
@@ -103,9 +101,9 @@ func (s Service) LogOut(token string) (err error) {
 	return
 }
 
-//GetAllUsers  ...
+// GetAllUsers  ...
 func (s Service) GetAllUsers() (users []dbapp.User, err error) {
-	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
+	dbURL := "http://" + s.dbHost + ":" + s.dbPort
 
 	users, err = petitionGetAllUsers(s.client, dbURL+"/users")
 	if err != nil {
@@ -114,10 +112,10 @@ func (s Service) GetAllUsers() (users []dbapp.User, err error) {
 	return
 }
 
-//Profile  ...
+// Profile  ...
 func (s Service) Profile(token string) (user dbapp.User, err error) {
-	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
-	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
+	dbURL := "http://" + s.dbHost + ":" + s.dbPort
+	tokenURL := "http://" + s.tokenHost + ":" + s.tokenPort
 
 	check, err := petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {
@@ -140,10 +138,10 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 	return
 }
 
-//DeleteAccount  ...
+// DeleteAccount  ...
 func (s Service) DeleteAccount(token string) (err error) {
-	var dbURL = "http://" + s.dbHost + ":" + s.dbPort
-	var tokenURL = "http://" + s.tokenHost + ":" + s.tokenPort
+	dbURL := "http://" + s.dbHost + ":" + s.dbPort
+	tokenURL := "http://" + s.tokenHost + ":" + s.tokenPort
 
 	check, err := petitionCheckToken(s.client, tokenURL+"/check", tokenapp.CheckTokenRequest{Token: token})
 	if err != nil {

@@ -1,6 +1,17 @@
 package service
 
-import "net/http"
+import (
+	"net/http"
+
+	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
+)
+
+var userTest = dbapp.User{
+	ID:       1,
+	Username: "cesar",
+	Password: "01234",
+	Email:    "cesar@email.com",
+}
 
 type myDoFunc func(req *http.Request) (*http.Response, error)
 

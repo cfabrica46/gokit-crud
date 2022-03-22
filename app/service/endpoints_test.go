@@ -43,7 +43,7 @@ func TestSignUpEndpoint(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			r, err := MakeSignUpEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -94,7 +94,7 @@ func TestSignInEndpoint(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			r, err := MakeSignInEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -138,7 +138,7 @@ func TestLogOutEndpoint(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			r, err := MakeLogOutEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -187,7 +187,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -244,7 +244,7 @@ func TestProfileEndpoint(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			r, err := MakeProfileEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -294,7 +294,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			r, err := MakeDeleteAccountEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {

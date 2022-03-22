@@ -22,18 +22,55 @@ func TestSignUp(t *testing.T) {
 		url                             string
 		method                          string
 	}{
-		{"cesar", "01234", "cesar@email.com", false, "", ""},
-		{"cesar", "01234", "cesar@email.com", true, "http://db:8080/user", http.MethodPost},
-		{"cesar", "01234", "cesar@email.com", true, "http://db:8080/id/username", http.MethodGet},
-		{"cesar", "01234", "cesar@email.com", true, "http://token:8080/generate", http.MethodPost},
-		{"cesar", "01234", "cesar@email.com", true, "http://token:8080/token", http.MethodPost},
+		{
+			"username",
+			"password",
+			"email@email.com",
+			false,
+			"http://token:8080/generate",
+			http.MethodPost,
+		},
+		{
+			"username",
+			"password",
+			"email@email.com",
+			true,
+			"http://db:8080/user",
+			http.MethodPost,
+		},
+		{
+			"username",
+			"password",
+			"email@email.com",
+			true,
+			"http://db:8080/id/username",
+			http.MethodGet,
+		},
+		{
+			"username",
+			"password",
+			"email@email.com",
+			true,
+			"http://token:8080/generate",
+			http.MethodPost,
+		},
+		{
+			"username",
+			"password",
+			"email@email.com",
+			true,
+			"http://token:8080/token",
+			http.MethodPost,
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var resultErr string
-			var errorMessage string
+			var resultToken, resultErr string
+			var tokenResponse, errorResponse string
 
 			if tt.isError {
-				errorMessage = "Error from web server"
+				errorResponse = "Error from web server"
+			} else {
+				tokenResponse = "token"
 			}
 
 			testResp := struct {
@@ -42,8 +79,8 @@ func TestSignUp(t *testing.T) {
 				Err   string `json:"err"`
 			}{
 				ID:    1,
-				Token: "token",
-				Err:   errorMessage,
+				Token: tokenResponse,
+				Err:   errorResponse,
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -54,9 +91,8 @@ func TestSignUp(t *testing.T) {
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
-				// log.Println(i, req.URL.String(), tt.url, req.URL.String() == tt.url)
-
 				if req.URL.String() == tt.url {
+					// log.Println(i, "-", resultToken, "-", tokenResponse, tt.isError)
 					switch req.Method {
 					case tt.method:
 						response = &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(jsonData)))}
@@ -66,14 +102,15 @@ func TestSignUp(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
 
-			_, err = svc.SignUp(tt.inUsername, tt.inPassword, tt.inEmail)
+			resultToken, err = svc.SignUp(tt.inUsername, tt.inPassword, tt.inEmail)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, errorMessage, resultErr)
+			assert.Equal(t, errorResponse, resultErr)
+			assert.Equal(t, tokenResponse, resultToken)
 		})
 	}
 }
@@ -92,11 +129,13 @@ func TestSignIn(t *testing.T) {
 		{"cesar", "01234", true, "http://token:8080/token", http.MethodPost},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var resultErr string
-			var errorMessage string
+			var resultToken, resultErr string
+			var tokenResponse, errorResponse string
 
 			if tt.isError {
-				errorMessage = "Error from web server"
+				errorResponse = "Error from web server"
+			} else {
+				tokenResponse = "token"
 			}
 
 			testResp := struct {
@@ -110,8 +149,8 @@ func TestSignIn(t *testing.T) {
 					Password: "01234",
 					Email:    "cesar@email.com",
 				},
-				Token: "token",
-				Err:   errorMessage,
+				Token: tokenResponse,
+				Err:   errorResponse,
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -132,14 +171,15 @@ func TestSignIn(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
 
 			_, err = svc.SignIn(tt.inUsername, tt.inPassword)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, errorMessage, resultErr)
+			assert.Equal(t, errorResponse, resultErr)
+			assert.Equal(t, tokenResponse, resultToken)
 		})
 	}
 }
@@ -199,8 +239,6 @@ func TestLogOut(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				log.Println(i, req.URL.String(), tt.url, req.Method, tt.method)
-
 				if req.URL.String() == tt.url {
 					switch req.Method {
 					case tt.method:
@@ -211,7 +249,7 @@ func TestLogOut(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
 
 			err = svc.LogOut(tt.inToken)
 			if err != nil {
@@ -257,7 +295,7 @@ func TestGetAllUsers(t *testing.T) {
 				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
 			})
 
-			svc := GetService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			_, err = svc.GetAllUsers()
 			if err != nil {
@@ -338,8 +376,6 @@ func TestProfile(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				log.Println(i, req.URL.String(), tt.url, req.Method, tt.method)
-
 				if req.URL.String() == tt.url {
 					switch req.Method {
 					case tt.method:
@@ -350,7 +386,7 @@ func TestProfile(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
 
 			_, err = svc.Profile(tt.inToken)
 			if err != nil {
@@ -431,8 +467,6 @@ func TestDeleteAccount(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				log.Println(i, req.URL.String(), tt.url, req.Method, tt.method)
-
 				if req.URL.String() == tt.url {
 					switch req.Method {
 					case tt.method:
@@ -443,7 +477,7 @@ func TestDeleteAccount(t *testing.T) {
 				return response, nil
 			})
 
-			svc := GetService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
 
 			err = svc.DeleteAccount(tt.inToken)
 			if err != nil {
