@@ -11,7 +11,8 @@ import (
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 )
 
-func makePetition(client httpClient, url, httpMethod string, bodyStruct ...interface{}) (dataResp []byte, err error) {
+func makePetition(client httpClient, url, httpMethod string, bodyStruct ...interface{},
+) (dataResp []byte, err error) {
 	var dataReq []byte
 
 	if len(bodyStruct) > 0 {
@@ -57,11 +58,12 @@ func petitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err 
 	return
 }
 
-func petitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRequest) (user dbapp.User, err error) {
+func petitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRequest,
+) (user dbapp.User, err error) {
 	var response dbapp.GetUserByIDResponse
 
-	//convert password to Sha256
-	//in ENDPOINT
+	// convert password to Sha256
+	// in ENDPOINT
 	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 
 	dataResp, err := makePetition(client, url, http.MethodGet, body)
@@ -81,10 +83,11 @@ func petitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRe
 	return
 }
 
-func petitionGetUserByUsernameAndPassword(client httpClient, url string, body dbapp.GetUserByUsernameAndPasswordRequest) (user dbapp.User, err error) {
+func petitionGetUserByUsernameAndPassword(client httpClient, url string,
+	body dbapp.GetUserByUsernameAndPasswordRequest) (user dbapp.User, err error) {
 	var response dbapp.GetUserByUsernameAndPasswordResponse
 
-	//convert password to Sha256
+	// convert password to Sha256
 	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 	dataResp, err := makePetition(client, url, http.MethodGet, body)
 	if err != nil {
@@ -105,7 +108,8 @@ func petitionGetUserByUsernameAndPassword(client httpClient, url string, body db
 	return
 }
 
-func petitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUsernameRequest) (id int, err error) {
+func petitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUsernameRequest,
+) (id int, err error) {
 	var response dbapp.GetIDByUsernameResponse
 
 	dataResp, err := makePetition(client, url, http.MethodGet, body)
@@ -129,8 +133,8 @@ func petitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUs
 func petitionInsertUser(client httpClient, url string, body dbapp.InsertUserRequest) (err error) {
 	var response dbapp.InsertUserResponse
 
-	//convert password to Sha256
-	//in ENDPOINT
+	// convert password to Sha256
+	// in ENDPOINT
 	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 
 	dataResp, err := makePetition(client, url, http.MethodPost, body)
@@ -152,7 +156,7 @@ func petitionInsertUser(client httpClient, url string, body dbapp.InsertUserRequ
 func petitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequest) (err error) {
 	var response dbapp.DeleteUserResponse
 
-	//convert password to Sha256
+	// convert password to Sha256
 	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 
 	dataResp, err := makePetition(client, url, http.MethodDelete, body)
@@ -171,7 +175,8 @@ func petitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequ
 	return
 }
 
-func petitionGenerateToken(client httpClient, url string, body tokenapp.GenerateTokenRequest) (token string, err error) {
+func petitionGenerateToken(client httpClient, url string, body tokenapp.GenerateTokenRequest,
+) (token string, err error) {
 	// var response tokenapp.GenerateTokenResponse
 	var response struct {
 		Err string
@@ -196,7 +201,8 @@ func petitionGenerateToken(client httpClient, url string, body tokenapp.Generate
 	return
 }
 
-func petitionExtractToken(client httpClient, url string, body tokenapp.ExtractTokenRequest) (id int, username, email string, err error) {
+func petitionExtractToken(client httpClient, url string, body tokenapp.ExtractTokenRequest,
+) (id int, username, email string, err error) {
 	var response tokenapp.ExtractTokenResponse
 
 	dataResp, err := makePetition(client, url, http.MethodPost, body)
@@ -240,7 +246,8 @@ func petitionSetToken(client httpClient, url string, body tokenapp.SetTokenReque
 	return
 }
 
-func petitionDeleteToken(client httpClient, url string, body tokenapp.DeleteTokenRequest) (err error) {
+func petitionDeleteToken(client httpClient, url string, body tokenapp.DeleteTokenRequest,
+) (err error) {
 	var response tokenapp.DeleteTokenResponse
 
 	dataResp, err := makePetition(client, url, http.MethodDelete, body)
@@ -260,7 +267,8 @@ func petitionDeleteToken(client httpClient, url string, body tokenapp.DeleteToke
 	return
 }
 
-func petitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenRequest) (check bool, err error) {
+func petitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenRequest,
+) (check bool, err error) {
 	var response tokenapp.CheckTokenResponse
 
 	dataResp, err := makePetition(client, url, http.MethodPost, body)
