@@ -9,6 +9,8 @@ import (
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 )
 
+var errTokenNotValid = errors.New("token not validate")
+
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
@@ -147,7 +149,7 @@ func (s Service) LogOut(token string) (err error) {
 		return
 	}
 	if !check {
-		err = errors.New("token not validate")
+		err = errTokenNotValid
 		return
 	}
 
@@ -191,7 +193,7 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 		return
 	}
 	if !check {
-		err = errors.New("token not validate")
+		err = errTokenNotValid
 		return
 	}
 
@@ -236,7 +238,7 @@ func (s Service) DeleteAccount(token string) (err error) {
 		return
 	}
 	if !check {
-		err = errors.New("token not validate")
+		err = errTokenNotValid
 		return
 	}
 
