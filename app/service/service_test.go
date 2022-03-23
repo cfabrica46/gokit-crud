@@ -92,10 +92,11 @@ func TestSignUp(t *testing.T) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
 				if req.URL.String() == tt.url {
-					// log.Println(i, "-", resultToken, "-", tokenResponse, tt.isError)
-					switch req.Method {
-					case tt.method:
-						response = &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(jsonData)))}
+					if req.Method == tt.method {
+						response = &http.Response{
+							StatusCode: 200,
+							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+						}
 					}
 				}
 
@@ -162,9 +163,11 @@ func TestSignIn(t *testing.T) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
 				if req.URL.String() == tt.url {
-					switch req.Method {
-					case tt.method:
-						response = &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(jsonData)))}
+					if req.Method == tt.method {
+						response = &http.Response{
+							StatusCode: 200,
+							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+						}
 					}
 				}
 
@@ -240,9 +243,11 @@ func TestLogOut(t *testing.T) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
 				if req.URL.String() == tt.url {
-					switch req.Method {
-					case tt.method:
-						response = &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(jsonData)))}
+					if req.Method == tt.method {
+						response = &http.Response{
+							StatusCode: 200,
+							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+						}
 					}
 				}
 
@@ -292,7 +297,10 @@ func TestGetAllUsers(t *testing.T) {
 			}
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+				}, nil
 			})
 
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
@@ -377,12 +385,13 @@ func TestProfile(t *testing.T) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
 				if req.URL.String() == tt.url {
-					switch req.Method {
-					case tt.method:
-						response = &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(jsonData)))}
+					if req.Method == tt.method {
+						response = &http.Response{
+							StatusCode: 200,
+							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+						}
 					}
 				}
-
 				return response, nil
 			})
 
@@ -468,12 +477,13 @@ func TestDeleteAccount(t *testing.T) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
 				if req.URL.String() == tt.url {
-					switch req.Method {
-					case tt.method:
-						response = &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(jsonData)))}
+					if req.Method == tt.method {
+						response = &http.Response{
+							StatusCode: 200,
+							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+						}
 					}
 				}
-
 				return response, nil
 			})
 

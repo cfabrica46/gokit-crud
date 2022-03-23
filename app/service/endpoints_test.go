@@ -40,7 +40,10 @@ func TestSignUpEndpoint(t *testing.T) {
 			}
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+				}, nil
 			})
 
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
@@ -91,7 +94,10 @@ func TestSignInEndpoint(t *testing.T) {
 			}
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+				}, nil
 			})
 
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
@@ -135,7 +141,10 @@ func TestLogOutEndpoint(t *testing.T) {
 			}
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+				}, nil
 			})
 
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
@@ -184,7 +193,10 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 			}
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+				}, nil
 			})
 
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
@@ -241,7 +253,10 @@ func TestProfileEndpoint(t *testing.T) {
 			}
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+				}, nil
 			})
 
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
@@ -291,7 +306,10 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 			}
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader([]byte(jsonData)))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+				}, nil
 			})
 
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
