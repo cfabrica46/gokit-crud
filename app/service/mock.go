@@ -3,19 +3,21 @@ package service
 import (
 	"errors"
 	"net/http"
-
-	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 )
 
-var (
-	userTest = dbapp.User{
-		ID:       1,
-		Username: "username",
-		Password: "password",
-		Email:    "email@email.com",
-	}
+const (
+	// userTest = dbapp.User{
+	// 	ID:       1,
+	// 	Username: "username",
+	// 	Password: "password",
+	// 	Email:    "email@email.com",
+	// }.
+	usernameTest = "username"
+	passwordTest = "username"
+	emailTest    = "username"
 
 	urlTest   = "localhost:8080"
+	portTest  = "8080"
 	tokenTest = "token"
 )
 

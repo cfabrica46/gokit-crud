@@ -56,6 +56,12 @@ func TestSignUpEndpoint(t *testing.T) {
 				}, nil
 			})
 
+			// if true {
+			// 	return
+			// } else {
+			// 	return
+			// }
+
 			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
 
 			r, err := MakeSignUpEndpoint(svc)(context.TODO(), tt.in)
