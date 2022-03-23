@@ -7,12 +7,17 @@ import (
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 )
 
-var userTest = dbapp.User{
-	ID:       1,
-	Username: "username",
-	Password: "password",
-	Email:    "email@email.com",
-}
+var (
+	userTest = dbapp.User{
+		ID:       1,
+		Username: "username",
+		Password: "password",
+		Email:    "email@email.com",
+	}
+
+	urlTest   = "localhost:8080"
+	tokenTest = "token"
+)
 
 var (
 	errWebServer        = errors.New("error from web server")

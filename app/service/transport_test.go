@@ -13,16 +13,16 @@ import (
 )
 
 func TestDecodeSignUpRequest(t *testing.T) {
-	url := "localhost:8080"
+	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
 		Email    string `json:"email"`
 	}{
-		"cesar",
-		"01234",
-		"cesar@email.com",
+		userTest.Username,
+		userTest.Password,
+		userTest.Email,
 	})
 	if err != nil {
 		t.Error(err)
@@ -43,7 +43,7 @@ func TestDecodeSignUpRequest(t *testing.T) {
 		out    SignUpRequest
 		outErr string
 	}{
-		{goodReq, SignUpRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{goodReq, SignUpRequest{userTest.Username, userTest.Password, userTest.Email}, ""},
 		{badReq, SignUpRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -69,14 +69,14 @@ func TestDecodeSignUpRequest(t *testing.T) {
 }
 
 func TestDecodeSignInRequest(t *testing.T) {
-	url := "localhost:8080"
+	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}{
-		"cesar",
-		"01234",
+		userTest.Username,
+		userTest.Password,
 	})
 	if err != nil {
 		t.Error(err)
@@ -97,7 +97,7 @@ func TestDecodeSignInRequest(t *testing.T) {
 		out    SignInRequest
 		outErr string
 	}{
-		{goodReq, SignInRequest{"cesar", "01234"}, ""},
+		{goodReq, SignInRequest{userTest.Username, userTest.Password}, ""},
 		{badReq, SignInRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -123,12 +123,12 @@ func TestDecodeSignInRequest(t *testing.T) {
 }
 
 func TestDecodeLogOutRequest(t *testing.T) {
-	url := "localhost:8080"
+	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
-		Token string `json:"token"`
+		Token string `json:tokenTest`
 	}{
-		"token",
+		tokenTest,
 	})
 	if err != nil {
 		t.Error(err)
@@ -169,7 +169,7 @@ func TestDecodeLogOutRequest(t *testing.T) {
 }
 
 func TestDecodeGetAllUsersRequest(t *testing.T) {
-	url := "localhost:8080"
+	url := urlTest
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -206,12 +206,12 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 }
 
 func TestDecodeProfileRequest(t *testing.T) {
-	url := "localhost:8080"
+	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
-		Token string `json:"token"`
+		Token string `json:tokenTest`
 	}{
-		"token",
+		tokenTest,
 	})
 	if err != nil {
 		t.Error(err)
@@ -252,12 +252,12 @@ func TestDecodeProfileRequest(t *testing.T) {
 }
 
 func TestDecodeDeleteAccountRequest(t *testing.T) {
-	url := "localhost:8080"
+	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
-		Token string `json:"token"`
+		Token string `json:tokenTest`
 	}{
-		"token",
+		tokenTest,
 	})
 	if err != nil {
 		t.Error(err)

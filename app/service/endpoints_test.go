@@ -36,11 +36,11 @@ func TestSignUpEndpoint(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
 				ID    int    `json:"id"`
-				Token string `json:"token"`
+				Token string `json:tokenTest`
 				Err   string `json:"err"`
 			}{
 				ID:    1,
-				Token: "token",
+				Token: tokenTest,
 				Err:   tt.outErr,
 			}
 
@@ -85,7 +85,7 @@ func TestSignInEndpoint(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
 				User  dbapp.User
-				Token string `json:"token"`
+				Token string `json:tokenTest`
 				Err   string `json:"err"`
 			}{
 				User: dbapp.User{
@@ -94,7 +94,7 @@ func TestSignInEndpoint(t *testing.T) {
 					Password: userTest.Password,
 					Email:    userTest.Email,
 				},
-				Token: "token",
+				Token: tokenTest,
 				Err:   tt.outErr,
 			}
 
@@ -133,7 +133,7 @@ func TestLogOutEndpoint(t *testing.T) {
 		in     LogOutRequest
 		outErr string
 	}{
-		{LogOutRequest{Token: "token"}, ""},
+		{LogOutRequest{Token: tokenTest}, ""},
 		{LogOutRequest{}, errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {

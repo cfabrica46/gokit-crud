@@ -20,14 +20,14 @@ func TestMakePetition(t *testing.T) {
 		outErr          string
 	}{
 		{
-			"localhost:8080",
+			urlTest,
 			http.MethodGet,
 			[]byte("body"),
 			[]byte("body"),
 			"",
 		},
 		{
-			"localhost:8080",
+			urlTest,
 			http.MethodGet,
 			func() {},
 			[]byte(nil),
@@ -41,7 +41,7 @@ func TestMakePetition(t *testing.T) {
 			`parse "%%": invalid URL escape "%%"`,
 		},
 		{
-			"localhost:8080",
+			urlTest,
 			http.MethodGet,
 			[]byte("body"),
 			[]byte(nil),
@@ -81,10 +81,10 @@ func TestPetitionGetAllUsers(t *testing.T) {
 		inResp []byte
 		outErr string
 	}{
-		{"localhost:8080", []byte("{}"), ""},
+		{urlTest, []byte("{}"), ""},
 		{"%%", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", []byte(`{"err":"error"}`), "error"},
+		{urlTest, []byte(""), "unexpected end of JSON input"},
+		{urlTest, []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -112,10 +112,10 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 		inResp            []byte
 		outErr            string
 	}{
-		{"localhost:8080", "cesar", []byte("{}"), ""},
-		{"%%", "cesar", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "cesar", []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", "cesar", []byte(`{"err":"error"}`), "error"},
+		{urlTest, userTest.Username, []byte("{}"), ""},
+		{"%%", userTest.Username, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, userTest.Username, []byte(""), "unexpected end of JSON input"},
+		{urlTest, userTest.Username, []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -150,10 +150,10 @@ func TestPetitionGetUserByID(t *testing.T) {
 		inResp []byte
 		outErr string
 	}{
-		{"localhost:8080", 1, []byte("{}"), ""},
-		{"%%", 1, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", 1, []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", 1, []byte(`{"err":"error"}`), "error"},
+		{urlTest, userTest.ID, []byte("{}"), ""},
+		{"%%", userTest.ID, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, userTest.ID, []byte(""), "unexpected end of JSON input"},
+		{urlTest, userTest.ID, []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -181,10 +181,34 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 		inResp                        []byte
 		outErr                        string
 	}{
-		{"localhost:8080", "cesar", "01234", []byte("{}"), ""},
-		{"%%", "cesar", "01234", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "cesar", "01234", []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", "cesar", "01234", []byte(`{"err":"error"}`), "error"},
+		{
+			urlTest,
+			userTest.Username,
+			userTest.Password,
+			[]byte("{}"),
+			"",
+		},
+		{
+			"%%",
+			userTest.Username,
+			userTest.Password,
+			[]byte("{}"),
+			`parse "%%": invalid URL escape "%%"`,
+		},
+		{
+			urlTest,
+			userTest.Username,
+			userTest.Password,
+			[]byte(""),
+			"unexpected end of JSON input",
+		},
+		{
+			urlTest,
+			userTest.Username,
+			userTest.Password,
+			[]byte(`{"err":"error"}`),
+			"error",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -220,34 +244,34 @@ func TestPetitionInsertUser(t *testing.T) {
 		outErr                                 string
 	}{
 		{
-			"localhost:8080",
-			"cesar",
-			"01234",
-			"cesar@email.com",
+			urlTest,
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			[]byte("{}"),
 			"",
 		},
 		{
 			"%%",
-			"cesar",
-			"01234",
-			"cesar@email.com",
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			[]byte("{}"),
 			`parse "%%": invalid URL escape "%%"`,
 		},
 		{
-			"localhost:8080",
-			"cesar",
-			"01234",
-			"cesar@email.com",
+			urlTest,
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			[]byte(""),
 			"unexpected end of JSON input",
 		},
 		{
-			"localhost:8080",
-			"cesar",
-			"01234",
-			"cesar@email.com",
+			urlTest,
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			[]byte(`{"err":"error"}`),
 			"error",
 		},
@@ -287,10 +311,10 @@ func TestPetitionDeleteUser(t *testing.T) {
 		inResp []byte
 		outErr string
 	}{
-		{"localhost:8080", 1, []byte("{}"), ""},
-		{"%%", 1, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", 1, []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", 1, []byte(`{"err":"error"}`), "error"},
+		{urlTest, userTest.ID, []byte("{}"), ""},
+		{"%%", userTest.ID, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, userTest.ID, []byte(""), "unexpected end of JSON input"},
+		{urlTest, userTest.ID, []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -320,29 +344,29 @@ func TestPetitionGenerateToken(t *testing.T) {
 		outErr                               string
 	}{
 		{
-			"localhost:8080",
-			"cesar",
-			"cesar@email.com",
+			urlTest,
+			userTest.Username,
+			userTest.Email,
 			"secret",
-			1,
+			userTest.ID,
 			[]byte("{}"),
 			"",
 		},
 		{
 			"%%",
-			"cesar",
-			"cesar@email.com",
+			userTest.Username,
+			userTest.Email,
 			"secret",
-			1,
+			userTest.ID,
 			[]byte("{}"),
 			`parse "%%": invalid URL escape "%%"`,
 		},
 		{
-			"localhost:8080",
-			"cesar",
-			"cesar@email.com",
+			urlTest,
+			userTest.Username,
+			userTest.Email,
 			"secret",
-			1,
+			userTest.ID,
 			[]byte(""),
 			"unexpected end of JSON input",
 		},
@@ -382,10 +406,10 @@ func TestPetitionExtractToken(t *testing.T) {
 		inResp                   []byte
 		outErr                   string
 	}{
-		{"localhost:8080", "token", "secret", []byte("{}"), ""},
-		{"%%", "token", "secret", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "token", "secret", []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", "token", "secret", []byte(`{"err":"error"}`), "error"},
+		{urlTest, tokenTest, "secret", []byte("{}"), ""},
+		{"%%", tokenTest, "secret", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, tokenTest, "secret", []byte(""), "unexpected end of JSON input"},
+		{urlTest, tokenTest, "secret", []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -420,10 +444,10 @@ func TestPetitionSetToken(t *testing.T) {
 		inResp         []byte
 		outErr         string
 	}{
-		{"localhost:8080", "token", []byte("{}"), ""},
-		{"%%", "token", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "token", []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", "token", []byte(`{"err":"error"}`), "error"},
+		{urlTest, tokenTest, []byte("{}"), ""},
+		{"%%", tokenTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
+		{urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -451,10 +475,10 @@ func TestPetitionDeleteToken(t *testing.T) {
 		inResp         []byte
 		outErr         string
 	}{
-		{"localhost:8080", "token", []byte("{}"), ""},
-		{"%%", "token", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "token", []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", "token", []byte(`{"err":"error"}`), "error"},
+		{urlTest, tokenTest, []byte("{}"), ""},
+		{"%%", tokenTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
+		{urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -488,10 +512,10 @@ func TestPetitionCheckToken(t *testing.T) {
 		inResp         []byte
 		outErr         string
 	}{
-		{"localhost:8080", "token", []byte("{}"), ""},
-		{"%%", "token", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "token", []byte(""), "unexpected end of JSON input"},
-		// {"localhost:8080", "token", []byte(`{"err":"error"}`), "error"},
+		{urlTest, tokenTest, []byte("{}"), ""},
+		{"%%", tokenTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
+		// {urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string

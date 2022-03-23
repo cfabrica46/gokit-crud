@@ -70,12 +70,12 @@ func TestSignUp(t *testing.T) {
 			if tt.isError {
 				errorResponse = errWebServer.Error()
 			} else {
-				tokenResponse = "token"
+				tokenResponse = tokenTest
 			}
 
 			testResp := struct {
 				ID    int    `json:"id"`
-				Token string `json:"token"`
+				Token string `json:tokenTest`
 				Err   string `json:"err"`
 			}{
 				ID:    1,
@@ -103,7 +103,7 @@ func TestSignUp(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
 
 			resultToken, err = svc.SignUp(tt.inUsername, tt.inPassword, tt.inEmail)
 			if err != nil {
@@ -160,12 +160,12 @@ func TestSignIn(t *testing.T) {
 			if tt.isError {
 				errorResponse = errWebServer.Error()
 			} else {
-				tokenResponse = "token"
+				tokenResponse = tokenTest
 			}
 
 			testResp := struct {
 				User  dbapp.User
-				Token string `json:"token"`
+				Token string `json:tokenTest`
 				Err   string `json:"err"`
 			}{
 				User: dbapp.User{
@@ -198,7 +198,7 @@ func TestSignIn(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
 
 			_, err = svc.SignIn(tt.inUsername, tt.inPassword)
 			if err != nil {
@@ -221,10 +221,10 @@ func TestLogOut(t *testing.T) {
 		url     string
 		method  string
 	}{
-		{"token", true, false, "http://token:8080/check", http.MethodPost},
-		{"token", true, true, "http://token:8080/check", http.MethodPost},
-		{"token", false, true, "http://token:8080/check", http.MethodPost},
-		{"token", true, true, "http://token:8080/token", http.MethodDelete},
+		{tokenTest, true, false, "http://token:8080/check", http.MethodPost},
+		{tokenTest, true, true, "http://token:8080/check", http.MethodPost},
+		{tokenTest, false, true, "http://token:8080/check", http.MethodPost},
+		{tokenTest, true, true, "http://token:8080/token", http.MethodDelete},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -278,7 +278,7 @@ func TestLogOut(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
 
 			err = svc.LogOut(tt.inToken)
 			if err != nil {
@@ -349,11 +349,11 @@ func TestProfile(t *testing.T) {
 		url     string
 		method  string
 	}{
-		{"token", true, false, "http://token:8080/check", http.MethodPost},
-		{"token", true, true, "http://token:8080/check", http.MethodPost},
-		{"token", false, true, "http://token:8080/check", http.MethodPost},
-		{"token", true, true, "http://token:8080/extract", http.MethodPost},
-		{"token", true, true, "http://db:8080/user/id", http.MethodGet},
+		{tokenTest, true, false, "http://token:8080/check", http.MethodPost},
+		{tokenTest, true, true, "http://token:8080/check", http.MethodPost},
+		{tokenTest, false, true, "http://token:8080/check", http.MethodPost},
+		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
+		{tokenTest, true, true, "http://db:8080/user/id", http.MethodGet},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -419,7 +419,7 @@ func TestProfile(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
 
 			_, err = svc.Profile(tt.inToken)
 			if err != nil {
@@ -441,11 +441,11 @@ func TestDeleteAccount(t *testing.T) {
 		url     string
 		method  string
 	}{
-		{"token", true, false, "http://token:8080/check", http.MethodPost},
-		{"token", true, true, "http://token:8080/check", http.MethodPost},
-		{"token", false, true, "http://token:8080/check", http.MethodPost},
-		{"token", true, true, "http://token:8080/extract", http.MethodPost},
-		{"token", true, true, "http://db:8080/user", http.MethodDelete},
+		{tokenTest, true, false, "http://token:8080/check", http.MethodPost},
+		{tokenTest, true, true, "http://token:8080/check", http.MethodPost},
+		{tokenTest, false, true, "http://token:8080/check", http.MethodPost},
+		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
+		{tokenTest, true, true, "http://db:8080/user", http.MethodDelete},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -511,7 +511,7 @@ func TestDeleteAccount(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", "token", "8080", "secret")
+			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
 
 			err = svc.DeleteAccount(tt.inToken)
 			if err != nil {
