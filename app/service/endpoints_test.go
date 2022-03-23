@@ -20,8 +20,18 @@ func TestSignUpEndpoint(t *testing.T) {
 		in     SignUpRequest
 		outErr string
 	}{
-		{SignUpRequest{Username: "cesar", Password: "01234", Email: "cesar@email.com"}, ""},
-		{SignUpRequest{}, "Error from web server"},
+		{
+			SignUpRequest{
+				Username: userTest.Username,
+				Password: userTest.Password,
+				Email:    userTest.Email,
+			},
+			"",
+		},
+		{
+			SignUpRequest{},
+			errWebServer.Error(),
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
@@ -55,7 +65,7 @@ func TestSignUpEndpoint(t *testing.T) {
 
 			result, ok := r.(SignUpResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				t.Error(errNotTypeIndicated)
 			}
 
 			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
@@ -69,8 +79,8 @@ func TestSignInEndpoint(t *testing.T) {
 		in     SignInRequest
 		outErr string
 	}{
-		{SignInRequest{Username: "cesar", Password: "01234"}, ""},
-		{SignInRequest{}, "Error from web server"},
+		{SignInRequest{Username: userTest.Username, Password: userTest.Password}, ""},
+		{SignInRequest{}, errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
@@ -80,9 +90,9 @@ func TestSignInEndpoint(t *testing.T) {
 			}{
 				User: dbapp.User{
 					ID:       1,
-					Username: "cesar",
-					Password: "01234",
-					Email:    "cesar@email.com",
+					Username: userTest.Username,
+					Password: userTest.Password,
+					Email:    userTest.Email,
 				},
 				Token: "token",
 				Err:   tt.outErr,
@@ -109,7 +119,7 @@ func TestSignInEndpoint(t *testing.T) {
 
 			result, ok := r.(SignInResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				t.Error(errNotTypeIndicated)
 			}
 
 			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
@@ -124,7 +134,7 @@ func TestLogOutEndpoint(t *testing.T) {
 		outErr string
 	}{
 		{LogOutRequest{Token: "token"}, ""},
-		{LogOutRequest{}, "Error from web server"},
+		{LogOutRequest{}, errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
@@ -156,7 +166,7 @@ func TestLogOutEndpoint(t *testing.T) {
 
 			result, ok := r.(LogOutResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				t.Error(errNotTypeIndicated)
 			}
 
 			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
@@ -171,7 +181,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 		outErr string
 	}{
 		{GetAllUsersRequest{}, ""},
-		{GetAllUsersRequest{}, "Error from web server"},
+		{GetAllUsersRequest{}, errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
@@ -180,9 +190,9 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 			}{
 				User: []dbapp.User{{
 					ID:       1,
-					Username: "cesar",
-					Password: "01234",
-					Email:    "cesar@email.com",
+					Username: userTest.Username,
+					Password: userTest.Password,
+					Email:    userTest.Email,
 				}},
 				Err: tt.outErr,
 			}
@@ -208,7 +218,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 
 			result, ok := r.(GetAllUsersResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				t.Error(errNotTypeIndicated)
 			}
 
 			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
@@ -223,7 +233,7 @@ func TestProfileEndpoint(t *testing.T) {
 		outErr string
 	}{
 		{ProfileRequest{}, ""},
-		{ProfileRequest{}, "Error from web server"},
+		{ProfileRequest{}, errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
@@ -236,13 +246,13 @@ func TestProfileEndpoint(t *testing.T) {
 			}{
 				User: dbapp.User{
 					ID:       1,
-					Username: "cesar",
-					Password: "01234",
-					Email:    "cesar@email.com",
+					Username: userTest.Username,
+					Password: userTest.Password,
+					Email:    userTest.Email,
 				},
 				ID:       1,
-				Username: "cesar",
-				Email:    "cesar@email.com",
+				Username: userTest.Username,
+				Email:    userTest.Email,
 				Check:    true,
 				Err:      tt.outErr,
 			}
@@ -268,7 +278,7 @@ func TestProfileEndpoint(t *testing.T) {
 
 			result, ok := r.(ProfileResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				t.Error(errNotTypeIndicated)
 			}
 
 			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
@@ -283,7 +293,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 		outErr string
 	}{
 		{DeleteAccountRequest{}, ""},
-		{DeleteAccountRequest{}, "Error from web server"},
+		{DeleteAccountRequest{}, errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			testResp := struct {
@@ -294,8 +304,8 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				Err      string `json:"err"`
 			}{
 				ID:       1,
-				Username: "cesar",
-				Email:    "cesar@email.com",
+				Username: userTest.Username,
+				Email:    userTest.Email,
 				Check:    true,
 				Err:      tt.outErr,
 			}
@@ -321,7 +331,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 			result, ok := r.(DeleteAccountResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				t.Error(errNotTypeIndicated)
 			}
 
 			assert.Equal(t, tt.outErr, result.Err, "they should be equal")

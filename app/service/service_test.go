@@ -23,41 +23,41 @@ func TestSignUp(t *testing.T) {
 		method                          string
 	}{
 		{
-			"username",
-			"password",
-			"email@email.com",
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			false,
 			"http://token:8080/generate",
 			http.MethodPost,
 		},
 		{
-			"username",
-			"password",
-			"email@email.com",
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			true,
 			"http://db:8080/user",
 			http.MethodPost,
 		},
 		{
-			"username",
-			"password",
-			"email@email.com",
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			true,
 			"http://db:8080/id/username",
 			http.MethodGet,
 		},
 		{
-			"username",
-			"password",
-			"email@email.com",
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			true,
 			"http://token:8080/generate",
 			http.MethodPost,
 		},
 		{
-			"username",
-			"password",
-			"email@email.com",
+			userTest.Username,
+			userTest.Password,
+			userTest.Email,
 			true,
 			"http://token:8080/token",
 			http.MethodPost,
@@ -68,7 +68,7 @@ func TestSignUp(t *testing.T) {
 			var tokenResponse, errorResponse string
 
 			if tt.isError {
-				errorResponse = "Error from web server"
+				errorResponse = errWebServer.Error()
 			} else {
 				tokenResponse = "token"
 			}
@@ -124,17 +124,41 @@ func TestSignIn(t *testing.T) {
 		url                    string
 		method                 string
 	}{
-		{"cesar", "01234", false, "", ""},
-		{"cesar", "01234", true, "http://db:8080/user/username_password", http.MethodGet},
-		{"cesar", "01234", true, "http://token:8080/generate", http.MethodPost},
-		{"cesar", "01234", true, "http://token:8080/token", http.MethodPost},
+		{
+			userTest.Username,
+			userTest.Password,
+			false,
+			"",
+			"",
+		},
+		{
+			userTest.Username,
+			userTest.Password,
+			true,
+			"http://db:8080/user/username_password",
+			http.MethodGet,
+		},
+		{
+			userTest.Username,
+			userTest.Password,
+			true,
+			"http://token:8080/generate",
+			http.MethodPost,
+		},
+		{
+			userTest.Username,
+			userTest.Password,
+			true,
+			"http://token:8080/token",
+			http.MethodPost,
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultToken, resultErr string
 			var tokenResponse, errorResponse string
 
 			if tt.isError {
-				errorResponse = "Error from web server"
+				errorResponse = errWebServer.Error()
 			} else {
 				tokenResponse = "token"
 			}
@@ -146,9 +170,9 @@ func TestSignIn(t *testing.T) {
 			}{
 				User: dbapp.User{
 					ID:       1,
-					Username: "cesar",
-					Password: "01234",
-					Email:    "cesar@email.com",
+					Username: userTest.Username,
+					Password: userTest.Password,
+					Email:    userTest.Email,
 				},
 				Token: tokenResponse,
 				Err:   errorResponse,
@@ -207,7 +231,7 @@ func TestLogOut(t *testing.T) {
 			var errorMessage string
 
 			if tt.isError {
-				errorMessage = "Error from web server"
+				errorMessage = errWebServer.Error()
 			}
 
 			testResp := struct {
@@ -220,7 +244,7 @@ func TestLogOut(t *testing.T) {
 
 			if !tt.outCheck {
 				testResp.Err = ""
-				errorMessage = "token not validate"
+				errorMessage = errTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -273,7 +297,7 @@ func TestGetAllUsers(t *testing.T) {
 		outErr string
 	}{
 		{""},
-		{"Error from web server"},
+		{errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
@@ -284,9 +308,9 @@ func TestGetAllUsers(t *testing.T) {
 			}{
 				User: []dbapp.User{{
 					ID:       1,
-					Username: "cesar",
-					Password: "01234",
-					Email:    "cesar@email.com",
+					Username: userTest.Username,
+					Password: userTest.Password,
+					Email:    userTest.Email,
 				}},
 				Err: tt.outErr,
 			}
@@ -336,7 +360,7 @@ func TestProfile(t *testing.T) {
 			var errorMessage string
 
 			if tt.isError {
-				errorMessage = "Error from web server"
+				errorMessage = errWebServer.Error()
 			}
 
 			testResp := struct {
@@ -349,20 +373,20 @@ func TestProfile(t *testing.T) {
 			}{
 				User: dbapp.User{
 					ID:       1,
-					Username: "cesar",
-					Password: "01234",
-					Email:    "cesar@email.com",
+					Username: userTest.Username,
+					Password: userTest.Password,
+					Email:    userTest.Email,
 				},
 				ID:       1,
-				Username: "cesar",
-				Email:    "cesar@email.com",
+				Username: userTest.Username,
+				Email:    userTest.Email,
 				Check:    tt.outCheck,
 				Err:      errorMessage,
 			}
 
 			if !tt.outCheck {
 				testResp.Err = ""
-				errorMessage = "token not validate"
+				errorMessage = errTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -428,7 +452,7 @@ func TestDeleteAccount(t *testing.T) {
 			var errorMessage string
 
 			if tt.isError {
-				errorMessage = "Error from web server"
+				errorMessage = errWebServer.Error()
 			}
 
 			testResp := struct {
@@ -441,20 +465,20 @@ func TestDeleteAccount(t *testing.T) {
 			}{
 				User: dbapp.User{
 					ID:       1,
-					Username: "cesar",
-					Password: "01234",
-					Email:    "cesar@email.com",
+					Username: userTest.Username,
+					Password: userTest.Password,
+					Email:    userTest.Email,
 				},
 				ID:       1,
-				Username: "cesar",
-				Email:    "cesar@email.com",
+				Username: userTest.Username,
+				Email:    userTest.Email,
 				Check:    tt.outCheck,
 				Err:      errorMessage,
 			}
 
 			if !tt.outCheck {
 				testResp.Err = ""
-				errorMessage = "token not validate"
+				errorMessage = errTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)

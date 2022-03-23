@@ -45,7 +45,7 @@ func TestMakePetition(t *testing.T) {
 			http.MethodGet,
 			[]byte("body"),
 			[]byte(nil),
-			errWebService.Error(),
+			errWebServer.Error(),
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -58,9 +58,9 @@ func TestMakePetition(t *testing.T) {
 				}, nil
 			})
 
-			if tt.outErr == errWebService.Error() {
+			if tt.outErr == errWebServer.Error() {
 				mock = newMockClient(func(req *http.Request) (*http.Response, error) {
-					return nil, errWebService
+					return nil, errWebServer
 				})
 			}
 

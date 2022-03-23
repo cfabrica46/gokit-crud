@@ -14,7 +14,10 @@ var userTest = dbapp.User{
 	Email:    "email@email.com",
 }
 
-var errWebService = errors.New("error from web server")
+var (
+	errWebServer        = errors.New("error from web server")
+	errNotTypeIndicated = errors.New("response is not of the type indicated")
+)
 
 type myDoFunc func(req *http.Request) (*http.Response, error)
 
