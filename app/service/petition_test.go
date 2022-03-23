@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,21 +19,48 @@ func TestMakePetition(t *testing.T) {
 		out             []byte
 		outErr          string
 	}{
-		{"localhost:8080", http.MethodGet, []byte("body"), []byte("body"), ""},
-		{"localhost:8080", http.MethodGet, func() {}, []byte(nil), "json: unsupported type: func()"},
-		{"%%", http.MethodGet, []byte("body"), []byte(nil), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", http.MethodGet, []byte("body"), []byte(nil), "Error from web server"},
+		{
+			"localhost:8080",
+			http.MethodGet,
+			[]byte("body"),
+			[]byte("body"),
+			"",
+		},
+		{
+			"localhost:8080",
+			http.MethodGet,
+			func() {},
+			[]byte(nil),
+			"json: unsupported type: func()",
+		},
+		{
+			"%%",
+			http.MethodGet,
+			[]byte("body"),
+			[]byte(nil),
+			`parse "%%": invalid URL escape "%%"`,
+		},
+		{
+			"localhost:8080",
+			http.MethodGet,
+			[]byte("body"),
+			[]byte(nil),
+			errWebService.Error(),
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.out))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.out)),
+				}, nil
 			})
 
-			if tt.outErr == "Error from web server" {
+			if tt.outErr == errWebService.Error() {
 				mock = newMockClient(func(req *http.Request) (*http.Response, error) {
-					return nil, errors.New("Error from web server")
+					return nil, errWebService
 				})
 			}
 
@@ -64,7 +90,10 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
 			_, err := petitionGetAllUsers(mock, tt.inURL)
@@ -92,10 +121,19 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
-			_, err := petitionGetIDByUsername(mock, tt.inURL, dbapp.GetIDByUsernameRequest{Username: tt.inUsername})
+			_, err := petitionGetIDByUsername(
+				mock,
+				tt.inURL,
+				dbapp.GetIDByUsernameRequest{
+					Username: tt.inUsername,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -121,7 +159,10 @@ func TestPetitionGetUserByID(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
 			_, err := petitionGetUserByID(mock, tt.inURL, dbapp.GetUserByIDRequest{ID: tt.inID})
@@ -149,10 +190,20 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
-			_, err := petitionGetUserByUsernameAndPassword(mock, tt.inURL, dbapp.GetUserByUsernameAndPasswordRequest{Username: tt.inUsername, Password: tt.inPassword})
+			_, err := petitionGetUserByUsernameAndPassword(
+				mock,
+				tt.inURL,
+				dbapp.GetUserByUsernameAndPasswordRequest{
+					Username: tt.inUsername,
+					Password: tt.inPassword,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -168,19 +219,58 @@ func TestPetitionInsertUser(t *testing.T) {
 		inResp                                 []byte
 		outErr                                 string
 	}{
-		{"localhost:8080", "cesar", "01234", "cesar@email.com", []byte("{}"), ""},
-		{"%%", "cesar", "01234", "cesar@email.com", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "cesar", "01234", "cesar@email.com", []byte(""), "unexpected end of JSON input"},
-		{"localhost:8080", "cesar", "01234", "cesar@email.com", []byte(`{"err":"error"}`), "error"},
+		{
+			"localhost:8080",
+			"cesar",
+			"01234",
+			"cesar@email.com",
+			[]byte("{}"),
+			"",
+		},
+		{
+			"%%",
+			"cesar",
+			"01234",
+			"cesar@email.com",
+			[]byte("{}"),
+			`parse "%%": invalid URL escape "%%"`,
+		},
+		{
+			"localhost:8080",
+			"cesar",
+			"01234",
+			"cesar@email.com",
+			[]byte(""),
+			"unexpected end of JSON input",
+		},
+		{
+			"localhost:8080",
+			"cesar",
+			"01234",
+			"cesar@email.com",
+			[]byte(`{"err":"error"}`),
+			"error",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
-			err := petitionInsertUser(mock, tt.inURL, dbapp.InsertUserRequest{Username: tt.inUsername, Password: tt.inPassword, Email: tt.inEmail})
+			err := petitionInsertUser(
+				mock,
+				tt.inURL,
+				dbapp.InsertUserRequest{
+					Username: tt.inUsername,
+					Password: tt.inPassword,
+					Email:    tt.inEmail,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -206,7 +296,10 @@ func TestPetitionDeleteUser(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
 			err := petitionDeleteUser(mock, tt.inURL, dbapp.DeleteUserRequest{ID: tt.inID})
@@ -226,18 +319,54 @@ func TestPetitionGenerateToken(t *testing.T) {
 		inResp                               []byte
 		outErr                               string
 	}{
-		{"localhost:8080", "cesar", "cesar@email.com", "secret", 1, []byte("{}"), ""},
-		{"%%", "cesar", "cesar@email.com", "secret", 1, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{"localhost:8080", "cesar", "cesar@email.com", "secret", 1, []byte(""), "unexpected end of JSON input"},
+		{
+			"localhost:8080",
+			"cesar",
+			"cesar@email.com",
+			"secret",
+			1,
+			[]byte("{}"),
+			"",
+		},
+		{
+			"%%",
+			"cesar",
+			"cesar@email.com",
+			"secret",
+			1,
+			[]byte("{}"),
+			`parse "%%": invalid URL escape "%%"`,
+		},
+		{
+			"localhost:8080",
+			"cesar",
+			"cesar@email.com",
+			"secret",
+			1,
+			[]byte(""),
+			"unexpected end of JSON input",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
-			_, err := petitionGenerateToken(mock, tt.inURL, tokenapp.GenerateTokenRequest{ID: tt.inID, Username: tt.inUsername, Email: tt.inEmail, Secret: tt.inSecret})
+			_, err := petitionGenerateToken(
+				mock,
+				tt.inURL,
+				tokenapp.GenerateTokenRequest{
+					ID:       tt.inID,
+					Username: tt.inUsername,
+					Email:    tt.inEmail,
+					Secret:   tt.inSecret,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -262,10 +391,20 @@ func TestPetitionExtractToken(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
-			_, _, _, err := petitionExtractToken(mock, tt.inURL, tokenapp.ExtractTokenRequest{Token: tt.inToken, Secret: tt.inSecret})
+			_, _, _, err := petitionExtractToken(
+				mock,
+				tt.inURL,
+				tokenapp.ExtractTokenRequest{
+					Token:  tt.inToken,
+					Secret: tt.inSecret,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -290,7 +429,10 @@ func TestPetitionSetToken(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
 			err := petitionSetToken(mock, tt.inURL, tokenapp.SetTokenRequest{Token: tt.inToken})
@@ -318,10 +460,19 @@ func TestPetitionDeleteToken(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
-			err := petitionDeleteToken(mock, tt.inURL, tokenapp.DeleteTokenRequest{Token: tt.inToken})
+			err := petitionDeleteToken(
+				mock,
+				tt.inURL,
+				tokenapp.DeleteTokenRequest{
+					Token: tt.inToken,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -346,10 +497,19 @@ func TestPetitionCheckToken(t *testing.T) {
 			var resultErr string
 
 			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewReader(tt.inResp))}, nil
+				return &http.Response{
+					StatusCode: 200,
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+				}, nil
 			})
 
-			_, err := petitionCheckToken(mock, tt.inURL, tokenapp.CheckTokenRequest{Token: tt.inToken})
+			_, err := petitionCheckToken(
+				mock,
+				tt.inURL,
+				tokenapp.CheckTokenRequest{
+					Token: tt.inToken,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"net/http"
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
@@ -8,10 +9,12 @@ import (
 
 var userTest = dbapp.User{
 	ID:       1,
-	Username: "cesar",
-	Password: "01234",
-	Email:    "cesar@email.com",
+	Username: "username",
+	Password: "password",
+	Email:    "email@email.com",
 }
+
+var errWebService = errors.New("error from web server")
 
 type myDoFunc func(req *http.Request) (*http.Response, error)
 
