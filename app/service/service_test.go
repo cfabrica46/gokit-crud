@@ -128,8 +128,8 @@ func TestSignIn(t *testing.T) {
 			userTest.Username,
 			userTest.Password,
 			false,
-			"",
-			"",
+			"http://token:8080/generate",
+			http.MethodPost,
 		},
 		{
 			userTest.Username,
@@ -200,7 +200,7 @@ func TestSignIn(t *testing.T) {
 
 			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
 
-			_, err = svc.SignIn(tt.inUsername, tt.inPassword)
+			resultToken, err = svc.SignIn(tt.inUsername, tt.inPassword)
 			if err != nil {
 				resultErr = err.Error()
 			}
