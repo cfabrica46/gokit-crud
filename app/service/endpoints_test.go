@@ -377,7 +377,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				t.Error(errNotTypeIndicated)
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
