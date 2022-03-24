@@ -17,19 +17,19 @@ import (
 )
 
 const (
-	idTest       = 1
-	usernameTest = "username"
-	passwordTest = "password"
-	emailTest    = "email@email.com"
-	secretTest   = "secret"
+	idTest       int    = 1
+	usernameTest string = "username"
+	passwordTest string = "password"
+	emailTest    string = "email@email.com"
+	secretTest   string = "secret"
 
-	urlTest       = "localhost:8080"
-	dbHostTest    = "db"
-	tokenHostTest = "token"
-	portTest      = "8080"
-	tokenTest     = "token"
+	urlTest       string = "localhost:8080"
+	dbHostTest    string = "db"
+	tokenHostTest string = "token"
+	portTest      string = "8080"
+	tokenTest     string = "token"
 
-	schemaNameTest = "%v"
+	schemaNameTest string = "%v"
 )
 
 var (
@@ -46,44 +46,44 @@ func TestSignUp(t *testing.T) {
 		method                          string
 	}{
 		{
-			usernameTest,
-			passwordTest,
-			emailTest,
-			false,
-			"http://token:8080/generate",
-			http.MethodPost,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			isError:    false,
+			url:        "http://token:8080/generate",
+			method:     http.MethodPost,
 		},
 		{
-			usernameTest,
-			passwordTest,
-			emailTest,
-			true,
-			"http://db:8080/user",
-			http.MethodPost,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			isError:    true,
+			url:        "http://db:8080/user",
+			method:     http.MethodPost,
 		},
 		{
-			usernameTest,
-			passwordTest,
-			emailTest,
-			true,
-			"http://db:8080/id/username",
-			http.MethodGet,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			isError:    true,
+			url:        "http://db:8080/id/username",
+			method:     http.MethodGet,
 		},
 		{
-			usernameTest,
-			passwordTest,
-			emailTest,
-			true,
-			"http://token:8080/generate",
-			http.MethodPost,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			isError:    true,
+			url:        "http://token:8080/generate",
+			method:     http.MethodPost,
 		},
 		{
-			usernameTest,
-			passwordTest,
-			emailTest,
-			true,
-			"http://token:8080/token",
-			http.MethodPost,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			isError:    true,
+			url:        "http://token:8080/token",
+			method:     http.MethodPost,
 		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
@@ -155,32 +155,32 @@ func TestSignIn(t *testing.T) {
 		method                 string
 	}{
 		{
-			usernameTest,
-			passwordTest,
-			false,
-			"http://token:8080/generate",
-			http.MethodPost,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			isError:    false,
+			url:        "http://token:8080/generate",
+			method:     http.MethodPost,
 		},
 		{
-			usernameTest,
-			passwordTest,
-			true,
-			"http://db:8080/user/username_password",
-			http.MethodGet,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			isError:    true,
+			url:        "http://db:8080/user/username_password",
+			method:     http.MethodGet,
 		},
 		{
-			usernameTest,
-			passwordTest,
-			true,
-			"http://token:8080/generate",
-			http.MethodPost,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			isError:    true,
+			url:        "http://token:8080/generate",
+			method:     http.MethodPost,
 		},
 		{
-			usernameTest,
-			passwordTest,
-			true,
-			"http://token:8080/token",
-			http.MethodPost,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			isError:    true,
+			url:        "http://token:8080/token",
+			method:     http.MethodPost,
 		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
@@ -258,10 +258,34 @@ func TestLogOut(t *testing.T) {
 		url     string
 		method  string
 	}{
-		{tokenTest, true, false, "http://token:8080/check", http.MethodPost},
-		{tokenTest, true, true, "http://token:8080/check", http.MethodPost},
-		{tokenTest, false, true, "http://token:8080/check", http.MethodPost},
-		{tokenTest, true, true, "http://token:8080/token", http.MethodDelete},
+		{
+			inToken:  tokenTest,
+			outCheck: true,
+			isError:  false,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outCheck: false,
+			isError:  true,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			tokenTest,
+			true,
+			true,
+			"http://token:8080/token",
+			http.MethodDelete,
+		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
@@ -338,10 +362,21 @@ func TestGetAllUsers(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 
 	for i, tt := range []struct {
-		outErr string
+		inUsers []dbapp.User
+		outErr  string
 	}{
-		{""},
-		{errWebServer.Error()},
+		{
+			[]dbapp.User{
+				{
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
+				},
+			},
+			"",
+		},
+		{nil, errWebServer.Error()},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
@@ -467,6 +502,7 @@ func TestProfile(t *testing.T) {
 						}
 					}
 				}
+
 				return response, nil
 			})
 
@@ -566,6 +602,7 @@ func TestDeleteAccount(t *testing.T) {
 						}
 					}
 				}
+
 				return response, nil
 			})
 

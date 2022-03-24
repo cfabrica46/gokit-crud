@@ -21,7 +21,15 @@ func main() {
 		log.Println(err)
 	}
 
-	dbInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
+	dbInfo := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USERNAME"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_SSLMODE"),
+	)
 
 	fmt.Println(dbInfo)
 
@@ -81,7 +89,8 @@ func runServer(port string, db *sql.DB) {
 	r := mux.NewRouter()
 	r.Methods(http.MethodGet).Path("/users").Handler(getAllUsersHandler)
 	r.Methods(http.MethodGet).Path("/user/id").Handler(getUserByIDHandler)
-	r.Methods(http.MethodGet).Path("/user/username_password").Handler(getUserByUsernameAndPasswordHandler)
+	r.Methods(http.MethodGet).Path("/user/username_password").
+		Handler(getUserByUsernameAndPasswordHandler)
 	r.Methods(http.MethodGet).Path("/id/username").Handler(getIDByUsernameHandler)
 	r.Methods(http.MethodPost).Path("/user").Handler(insertUserHandler)
 	r.Methods(http.MethodDelete).Path("/user").Handler(deleteUserHandler)

@@ -31,7 +31,18 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(userTest.ID, userTest.Username, userTest.Password, userTest.Email)
+			rows := sqlmock.NewRows(
+				[]string{
+					"id",
+					"username",
+					"password",
+					"email",
+				}).AddRow(
+				idTest,
+				usernameTest,
+				passwordTest,
+				emailTest,
+			)
 
 			mock.ExpectQuery("^SELECT id, username, email FROM users").WillReturnRows(rows)
 
@@ -72,9 +83,9 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(userTest.ID, userTest.Username, userTest.Password, userTest.Email)
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(idTest, usernameTest, passwordTest, emailTest)
 
-			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(userTest.ID).WillReturnRows(rows)
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(idTest).WillReturnRows(rows)
 
 			r, err := MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -113,9 +124,9 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(userTest.ID, userTest.Username, userTest.Password, userTest.Email)
+			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(idTest, usernameTest, passwordTest, emailTest)
 
-			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(userTest.Username, userTest.Password).WillReturnRows(rows)
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(usernameTest, passwordTest).WillReturnRows(rows)
 
 			r, err := MakeGetUserByUsernameAndPasswordEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -154,9 +165,9 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			rows := sqlmock.NewRows([]string{"id"}).AddRow(userTest.ID)
+			rows := sqlmock.NewRows([]string{"id"}).AddRow(idTest)
 
-			mock.ExpectQuery("^SELECT id FROM users").WithArgs(userTest.Username).WillReturnRows(rows)
+			mock.ExpectQuery("^SELECT id FROM users").WithArgs(usernameTest).WillReturnRows(rows)
 
 			r, err := MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -195,7 +206,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectExec("^INSERT INTO users").WithArgs(userTest.Username, userTest.Password, userTest.Email).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^INSERT INTO users").WithArgs(usernameTest, passwordTest, emailTest).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
@@ -234,7 +245,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectExec("^DELETE FROM users").WithArgs(userTest.ID).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^DELETE FROM users").WithArgs(idTest).WillReturnResult(sqlmock.NewResult(0, 1))
 
 			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {

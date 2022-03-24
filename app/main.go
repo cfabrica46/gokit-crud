@@ -17,7 +17,14 @@ func main() {
 		log.Println(".env loaded")
 	}
 
-	runServer(os.Getenv("PORT"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("TOKEN_HOST"), os.Getenv("TOKEN_PORT"), os.Getenv("SECRET"))
+	runServer(
+		os.Getenv("PORT"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("TOKEN_HOST"),
+		os.Getenv("TOKEN_PORT"),
+		os.Getenv("SECRET"),
+	)
 }
 
 func runServer(port, dbHost, dbPort, tokenHost, tokenPort, secret string) {

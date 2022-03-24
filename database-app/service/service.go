@@ -59,7 +59,11 @@ func (s Service) GetUserByID(id int) (user User, err error) {
 
 // GetUserByUsernameAndPassword ...
 func (s Service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
-	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2", username, password)
+	row := s.db.QueryRow(
+		"SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2",
+		username,
+		password,
+	)
 
 	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
@@ -87,7 +91,12 @@ func (s Service) GetIDByUsername(username string) (id int, err error) {
 
 // InsertUser ...
 func (s *Service) InsertUser(username, password, email string) (err error) {
-	_, err = s.db.Exec("INSERT INTO users(username, password, email) VALUES ($1,$2,$3)", username, password, email)
+	_, err = s.db.Exec(
+		"INSERT INTO users(username, password, email) VALUES ($1,$2,$3)",
+		username,
+		password,
+		email,
+	)
 	if err != nil {
 		return
 	}
