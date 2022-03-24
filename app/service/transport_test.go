@@ -127,7 +127,7 @@ func TestDecodeLogOutRequest(t *testing.T) {
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
-		Token string `json:tokenTest`
+		Token string `json:"token"`
 	}{
 		tokenTest,
 	})
@@ -210,7 +210,7 @@ func TestDecodeProfileRequest(t *testing.T) {
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
-		Token string `json:tokenTest`
+		Token string `json:"token"`
 	}{
 		tokenTest,
 	})
@@ -256,7 +256,7 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
-		Token string `json:tokenTest`
+		Token string `json:"token"`
 	}{
 		tokenTest,
 	})

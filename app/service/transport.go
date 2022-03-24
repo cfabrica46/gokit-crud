@@ -12,6 +12,7 @@ func DecodeSignUpRequest(_ context.Context, r *http.Request) (interface{}, error
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -21,6 +22,7 @@ func DecodeSignInRequest(_ context.Context, r *http.Request) (interface{}, error
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -28,12 +30,14 @@ func DecodeSignInRequest(_ context.Context, r *http.Request) (interface{}, error
 func DecodeLogOutRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request LogOutRequest
 	request.Token = r.Header.Get("Authorization")
+
 	return request, nil
 }
 
 // DecodeGetAllUsersRequest ...
 func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	var request GetAllUsersRequest
+
 	return request, nil
 }
 
@@ -41,6 +45,7 @@ func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, 
 func DecodeProfileRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request ProfileRequest
 	request.Token = r.Header.Get("Authorization")
+
 	return request, nil
 }
 
@@ -48,6 +53,7 @@ func DecodeProfileRequest(_ context.Context, r *http.Request) (interface{}, erro
 func DecodeDeleteAccountRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request DeleteAccountRequest
 	request.Token = r.Header.Get("Authorization")
+
 	return request, nil
 }
 

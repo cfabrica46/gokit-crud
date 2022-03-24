@@ -89,6 +89,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 	if err != nil {
 		return
 	}
+
 	return token, err
 }
 
@@ -133,6 +134,7 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 	if err != nil {
 		return
 	}
+
 	return token, err
 }
 
@@ -152,6 +154,7 @@ func (s Service) LogOut(token string) (err error) {
 	}
 	if !check {
 		err = ErrTokenNotValid
+
 		return
 	}
 
@@ -165,7 +168,8 @@ func (s Service) LogOut(token string) (err error) {
 	if err != nil {
 		return
 	}
-	return
+
+	return err
 }
 
 // GetAllUsers  ...
@@ -176,6 +180,7 @@ func (s Service) GetAllUsers() (users []dbapp.User, err error) {
 	if err != nil {
 		return
 	}
+
 	return
 }
 
@@ -196,6 +201,7 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 	}
 	if !check {
 		err = ErrTokenNotValid
+
 		return
 	}
 
@@ -221,6 +227,7 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 	if err != nil {
 		return
 	}
+
 	return user, err
 }
 
@@ -241,6 +248,7 @@ func (s Service) DeleteAccount(token string) (err error) {
 	}
 	if !check {
 		err = ErrTokenNotValid
+
 		return
 	}
 
@@ -259,5 +267,6 @@ func (s Service) DeleteAccount(token string) (err error) {
 	if err != nil {
 		return
 	}
+
 	return err
 }

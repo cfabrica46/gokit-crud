@@ -9,11 +9,12 @@ import (
 // MakeSignUpEndpoint ...
 func MakeSignUpEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(SignUpRequest)
+		req, _ := request.(SignUpRequest)
 		token, err := svc.SignUp(req.Username, req.Password, req.Email)
 		if err != nil {
 			return SignUpResponse{token, err.Error()}, nil
 		}
+
 		return SignUpResponse{token, ""}, nil
 	}
 }
@@ -21,11 +22,12 @@ func MakeSignUpEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeSignInEndpoint ...
 func MakeSignInEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(SignInRequest)
+		req, _ := request.(SignInRequest)
 		token, err := svc.SignIn(req.Username, req.Password)
 		if err != nil {
 			return SignInResponse{token, err.Error()}, nil
 		}
+
 		return SignInResponse{token, ""}, nil
 	}
 }
@@ -33,11 +35,12 @@ func MakeSignInEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeLogOutEndpoint ...
 func MakeLogOutEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(LogOutRequest)
+		req, _ := request.(LogOutRequest)
 		err := svc.LogOut(req.Token)
 		if err != nil {
 			return LogOutResponse{err.Error()}, nil
 		}
+
 		return LogOutResponse{""}, nil
 	}
 }
@@ -45,11 +48,11 @@ func MakeLogOutEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeGetAllUsersEndpoint ...
 func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
-		// req := request.(GetAllUsersRequest)
 		users, err := svc.GetAllUsers()
 		if err != nil {
 			return GetAllUsersResponse{users, err.Error()}, nil
 		}
+
 		return GetAllUsersResponse{users, ""}, nil
 	}
 }
@@ -57,11 +60,12 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeProfileEndpoint ...
 func MakeProfileEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(ProfileRequest)
+		req, _ := request.(ProfileRequest)
 		user, err := svc.Profile(req.Token)
 		if err != nil {
 			return ProfileResponse{user, err.Error()}, nil
 		}
+
 		return ProfileResponse{user, ""}, nil
 	}
 }
@@ -69,11 +73,12 @@ func MakeProfileEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeDeleteAccountEndpoint ...
 func MakeDeleteAccountEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(DeleteAccountRequest)
+		req, _ := request.(DeleteAccountRequest)
 		err := svc.DeleteAccount(req.Token)
 		if err != nil {
 			return DeleteAccountResponse{err.Error()}, nil
 		}
+
 		return DeleteAccountResponse{""}, nil
 	}
 }

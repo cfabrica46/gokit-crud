@@ -166,7 +166,13 @@ func TestPetitionGetUserByID(t *testing.T) {
 				}, nil
 			})
 
-			_, err := service.PetitionGetUserByID(mock, tt.inURL, dbapp.GetUserByIDRequest{ID: tt.inID})
+			_, err := service.PetitionGetUserByID(
+				mock,
+				tt.inURL,
+				dbapp.GetUserByIDRequest{
+					ID: tt.inID,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -439,7 +445,7 @@ func TestPetitionExtractToken(t *testing.T) {
 	}
 }
 
-func TestPetitionSetToken(t *testing.T) {
+func TestPetitionSetAndDeleteToken(t *testing.T) {
 	for i, tt := range []struct {
 		inURL, inToken string
 		inResp         []byte
@@ -460,13 +466,43 @@ func TestPetitionSetToken(t *testing.T) {
 				}, nil
 			})
 
-			err := service.PetitionSetToken(mock, tt.inURL, tokenapp.SetTokenRequest{Token: tt.inToken})
+			err := service.PetitionSetToken(
+				mock,
+				tt.inURL,
+				tokenapp.SetTokenRequest{
+					Token: tt.inToken,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			assert.Equal(t, tt.outErr, resultErr)
 		})
+
+		// t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		// 	var resultErr string
+
+		// 	mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
+		// 		return &http.Response{
+		// 			StatusCode: http.StatusOK,
+		// 			Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+		// 		}, nil
+		// 	})
+
+		// 	err := service.PetitionDeleteToken(
+		// 		mock,
+		// 		tt.inURL,
+		// 		tokenapp.DeleteTokenRequest{
+		// 			Token: tt.inToken,
+		// 		},
+		// 	)
+		// 	if err != nil {
+		// 		resultErr = err.Error()
+		// 	}
+
+		// 	assert.Equal(t, tt.outErr, resultErr)
+		// })
 	}
 }
 

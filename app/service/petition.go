@@ -34,6 +34,7 @@ func MakePetition(client httpClient, url, httpMethod string, bodyStruct ...inter
 	defer resp.Body.Close()
 
 	dataResp, _ = io.ReadAll(resp.Body)
+
 	return
 }
 
@@ -52,9 +53,11 @@ func PetitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err 
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
 	user = response.Users
+
 	return
 }
 
@@ -77,9 +80,11 @@ func PetitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRe
 	}
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
 	user = response.User
+
 	return
 }
 
@@ -102,10 +107,12 @@ func PetitionGetUserByUsernameAndPassword(client httpClient, url string,
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
 
 	user = response.User
+
 	return
 }
 
@@ -125,9 +132,11 @@ func PetitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUs
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
 	id = response.ID
+
 	return
 }
 
@@ -149,8 +158,10 @@ func PetitionInsertUser(client httpClient, url string, body dbapp.InsertUserRequ
 	}
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
+
 	return
 }
 
@@ -171,8 +182,10 @@ func PetitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequ
 	}
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
+
 	return
 }
 
@@ -195,10 +208,12 @@ func PetitionGenerateToken(client httpClient, url string, body tokenapp.Generate
 	}
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
 
 	token = response.Token
+
 	return
 }
 
@@ -218,12 +233,14 @@ func PetitionExtractToken(client httpClient, url string, body tokenapp.ExtractTo
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
 
 	id = response.ID
 	username = response.Username
 	email = response.Email
+
 	return
 }
 
@@ -242,8 +259,10 @@ func PetitionSetToken(client httpClient, url string, body tokenapp.SetTokenReque
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
+
 	return
 }
 
@@ -263,8 +282,10 @@ func PetitionDeleteToken(client httpClient, url string, body tokenapp.DeleteToke
 
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
+
 	return
 }
 
@@ -283,10 +304,11 @@ func PetitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenR
 	}
 	if response.Err != "" {
 		err = errors.New(response.Err)
+
 		return
 	}
 
 	check = response.Check
-	// log.Println(check)
+
 	return
 }

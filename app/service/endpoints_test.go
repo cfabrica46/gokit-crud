@@ -37,7 +37,7 @@ func TestSignUpEndpoint(t *testing.T) {
 		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				ID    int    `json:"id"`
-				Token string `json:tokenTest`
+				Token string `json:"token"`
 				Err   string `json:"err"`
 			}{
 				ID:    idTest,
@@ -76,7 +76,7 @@ func TestSignUpEndpoint(t *testing.T) {
 				t.Error(errNotTypeIndicated)
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
@@ -93,7 +93,7 @@ func TestSignInEndpoint(t *testing.T) {
 		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				User  dbapp.User
-				Token string `json:tokenTest`
+				Token string `json:"token"`
 				Err   string `json:"err"`
 			}{
 				User: dbapp.User{
@@ -137,7 +137,7 @@ func TestSignInEndpoint(t *testing.T) {
 				t.Error(errNotTypeIndicated)
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
@@ -191,7 +191,7 @@ func TestLogOutEndpoint(t *testing.T) {
 				t.Error(errNotTypeIndicated)
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
@@ -317,7 +317,7 @@ func TestProfileEndpoint(t *testing.T) {
 				t.Error(errNotTypeIndicated)
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }

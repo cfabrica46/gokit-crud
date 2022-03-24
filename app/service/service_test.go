@@ -98,7 +98,7 @@ func TestSignUp(t *testing.T) {
 
 			testResp := struct {
 				ID    int    `json:"id"`
-				Token string `json:tokenTest`
+				Token string `json:"token"`
 				Err   string `json:"err"`
 			}{
 				ID:    idTest,
@@ -194,9 +194,9 @@ func TestSignIn(t *testing.T) {
 			}
 
 			testResp := struct {
-				User  dbapp.User
-				Token string `json:tokenTest`
-				Err   string `json:"err"`
+				User  dbapp.User `json:"user"`
+				Token string     `json:"token"`
+				Err   string     `json:"err"`
 			}{
 				User: dbapp.User{
 					ID:       idTest,
