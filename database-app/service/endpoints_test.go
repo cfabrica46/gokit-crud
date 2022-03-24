@@ -11,11 +11,27 @@ import (
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     GetAllUsersRequest
-		outErr string
+		inID                            int
+		inUsername, inPassword, inEmail string
+		inRequest                       GetAllUsersRequest
+		outErr                          string
 	}{
-		{GetAllUsersRequest{}, ""},
-		{GetAllUsersRequest{}, "sql: database is closed"},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest:  GetAllUsersRequest{},
+			outErr:     "",
+		},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest:  GetAllUsersRequest{},
+			outErr:     "sql: database is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
@@ -38,15 +54,15 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 					"password",
 					"email",
 				}).AddRow(
-				idTest,
-				usernameTest,
-				passwordTest,
-				emailTest,
+				tt.inID,
+				tt.inUsername,
+				tt.inPassword,
+				tt.inEmail,
 			)
 
 			mock.ExpectQuery("^SELECT id, username, email FROM users").WillReturnRows(rows)
 
-			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.in)
+			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
@@ -56,18 +72,34 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
 
 func TestMakeGetUserByIDEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     GetUserByIDRequest
-		outErr string
+		inID                            int
+		inUsername, inPassword, inEmail string
+		inRequest                       GetUserByIDRequest
+		outErr                          string
 	}{
-		{GetUserByIDRequest{1}, ""},
-		{GetUserByIDRequest{}, "sql: database is closed"},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest:  GetUserByIDRequest{ID: idTest},
+			outErr:     "",
+		},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest:  GetUserByIDRequest{},
+			outErr:     "sql: database is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
@@ -83,11 +115,23 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(idTest, usernameTest, passwordTest, emailTest)
+			rows := sqlmock.NewRows(
+				[]string{
+					"id",
+					"username",
+					"password",
+					"email",
+				}).AddRow(
+				tt.inID,
+				tt.inUsername,
+				tt.inPassword,
+				tt.inEmail,
+			)
 
-			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(idTest).WillReturnRows(rows)
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").
+				WithArgs(tt.inID).WillReturnRows(rows)
 
-			r, err := MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.in)
+			r, err := MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
@@ -97,18 +141,37 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
 
 func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     GetUserByUsernameAndPasswordRequest
-		outErr string
+		inID                            int
+		inUsername, inPassword, inEmail string
+		inRequest                       GetUserByUsernameAndPasswordRequest
+		outErr                          string
 	}{
-		{GetUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{GetUserByUsernameAndPasswordRequest{}, "sql: database is closed"},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest: GetUserByUsernameAndPasswordRequest{
+				Username: usernameTest,
+				Password: passwordTest,
+			},
+			outErr: "",
+		},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest:  GetUserByUsernameAndPasswordRequest{},
+			outErr:     "sql: database is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
@@ -124,11 +187,23 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			rows := sqlmock.NewRows([]string{"id", "username", "password", "email"}).AddRow(idTest, usernameTest, passwordTest, emailTest)
+			rows := sqlmock.NewRows(
+				[]string{
+					"id",
+					"username",
+					"password",
+					"email",
+				}).AddRow(
+				tt.inID,
+				tt.inUsername,
+				tt.inPassword,
+				tt.inEmail,
+			)
 
-			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(usernameTest, passwordTest).WillReturnRows(rows)
+			mock.ExpectQuery("^SELECT id, username, password, email FROM users").
+				WithArgs(tt.inUsername, tt.inPassword).WillReturnRows(rows)
 
-			r, err := MakeGetUserByUsernameAndPasswordEndpoint(svc)(context.TODO(), tt.in)
+			r, err := MakeGetUserByUsernameAndPasswordEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
@@ -138,18 +213,32 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
 
 func TestGetIDByUsernameEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     GetIDByUsernameRequest
-		outErr string
+		inID       int
+		inUsername string
+		inRequest  GetIDByUsernameRequest
+		outErr     string
 	}{
-		{GetIDByUsernameRequest{"cesar"}, ""},
-		{GetIDByUsernameRequest{}, "sql: database is closed"},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inRequest: GetIDByUsernameRequest{
+				Username: usernameTest,
+			},
+			outErr: "",
+		},
+		{
+			inID:       idTest,
+			inUsername: usernameTest,
+			inRequest:  GetIDByUsernameRequest{},
+			outErr:     "sql: database is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
@@ -165,11 +254,11 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			rows := sqlmock.NewRows([]string{"id"}).AddRow(idTest)
+			rows := sqlmock.NewRows([]string{"id"}).AddRow(tt.inID)
 
-			mock.ExpectQuery("^SELECT id FROM users").WithArgs(usernameTest).WillReturnRows(rows)
+			mock.ExpectQuery("^SELECT id FROM users").WithArgs(tt.inUsername).WillReturnRows(rows)
 
-			r, err := MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.in)
+			r, err := MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
@@ -179,18 +268,35 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
 
 func TestMakeInsertUserEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     InsertUserRequest
-		outErr string
+		inUsername, inPassword, inEmail string
+		inRequest                       InsertUserRequest
+		outErr                          string
 	}{
-		{InsertUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
-		{InsertUserRequest{}, "sql: database is closed"},
+		{
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest: InsertUserRequest{
+				Username: usernameTest,
+				Password: passwordTest,
+				Email:    emailTest,
+			},
+			outErr: "",
+		},
+		{
+			inUsername: usernameTest,
+			inPassword: passwordTest,
+			inEmail:    emailTest,
+			inRequest:  InsertUserRequest{},
+			outErr:     "sql: database is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
@@ -206,9 +312,10 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectExec("^INSERT INTO users").WithArgs(usernameTest, passwordTest, emailTest).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^INSERT INTO users").
+				WithArgs(tt.inUsername, tt.inPassword, tt.inEmail).WillReturnResult(sqlmock.NewResult(0, 1))
 
-			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.in)
+			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
@@ -218,18 +325,29 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }
 
 func TestMakeDeleteUserEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     DeleteUserRequest
-		outErr string
+		inID      int
+		inRequest DeleteUserRequest
+		outErr    string
 	}{
-		{DeleteUserRequest{1}, ""},
-		{DeleteUserRequest{}, "sql: database is closed"},
+		{
+			inID: idTest,
+			inRequest: DeleteUserRequest{
+				ID: idTest,
+			},
+			outErr: "",
+		},
+		{
+			inID:      idTest,
+			inRequest: DeleteUserRequest{},
+			outErr:    "sql: database is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
@@ -245,9 +363,10 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 
 			svc := GetService(db)
 
-			mock.ExpectExec("^DELETE FROM users").WithArgs(idTest).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec("^DELETE FROM users").
+				WithArgs(tt.inID).WillReturnResult(sqlmock.NewResult(0, 1))
 
-			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.in)
+			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
@@ -257,7 +376,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Equal(t, tt.outErr, result.Err)
 		})
 	}
 }

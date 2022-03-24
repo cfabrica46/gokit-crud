@@ -13,6 +13,7 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 		if err != nil {
 			return GetAllUsersResponse{users, err.Error()}, nil
 		}
+
 		return GetAllUsersResponse{users, ""}, nil
 	}
 }
@@ -20,11 +21,12 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeGetUserByIDEndpoint ...
 func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetUserByIDRequest)
+		req, _ := request.(GetUserByIDRequest)
 		user, err := svc.GetUserByID(req.ID)
 		if err != nil {
 			return GetUserByIDResponse{user, err.Error()}, nil
 		}
+
 		return GetUserByIDResponse{user, ""}, nil
 	}
 }
@@ -32,11 +34,12 @@ func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeGetUserByUsernameAndPasswordEndpoint ...
 func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetUserByUsernameAndPasswordRequest)
+		req, _ := request.(GetUserByUsernameAndPasswordRequest)
 		user, err := svc.GetUserByUsernameAndPassword(req.Username, req.Password)
 		if err != nil {
 			return GetUserByUsernameAndPasswordResponse{user, err.Error()}, nil
 		}
+
 		return GetUserByUsernameAndPasswordResponse{user, ""}, nil
 	}
 }
@@ -44,11 +47,12 @@ func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.End
 // MakeGetIDByUsernameEndpoint ...
 func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetIDByUsernameRequest)
+		req, _ := request.(GetIDByUsernameRequest)
 		id, err := svc.GetIDByUsername(req.Username)
 		if err != nil {
 			return GetIDByUsernameResponse{id, err.Error()}, nil
 		}
+
 		return GetIDByUsernameResponse{id, ""}, nil
 	}
 }
@@ -56,11 +60,12 @@ func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeInsertUserEndpoint ...
 func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(InsertUserRequest)
+		req, _ := request.(InsertUserRequest)
 		err := svc.InsertUser(req.Username, req.Password, req.Email)
 		if err != nil {
 			return InsertUserResponse{err.Error()}, nil
 		}
+
 		return InsertUserResponse{""}, nil
 	}
 }
@@ -68,11 +73,12 @@ func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 // MakeDeleteUserEndpoint ...
 func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(DeleteUserRequest)
+		req, _ := request.(DeleteUserRequest)
 		rowsAffected, err := svc.DeleteUser(req.ID)
 		if err != nil {
 			return DeleteUserResponse{rowsAffected, err.Error()}, nil
 		}
+
 		return DeleteUserResponse{rowsAffected, ""}, nil
 	}
 }
