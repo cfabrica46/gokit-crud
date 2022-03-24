@@ -40,7 +40,6 @@ func main() {
 }
 
 func runServer(port string, db *sql.DB) {
-
 	svc := service.GetService(db)
 
 	getAllUsersHandler := httptransport.NewServer(

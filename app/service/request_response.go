@@ -38,8 +38,7 @@ type LogOutResponse struct {
 }
 
 // GetAllUsersRequest () ([]dbapp.User, error)
-type GetAllUsersRequest struct {
-}
+type GetAllUsersRequest struct{}
 
 // GetAllUsersResponse () ([]dbapp.User, error)
 type GetAllUsersResponse struct {

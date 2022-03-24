@@ -1,8 +1,7 @@
 package service
 
 // GetAllUsersRequest ...
-type GetAllUsersRequest struct {
-}
+type GetAllUsersRequest struct{}
 
 // GetAllUsersResponse ...
 type GetAllUsersResponse struct {

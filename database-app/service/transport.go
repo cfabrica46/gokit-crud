@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-//DecodeGetAllUsersRequest ...
+// DecodeGetAllUsersRequest ...
 func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	var request GetAllUsersRequest
 	return request, nil
 }
 
-//DecodeGetUserByIDRequest ...
+// DecodeGetUserByIDRequest ...
 func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GetUserByIDRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -21,7 +21,7 @@ func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, 
 	return request, nil
 }
 
-//DecodeGetUserByUsernameAndPasswordRequest ...
+// DecodeGetUserByUsernameAndPasswordRequest ...
 func DecodeGetUserByUsernameAndPasswordRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GetUserByUsernameAndPasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -30,7 +30,7 @@ func DecodeGetUserByUsernameAndPasswordRequest(_ context.Context, r *http.Reques
 	return request, nil
 }
 
-//DecodeGetIDByUsernameRequest ...
+// DecodeGetIDByUsernameRequest ...
 func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GetIDByUsernameRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -39,7 +39,7 @@ func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface
 	return request, nil
 }
 
-//DecodeInsertUserRequest ...
+// DecodeInsertUserRequest ...
 func DecodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request InsertUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -48,7 +48,7 @@ func DecodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	return request, nil
 }
 
-//DecodeDeleteUserRequest ...
+// DecodeDeleteUserRequest ...
 func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request DeleteUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -57,7 +57,7 @@ func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	return request, nil
 }
 
-//EncodeResponse ...
+// EncodeResponse ...
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	return json.NewEncoder(w).Encode(response)
 }

@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/cfabrica46/gokit-crud/app/service"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,9 +21,9 @@ func TestDecodeSignUpRequest(t *testing.T) {
 		Password string `json:"password"`
 		Email    string `json:"email"`
 	}{
-		userTest.Username,
-		userTest.Password,
-		userTest.Email,
+		usernameTest,
+		passwordTest,
+		emailTest,
 	})
 	if err != nil {
 		t.Error(err)
@@ -40,24 +41,24 @@ func TestDecodeSignUpRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in     *http.Request
-		out    SignUpRequest
+		out    service.SignUpRequest
 		outErr string
 	}{
-		{goodReq, SignUpRequest{userTest.Username, userTest.Password, userTest.Email}, ""},
-		{badReq, SignUpRequest{}, "EOF"},
+		{goodReq, service.SignUpRequest{usernameTest, passwordTest, emailTest}, ""},
+		{badReq, service.SignUpRequest{}, "EOF"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			r, err := DecodeSignUpRequest(context.TODO(), tt.in)
+			r, err := service.DecodeSignUpRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(SignUpRequest)
+			result, ok := r.(service.SignUpRequest)
 			if !ok {
-				if (tt.out != SignUpRequest{}) {
+				if (tt.out != service.SignUpRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -75,8 +76,8 @@ func TestDecodeSignInRequest(t *testing.T) {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}{
-		userTest.Username,
-		userTest.Password,
+		usernameTest,
+		passwordTest,
 	})
 	if err != nil {
 		t.Error(err)
@@ -94,24 +95,24 @@ func TestDecodeSignInRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in     *http.Request
-		out    SignInRequest
+		out    service.SignInRequest
 		outErr string
 	}{
-		{goodReq, SignInRequest{userTest.Username, userTest.Password}, ""},
-		{badReq, SignInRequest{}, "EOF"},
+		{goodReq, service.SignInRequest{usernameTest, passwordTest}, ""},
+		{badReq, service.SignInRequest{}, "EOF"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			r, err := DecodeSignInRequest(context.TODO(), tt.in)
+			r, err := service.DecodeSignInRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(SignInRequest)
+			result, ok := r.(service.SignInRequest)
 			if !ok {
-				if (tt.out != SignInRequest{}) {
+				if (tt.out != service.SignInRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -141,23 +142,23 @@ func TestDecodeLogOutRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in     *http.Request
-		out    LogOutRequest
+		out    service.LogOutRequest
 		outErr string
 	}{
-		{goodReq, LogOutRequest{}, ""},
+		{goodReq, service.LogOutRequest{}, ""},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			r, err := DecodeLogOutRequest(context.TODO(), tt.in)
+			r, err := service.DecodeLogOutRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(LogOutRequest)
+			result, ok := r.(service.LogOutRequest)
 			if !ok {
-				if (tt.out != LogOutRequest{}) {
+				if (tt.out != service.LogOutRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -178,23 +179,23 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in     *http.Request
-		out    GetAllUsersRequest
+		out    service.GetAllUsersRequest
 		outErr string
 	}{
-		{goodReq, GetAllUsersRequest{}, ""},
+		{goodReq, service.GetAllUsersRequest{}, ""},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			r, err := DecodeGetAllUsersRequest(context.TODO(), tt.in)
+			r, err := service.DecodeGetAllUsersRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(GetAllUsersRequest)
+			result, ok := r.(service.GetAllUsersRequest)
 			if !ok {
-				if (tt.out != GetAllUsersRequest{}) {
+				if (tt.out != service.GetAllUsersRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -224,23 +225,23 @@ func TestDecodeProfileRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in     *http.Request
-		out    ProfileRequest
+		out    service.ProfileRequest
 		outErr string
 	}{
-		{goodReq, ProfileRequest{}, ""},
+		{goodReq, service.ProfileRequest{}, ""},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			r, err := DecodeProfileRequest(context.TODO(), tt.in)
+			r, err := service.DecodeProfileRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(ProfileRequest)
+			result, ok := r.(service.ProfileRequest)
 			if !ok {
-				if (tt.out != ProfileRequest{}) {
+				if (tt.out != service.ProfileRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -270,23 +271,23 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in     *http.Request
-		out    DeleteAccountRequest
+		out    service.DeleteAccountRequest
 		outErr string
 	}{
-		{goodReq, DeleteAccountRequest{}, ""},
+		{goodReq, service.DeleteAccountRequest{}, ""},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			r, err := DecodeDeleteAccountRequest(context.TODO(), tt.in)
+			r, err := service.DecodeDeleteAccountRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(DeleteAccountRequest)
+			result, ok := r.(service.DeleteAccountRequest)
 			if !ok {
-				if (tt.out != DeleteAccountRequest{}) {
+				if (tt.out != service.DeleteAccountRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -304,10 +305,10 @@ func TestEncodeResponse(t *testing.T) {
 	}{
 		{"test", ""},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			err := EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
+			err := service.EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}

@@ -22,12 +22,12 @@ type Service struct {
 	host, port, user, password, dbName, sslmode, driver string
 }
 
-//GetService ...
+// GetService ...
 func GetService(db *sql.DB) *Service {
 	return &Service{db: db}
 }
 
-//GetAllUsers ...
+// GetAllUsers ...
 func (s Service) GetAllUsers() (users []User, err error) {
 	log.SetFlags(log.Lshortfile)
 	rows, err := s.db.Query("SELECT id, username, email FROM users")
@@ -43,7 +43,7 @@ func (s Service) GetAllUsers() (users []User, err error) {
 	return
 }
 
-//GetUserByID ...
+// GetUserByID ...
 func (s Service) GetUserByID(id int) (user User, err error) {
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE id = $1", id)
 
@@ -57,7 +57,7 @@ func (s Service) GetUserByID(id int) (user User, err error) {
 	return
 }
 
-//GetUserByUsernameAndPassword ...
+// GetUserByUsernameAndPassword ...
 func (s Service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2", username, password)
 
@@ -71,7 +71,7 @@ func (s Service) GetUserByUsernameAndPassword(username, password string) (user U
 	return
 }
 
-//GetIDByUsername ...
+// GetIDByUsername ...
 func (s Service) GetIDByUsername(username string) (id int, err error) {
 	row := s.db.QueryRow("SELECT id FROM users WHERE username = $1", username)
 
@@ -85,7 +85,7 @@ func (s Service) GetIDByUsername(username string) (id int, err error) {
 	return
 }
 
-//InsertUser ...
+// InsertUser ...
 func (s *Service) InsertUser(username, password, email string) (err error) {
 	_, err = s.db.Exec("INSERT INTO users(username, password, email) VALUES ($1,$2,$3)", username, password, email)
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *Service) InsertUser(username, password, email string) (err error) {
 	return
 }
 
-//DeleteUser ...
+// DeleteUser ...
 func (s *Service) DeleteUser(id int) (rowsAffected int, err error) {
 	r, err := s.db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {

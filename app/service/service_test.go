@@ -1,8 +1,9 @@
-package service
+package service_test
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,8 +11,30 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/cfabrica46/gokit-crud/app/service"
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 	"github.com/stretchr/testify/assert"
+)
+
+const (
+	idTest       = 1
+	usernameTest = "username"
+	passwordTest = "password"
+	emailTest    = "email@email.com"
+	secretTest   = "secret"
+
+	urlTest       = "localhost:8080"
+	dbHostTest    = "db"
+	tokenHostTest = "token"
+	portTest      = "8080"
+	tokenTest     = "token"
+
+	schemaNameTest = "%v"
+)
+
+var (
+	errWebServer        = errors.New("error from web server")
+	errNotTypeIndicated = errors.New("response is not of the type indicated")
 )
 
 func TestSignUp(t *testing.T) {
@@ -23,47 +46,47 @@ func TestSignUp(t *testing.T) {
 		method                          string
 	}{
 		{
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			false,
 			"http://token:8080/generate",
 			http.MethodPost,
 		},
 		{
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			true,
 			"http://db:8080/user",
 			http.MethodPost,
 		},
 		{
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			true,
 			"http://db:8080/id/username",
 			http.MethodGet,
 		},
 		{
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			true,
 			"http://token:8080/generate",
 			http.MethodPost,
 		},
 		{
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			true,
 			"http://token:8080/token",
 			http.MethodPost,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultToken, resultErr string
 			var tokenResponse, errorResponse string
 
@@ -78,7 +101,7 @@ func TestSignUp(t *testing.T) {
 				Token string `json:tokenTest`
 				Err   string `json:"err"`
 			}{
-				ID:    1,
+				ID:    idTest,
 				Token: tokenResponse,
 				Err:   errorResponse,
 			}
@@ -88,13 +111,13 @@ func TestSignUp(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
 				if req.URL.String() == tt.url {
 					if req.Method == tt.method {
 						response = &http.Response{
-							StatusCode: 200,
+							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
 						}
 					}
@@ -103,7 +126,14 @@ func TestSignUp(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
 			resultToken, err = svc.SignUp(tt.inUsername, tt.inPassword, tt.inEmail)
 			if err != nil {
@@ -125,35 +155,35 @@ func TestSignIn(t *testing.T) {
 		method                 string
 	}{
 		{
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			false,
 			"http://token:8080/generate",
 			http.MethodPost,
 		},
 		{
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			true,
 			"http://db:8080/user/username_password",
 			http.MethodGet,
 		},
 		{
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			true,
 			"http://token:8080/generate",
 			http.MethodPost,
 		},
 		{
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			true,
 			"http://token:8080/token",
 			http.MethodPost,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultToken, resultErr string
 			var tokenResponse, errorResponse string
 
@@ -169,10 +199,10 @@ func TestSignIn(t *testing.T) {
 				Err   string `json:"err"`
 			}{
 				User: dbapp.User{
-					ID:       1,
-					Username: userTest.Username,
-					Password: userTest.Password,
-					Email:    userTest.Email,
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
 				},
 				Token: tokenResponse,
 				Err:   errorResponse,
@@ -183,13 +213,13 @@ func TestSignIn(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
 				if req.URL.String() == tt.url {
 					if req.Method == tt.method {
 						response = &http.Response{
-							StatusCode: 200,
+							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
 						}
 					}
@@ -198,7 +228,14 @@ func TestSignIn(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
 			resultToken, err = svc.SignIn(tt.inUsername, tt.inPassword)
 			if err != nil {
@@ -226,7 +263,7 @@ func TestLogOut(t *testing.T) {
 		{tokenTest, false, true, "http://token:8080/check", http.MethodPost},
 		{tokenTest, true, true, "http://token:8080/token", http.MethodDelete},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 			var errorMessage string
 
@@ -244,7 +281,7 @@ func TestLogOut(t *testing.T) {
 
 			if !tt.outCheck {
 				testResp.Err = ""
-				errorMessage = errTokenNotValid.Error()
+				errorMessage = service.ErrTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -252,7 +289,7 @@ func TestLogOut(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
@@ -269,7 +306,7 @@ func TestLogOut(t *testing.T) {
 				if req.URL.String() == tt.url {
 					if req.Method == tt.method {
 						response = &http.Response{
-							StatusCode: 200,
+							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
 						}
 					}
@@ -278,7 +315,14 @@ func TestLogOut(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
 			err = svc.LogOut(tt.inToken)
 			if err != nil {
@@ -299,7 +343,7 @@ func TestGetAllUsers(t *testing.T) {
 		{""},
 		{errWebServer.Error()},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
 			testResp := struct {
@@ -307,10 +351,10 @@ func TestGetAllUsers(t *testing.T) {
 				Err  string       `json:"err"`
 			}{
 				User: []dbapp.User{{
-					ID:       1,
-					Username: userTest.Username,
-					Password: userTest.Password,
-					Email:    userTest.Email,
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
 				}},
 				Err: tt.outErr,
 			}
@@ -320,14 +364,21 @@ func TestGetAllUsers(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
 				}, nil
 			})
 
-			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
 			_, err = svc.GetAllUsers()
 			if err != nil {
@@ -355,7 +406,7 @@ func TestProfile(t *testing.T) {
 		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
 		{tokenTest, true, true, "http://db:8080/user/id", http.MethodGet},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 			var errorMessage string
 
@@ -372,21 +423,21 @@ func TestProfile(t *testing.T) {
 				Err      string     `json:"err"`
 			}{
 				User: dbapp.User{
-					ID:       1,
-					Username: userTest.Username,
-					Password: userTest.Password,
-					Email:    userTest.Email,
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
 				},
-				ID:       1,
-				Username: userTest.Username,
-				Email:    userTest.Email,
+				ID:       idTest,
+				Username: usernameTest,
+				Email:    emailTest,
 				Check:    tt.outCheck,
 				Err:      errorMessage,
 			}
 
 			if !tt.outCheck {
 				testResp.Err = ""
-				errorMessage = errTokenNotValid.Error()
+				errorMessage = service.ErrTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -394,7 +445,7 @@ func TestProfile(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
@@ -411,7 +462,7 @@ func TestProfile(t *testing.T) {
 				if req.URL.String() == tt.url {
 					if req.Method == tt.method {
 						response = &http.Response{
-							StatusCode: 200,
+							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
 						}
 					}
@@ -419,7 +470,14 @@ func TestProfile(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
 			_, err = svc.Profile(tt.inToken)
 			if err != nil {
@@ -447,7 +505,7 @@ func TestDeleteAccount(t *testing.T) {
 		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
 		{tokenTest, true, true, "http://db:8080/user", http.MethodDelete},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 			var errorMessage string
 
@@ -464,21 +522,21 @@ func TestDeleteAccount(t *testing.T) {
 				Err      string     `json:"err"`
 			}{
 				User: dbapp.User{
-					ID:       1,
-					Username: userTest.Username,
-					Password: userTest.Password,
-					Email:    userTest.Email,
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
 				},
-				ID:       1,
-				Username: userTest.Username,
-				Email:    userTest.Email,
+				ID:       idTest,
+				Username: usernameTest,
+				Email:    emailTest,
 				Check:    tt.outCheck,
 				Err:      errorMessage,
 			}
 
 			if !tt.outCheck {
 				testResp.Err = ""
-				errorMessage = errTokenNotValid.Error()
+				errorMessage = service.ErrTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -486,7 +544,7 @@ func TestDeleteAccount(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
@@ -503,7 +561,7 @@ func TestDeleteAccount(t *testing.T) {
 				if req.URL.String() == tt.url {
 					if req.Method == tt.method {
 						response = &http.Response{
-							StatusCode: 200,
+							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
 						}
 					}
@@ -511,7 +569,14 @@ func TestDeleteAccount(t *testing.T) {
 				return response, nil
 			})
 
-			svc := NewService(mock, "db", "8080", tokenTest, "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
 			err = svc.DeleteAccount(tt.inToken)
 			if err != nil {

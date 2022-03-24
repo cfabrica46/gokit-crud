@@ -141,7 +141,6 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 }
 
 func TestDecodeGetIDByUsernameRequest(t *testing.T) {
-
 	dataJSON, err := json.Marshal(GetIDByUsernameRequest{Username: "cesar"})
 	if err != nil {
 		t.Error(err)

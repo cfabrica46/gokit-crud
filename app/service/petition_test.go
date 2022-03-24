@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/cfabrica46/gokit-crud/app/service"
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 	"github.com/stretchr/testify/assert"
@@ -48,23 +49,23 @@ func TestMakePetition(t *testing.T) {
 			errWebServer.Error(),
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.out)),
 				}, nil
 			})
 
 			if tt.outErr == errWebServer.Error() {
-				mock = newMockClient(func(req *http.Request) (*http.Response, error) {
+				mock = service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 					return nil, errWebServer
 				})
 			}
 
-			result, err := makePetition(mock, tt.inURL, tt.inMethod, tt.inBody)
+			result, err := service.MakePetition(mock, tt.inURL, tt.inMethod, tt.inBody)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -86,17 +87,17 @@ func TestPetitionGetAllUsers(t *testing.T) {
 		{urlTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			_, err := petitionGetAllUsers(mock, tt.inURL)
+			_, err := service.PetitionGetAllUsers(mock, tt.inURL)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -112,22 +113,22 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 		inResp            []byte
 		outErr            string
 	}{
-		{urlTest, userTest.Username, []byte("{}"), ""},
-		{"%%", userTest.Username, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{urlTest, userTest.Username, []byte(""), "unexpected end of JSON input"},
-		{urlTest, userTest.Username, []byte(`{"err":"error"}`), "error"},
+		{urlTest, usernameTest, []byte("{}"), ""},
+		{"%%", usernameTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, usernameTest, []byte(""), "unexpected end of JSON input"},
+		{urlTest, usernameTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			_, err := petitionGetIDByUsername(
+			_, err := service.PetitionGetIDByUsername(
 				mock,
 				tt.inURL,
 				dbapp.GetIDByUsernameRequest{
@@ -150,22 +151,22 @@ func TestPetitionGetUserByID(t *testing.T) {
 		inResp []byte
 		outErr string
 	}{
-		{urlTest, userTest.ID, []byte("{}"), ""},
-		{"%%", userTest.ID, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{urlTest, userTest.ID, []byte(""), "unexpected end of JSON input"},
-		{urlTest, userTest.ID, []byte(`{"err":"error"}`), "error"},
+		{urlTest, idTest, []byte("{}"), ""},
+		{"%%", idTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, idTest, []byte(""), "unexpected end of JSON input"},
+		{urlTest, idTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			_, err := petitionGetUserByID(mock, tt.inURL, dbapp.GetUserByIDRequest{ID: tt.inID})
+			_, err := service.PetitionGetUserByID(mock, tt.inURL, dbapp.GetUserByIDRequest{ID: tt.inID})
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -183,44 +184,44 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 	}{
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			[]byte("{}"),
 			"",
 		},
 		{
 			"%%",
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			[]byte("{}"),
 			`parse "%%": invalid URL escape "%%"`,
 		},
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			[]byte(""),
 			"unexpected end of JSON input",
 		},
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Password,
+			usernameTest,
+			passwordTest,
 			[]byte(`{"err":"error"}`),
 			"error",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			_, err := petitionGetUserByUsernameAndPassword(
+			_, err := service.PetitionGetUserByUsernameAndPassword(
 				mock,
 				tt.inURL,
 				dbapp.GetUserByUsernameAndPasswordRequest{
@@ -245,48 +246,48 @@ func TestPetitionInsertUser(t *testing.T) {
 	}{
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			[]byte("{}"),
 			"",
 		},
 		{
 			"%%",
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			[]byte("{}"),
 			`parse "%%": invalid URL escape "%%"`,
 		},
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			[]byte(""),
 			"unexpected end of JSON input",
 		},
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Password,
-			userTest.Email,
+			usernameTest,
+			passwordTest,
+			emailTest,
 			[]byte(`{"err":"error"}`),
 			"error",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			err := petitionInsertUser(
+			err := service.PetitionInsertUser(
 				mock,
 				tt.inURL,
 				dbapp.InsertUserRequest{
@@ -311,22 +312,22 @@ func TestPetitionDeleteUser(t *testing.T) {
 		inResp []byte
 		outErr string
 	}{
-		{urlTest, userTest.ID, []byte("{}"), ""},
-		{"%%", userTest.ID, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{urlTest, userTest.ID, []byte(""), "unexpected end of JSON input"},
-		{urlTest, userTest.ID, []byte(`{"err":"error"}`), "error"},
+		{urlTest, idTest, []byte("{}"), ""},
+		{"%%", idTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, idTest, []byte(""), "unexpected end of JSON input"},
+		{urlTest, idTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			err := petitionDeleteUser(mock, tt.inURL, dbapp.DeleteUserRequest{ID: tt.inID})
+			err := service.PetitionDeleteUser(mock, tt.inURL, dbapp.DeleteUserRequest{ID: tt.inID})
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -345,43 +346,43 @@ func TestPetitionGenerateToken(t *testing.T) {
 	}{
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Email,
-			"secret",
-			userTest.ID,
+			usernameTest,
+			emailTest,
+			secretTest,
+			idTest,
 			[]byte("{}"),
 			"",
 		},
 		{
 			"%%",
-			userTest.Username,
-			userTest.Email,
-			"secret",
-			userTest.ID,
+			usernameTest,
+			emailTest,
+			secretTest,
+			idTest,
 			[]byte("{}"),
 			`parse "%%": invalid URL escape "%%"`,
 		},
 		{
 			urlTest,
-			userTest.Username,
-			userTest.Email,
-			"secret",
-			userTest.ID,
+			usernameTest,
+			emailTest,
+			secretTest,
+			idTest,
 			[]byte(""),
 			"unexpected end of JSON input",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			_, err := petitionGenerateToken(
+			_, err := service.PetitionGenerateToken(
 				mock,
 				tt.inURL,
 				tokenapp.GenerateTokenRequest{
@@ -406,22 +407,22 @@ func TestPetitionExtractToken(t *testing.T) {
 		inResp                   []byte
 		outErr                   string
 	}{
-		{urlTest, tokenTest, "secret", []byte("{}"), ""},
-		{"%%", tokenTest, "secret", []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-		{urlTest, tokenTest, "secret", []byte(""), "unexpected end of JSON input"},
-		{urlTest, tokenTest, "secret", []byte(`{"err":"error"}`), "error"},
+		{urlTest, tokenTest, secretTest, []byte("{}"), ""},
+		{"%%", tokenTest, secretTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
+		{urlTest, tokenTest, secretTest, []byte(""), "unexpected end of JSON input"},
+		{urlTest, tokenTest, secretTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			_, _, _, err := petitionExtractToken(
+			_, _, _, err := service.PetitionExtractToken(
 				mock,
 				tt.inURL,
 				tokenapp.ExtractTokenRequest{
@@ -449,17 +450,17 @@ func TestPetitionSetToken(t *testing.T) {
 		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			err := petitionSetToken(mock, tt.inURL, tokenapp.SetTokenRequest{Token: tt.inToken})
+			err := service.PetitionSetToken(mock, tt.inURL, tokenapp.SetTokenRequest{Token: tt.inToken})
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -480,17 +481,17 @@ func TestPetitionDeleteToken(t *testing.T) {
 		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			err := petitionDeleteToken(
+			err := service.PetitionDeleteToken(
 				mock,
 				tt.inURL,
 				tokenapp.DeleteTokenRequest{
@@ -517,17 +518,17 @@ func TestPetitionCheckToken(t *testing.T) {
 		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
 		// {urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			var resultErr string
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			_, err := petitionCheckToken(
+			_, err := service.PetitionCheckToken(
 				mock,
 				tt.inURL,
 				tokenapp.CheckTokenRequest{

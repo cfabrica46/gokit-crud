@@ -202,7 +202,7 @@ func TestKeyFunc(t *testing.T) {
 
 			kf := keyFunc(tt.inSecret)
 
-			//generateToken
+			// generateToken
 			token := jwt.NewWithClaims(jwt.SigningMethodPS256, jwt.MapClaims{
 				"id":       1,
 				"username": "cesar",

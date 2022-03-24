@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/cfabrica46/gokit-crud/app/service"
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,29 +18,29 @@ import (
 func TestSignUpEndpoint(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		in     SignUpRequest
+		in     service.SignUpRequest
 		outErr string
 	}{
 		{
-			SignUpRequest{
-				Username: userTest.Username,
-				Password: userTest.Password,
-				Email:    userTest.Email,
+			service.SignUpRequest{
+				Username: usernameTest,
+				Password: passwordTest,
+				Email:    emailTest,
 			},
 			"",
 		},
 		{
-			SignUpRequest{},
+			service.SignUpRequest{},
 			errWebServer.Error(),
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				ID    int    `json:"id"`
 				Token string `json:tokenTest`
 				Err   string `json:"err"`
 			}{
-				ID:    1,
+				ID:    idTest,
 				Token: tokenTest,
 				Err:   tt.outErr,
 			}
@@ -49,27 +50,28 @@ func TestSignUpEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
 				}, nil
 			})
 
-			// if true {
-			// 	return
-			// } else {
-			// 	return
-			// }
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
-
-			r, err := MakeSignUpEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeSignUpEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(SignUpResponse)
+			result, ok := r.(service.SignUpResponse)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -82,23 +84,23 @@ func TestSignUpEndpoint(t *testing.T) {
 func TestSignInEndpoint(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		in     SignInRequest
+		in     service.SignInRequest
 		outErr string
 	}{
-		{SignInRequest{Username: userTest.Username, Password: userTest.Password}, ""},
-		{SignInRequest{}, errWebServer.Error()},
+		{service.SignInRequest{Username: usernameTest, Password: passwordTest}, ""},
+		{service.SignInRequest{}, errWebServer.Error()},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				User  dbapp.User
 				Token string `json:tokenTest`
 				Err   string `json:"err"`
 			}{
 				User: dbapp.User{
-					ID:       1,
-					Username: userTest.Username,
-					Password: userTest.Password,
-					Email:    userTest.Email,
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
 				},
 				Token: tokenTest,
 				Err:   tt.outErr,
@@ -109,21 +111,28 @@ func TestSignInEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
 				}, nil
 			})
 
-			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-			r, err := MakeSignInEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeSignInEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(SignInResponse)
+			result, ok := r.(service.SignInResponse)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -136,13 +145,13 @@ func TestSignInEndpoint(t *testing.T) {
 func TestLogOutEndpoint(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		in     LogOutRequest
+		in     service.LogOutRequest
 		outErr string
 	}{
-		{LogOutRequest{Token: tokenTest}, ""},
-		{LogOutRequest{}, errWebServer.Error()},
+		{service.LogOutRequest{Token: tokenTest}, ""},
+		{service.LogOutRequest{}, errWebServer.Error()},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				Check bool   `json:"check"`
 				Err   string `json:"err"`
@@ -156,21 +165,28 @@ func TestLogOutEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
 				}, nil
 			})
 
-			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-			r, err := MakeLogOutEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeLogOutEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(LogOutResponse)
+			result, ok := r.(service.LogOutResponse)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -183,22 +199,22 @@ func TestLogOutEndpoint(t *testing.T) {
 func TestGetAllUsersEndpoint(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		in     GetAllUsersRequest
+		in     service.GetAllUsersRequest
 		outErr string
 	}{
-		{GetAllUsersRequest{}, ""},
-		{GetAllUsersRequest{}, errWebServer.Error()},
+		{service.GetAllUsersRequest{}, ""},
+		{service.GetAllUsersRequest{}, errWebServer.Error()},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				User []dbapp.User `json:"user"`
 				Err  string       `json:"err"`
 			}{
 				User: []dbapp.User{{
-					ID:       1,
-					Username: userTest.Username,
-					Password: userTest.Password,
-					Email:    userTest.Email,
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
 				}},
 				Err: tt.outErr,
 			}
@@ -208,21 +224,28 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
 				}, nil
 			})
 
-			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(GetAllUsersResponse)
+			result, ok := r.(service.GetAllUsersResponse)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -235,13 +258,13 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 func TestProfileEndpoint(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		in     ProfileRequest
+		in     service.ProfileRequest
 		outErr string
 	}{
-		{ProfileRequest{}, ""},
-		{ProfileRequest{}, errWebServer.Error()},
+		{service.ProfileRequest{}, ""},
+		{service.ProfileRequest{}, errWebServer.Error()},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				User     dbapp.User `json:"user"`
 				ID       int        `json:"id"`
@@ -251,14 +274,14 @@ func TestProfileEndpoint(t *testing.T) {
 				Err      string     `json:"err"`
 			}{
 				User: dbapp.User{
-					ID:       1,
-					Username: userTest.Username,
-					Password: userTest.Password,
-					Email:    userTest.Email,
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
 				},
-				ID:       1,
-				Username: userTest.Username,
-				Email:    userTest.Email,
+				ID:       idTest,
+				Username: usernameTest,
+				Email:    emailTest,
 				Check:    true,
 				Err:      tt.outErr,
 			}
@@ -268,21 +291,28 @@ func TestProfileEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
 				}, nil
 			})
 
-			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-			r, err := MakeProfileEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeProfileEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(ProfileResponse)
+			result, ok := r.(service.ProfileResponse)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -295,13 +325,13 @@ func TestProfileEndpoint(t *testing.T) {
 func TestDeleteAccountEndpoint(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 	for i, tt := range []struct {
-		in     DeleteAccountRequest
+		in     service.DeleteAccountRequest
 		outErr string
 	}{
-		{DeleteAccountRequest{}, ""},
-		{DeleteAccountRequest{}, errWebServer.Error()},
+		{service.DeleteAccountRequest{}, ""},
+		{service.DeleteAccountRequest{}, errWebServer.Error()},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
 			testResp := struct {
 				ID       int    `json:"id"`
 				Username string `json:"username"`
@@ -309,9 +339,9 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				Check    bool   `json:"check"`
 				Err      string `json:"err"`
 			}{
-				ID:       1,
-				Username: userTest.Username,
-				Email:    userTest.Email,
+				ID:       idTest,
+				Username: usernameTest,
+				Email:    emailTest,
 				Check:    true,
 				Err:      tt.outErr,
 			}
@@ -321,21 +351,28 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			mock := newMockClient(func(req *http.Request) (*http.Response, error) {
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: 200,
+					StatusCode: http.StatusOK,
 					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
 				}, nil
 			})
 
-			svc := NewService(mock, "localhost", "8080", "localhost", "8080", "secret")
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-			r, err := MakeDeleteAccountEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeDeleteAccountEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(DeleteAccountResponse)
+			result, ok := r.(service.DeleteAccountResponse)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}

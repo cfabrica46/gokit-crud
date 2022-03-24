@@ -17,17 +17,17 @@ type serviceInterface interface {
 	CheckToken(string) (bool, error)
 }
 
-//Service ...
+// Service ...
 type Service struct {
 	db *redis.Client
 }
 
-//GetService ...
+// GetService ...
 func GetService(db *redis.Client) *Service {
 	return &Service{db}
 }
 
-//GenerateToken ...
+// GenerateToken ...
 func (Service) GenerateToken(id int, username, email string, secret []byte) (token string) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       id,
@@ -40,7 +40,7 @@ func (Service) GenerateToken(id int, username, email string, secret []byte) (tok
 	return
 }
 
-//ExtractToken ...
+// ExtractToken ...
 func (s Service) ExtractToken(token string, secret []byte) (id int, username, email string, err error) {
 	t, err := jwt.Parse(token, keyFunc(secret))
 	if err != nil {
@@ -55,7 +55,7 @@ func (s Service) ExtractToken(token string, secret []byte) (id int, username, em
 	return
 }
 
-//SetToken ...
+// SetToken ...
 func (s *Service) SetToken(token string) (err error) {
 	err = s.db.Set(token, true, time.Minute*10).Err()
 	if err != nil {
@@ -64,12 +64,12 @@ func (s *Service) SetToken(token string) (err error) {
 	return
 }
 
-//DeleteToken ...
+// DeleteToken ...
 func (s *Service) DeleteToken(token string) error {
 	return s.db.Del(token).Err()
 }
 
-//CheckToken ...
+// CheckToken ...
 func (s Service) CheckToken(token string) (check bool, err error) {
 	result, err := s.db.Get(token).Result()
 	if err != nil {

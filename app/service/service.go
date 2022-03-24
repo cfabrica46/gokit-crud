@@ -9,7 +9,9 @@ import (
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 )
 
-var errTokenNotValid = errors.New("token not validate")
+const schemaURL = "http://%s:%s"
+
+var ErrTokenNotValid = errors.New("token not validate")
 
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
@@ -37,10 +39,10 @@ func NewService(client httpClient, dbHost, dbPort, tokenHost, tokenPort, secret 
 
 // SignUp ...
 func (s Service) SignUp(username, password, email string) (token string, err error) {
-	dbURL := fmt.Sprintf("http://%s:%s", s.dbHost, s.dbPort)
-	tokenURL := fmt.Sprintf("http://%s:%s", s.tokenHost, s.tokenPort)
+	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
+	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
-	err = petitionInsertUser(
+	err = PetitionInsertUser(
 		s.client,
 		dbURL+"/user",
 		dbapp.InsertUserRequest{
@@ -53,7 +55,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 		return
 	}
 
-	id, err := petitionGetIDByUsername(
+	id, err := PetitionGetIDByUsername(
 		s.client,
 		dbURL+"/id/username",
 		dbapp.GetIDByUsernameRequest{
@@ -64,7 +66,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 		return
 	}
 
-	token, err = petitionGenerateToken(s.client,
+	token, err = PetitionGenerateToken(s.client,
 		tokenURL+"/generate",
 		tokenapp.GenerateTokenRequest{
 			ID:       id,
@@ -77,7 +79,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 		return
 	}
 
-	err = petitionSetToken(
+	err = PetitionSetToken(
 		s.client,
 		tokenURL+"/token",
 		tokenapp.SetTokenRequest{
@@ -87,15 +89,15 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 	if err != nil {
 		return
 	}
-	return
+	return token, err
 }
 
 // SignIn ...
 func (s Service) SignIn(username, password string) (token string, err error) {
-	dbURL := fmt.Sprintf("http://%s:%s", s.dbHost, s.dbPort)
-	tokenURL := fmt.Sprintf("http://%s:%s", s.tokenHost, s.tokenPort)
+	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
+	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
-	user, err := petitionGetUserByUsernameAndPassword(
+	user, err := PetitionGetUserByUsernameAndPassword(
 		s.client,
 		dbURL+"/user/username_password",
 		dbapp.GetUserByUsernameAndPasswordRequest{
@@ -107,7 +109,7 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 		return
 	}
 
-	token, err = petitionGenerateToken(
+	token, err = PetitionGenerateToken(
 		s.client,
 		tokenURL+"/generate",
 		tokenapp.GenerateTokenRequest{
@@ -121,7 +123,7 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 		return
 	}
 
-	err = petitionSetToken(
+	err = PetitionSetToken(
 		s.client,
 		tokenURL+"/token",
 		tokenapp.SetTokenRequest{
@@ -131,14 +133,14 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 	if err != nil {
 		return
 	}
-	return
+	return token, err
 }
 
 // LogOut ...
 func (s Service) LogOut(token string) (err error) {
-	tokenURL := fmt.Sprintf("http://%s:%s", s.tokenHost, s.tokenPort)
+	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
-	check, err := petitionCheckToken(
+	check, err := PetitionCheckToken(
 		s.client,
 		tokenURL+"/check",
 		tokenapp.CheckTokenRequest{
@@ -149,11 +151,11 @@ func (s Service) LogOut(token string) (err error) {
 		return
 	}
 	if !check {
-		err = errTokenNotValid
+		err = ErrTokenNotValid
 		return
 	}
 
-	err = petitionDeleteToken(
+	err = PetitionDeleteToken(
 		s.client,
 		tokenURL+"/token",
 		tokenapp.DeleteTokenRequest{
@@ -168,9 +170,9 @@ func (s Service) LogOut(token string) (err error) {
 
 // GetAllUsers  ...
 func (s Service) GetAllUsers() (users []dbapp.User, err error) {
-	dbURL := fmt.Sprintf("http://%s:%s", s.dbHost, s.dbPort)
+	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
 
-	users, err = petitionGetAllUsers(s.client, dbURL+"/users")
+	users, err = PetitionGetAllUsers(s.client, dbURL+"/users")
 	if err != nil {
 		return
 	}
@@ -179,10 +181,10 @@ func (s Service) GetAllUsers() (users []dbapp.User, err error) {
 
 // Profile  ...
 func (s Service) Profile(token string) (user dbapp.User, err error) {
-	dbURL := fmt.Sprintf("http://%s:%s", s.dbHost, s.dbPort)
-	tokenURL := fmt.Sprintf("http://%s:%s", s.tokenHost, s.tokenPort)
+	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
+	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
-	check, err := petitionCheckToken(
+	check, err := PetitionCheckToken(
 		s.client,
 		tokenURL+"/check",
 		tokenapp.CheckTokenRequest{
@@ -193,11 +195,11 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 		return
 	}
 	if !check {
-		err = errTokenNotValid
+		err = ErrTokenNotValid
 		return
 	}
 
-	id, _, _, err := petitionExtractToken(
+	id, _, _, err := PetitionExtractToken(
 		s.client,
 		tokenURL+"/extract",
 		tokenapp.ExtractTokenRequest{
@@ -209,7 +211,7 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 		return
 	}
 
-	user, err = petitionGetUserByID(
+	user, err = PetitionGetUserByID(
 		s.client,
 		dbURL+"/user/id",
 		dbapp.GetUserByIDRequest{
@@ -219,15 +221,15 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 	if err != nil {
 		return
 	}
-	return
+	return user, err
 }
 
 // DeleteAccount  ...
 func (s Service) DeleteAccount(token string) (err error) {
-	dbURL := fmt.Sprintf("http://%s:%s", s.dbHost, s.dbPort)
-	tokenURL := fmt.Sprintf("http://%s:%s", s.tokenHost, s.tokenPort)
+	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
+	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
-	check, err := petitionCheckToken(
+	check, err := PetitionCheckToken(
 		s.client,
 		tokenURL+"/check",
 		tokenapp.CheckTokenRequest{
@@ -238,11 +240,11 @@ func (s Service) DeleteAccount(token string) (err error) {
 		return
 	}
 	if !check {
-		err = errTokenNotValid
+		err = ErrTokenNotValid
 		return
 	}
 
-	id, _, _, err := petitionExtractToken(s.client,
+	id, _, _, err := PetitionExtractToken(s.client,
 		tokenURL+"/extract",
 		tokenapp.ExtractTokenRequest{
 			Token:  token,
@@ -253,9 +255,9 @@ func (s Service) DeleteAccount(token string) (err error) {
 		return
 	}
 
-	err = petitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: id})
+	err = PetitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: id})
 	if err != nil {
 		return
 	}
-	return
+	return err
 }

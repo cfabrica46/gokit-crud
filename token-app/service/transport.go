@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-//DecodeGenerateTokenRequest ...
+// DecodeGenerateTokenRequest ...
 func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GenerateTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -15,7 +15,7 @@ func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}
 	return request, nil
 }
 
-//DecodeExtractTokenRequest ...
+// DecodeExtractTokenRequest ...
 func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request ExtractTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -24,7 +24,7 @@ func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{},
 	return request, nil
 }
 
-//DecodeSetTokenRequest ...
+// DecodeSetTokenRequest ...
 func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request SetTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -33,7 +33,7 @@ func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, err
 	return request, nil
 }
 
-//DecodeDeleteTokenRequest ...
+// DecodeDeleteTokenRequest ...
 func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request DeleteTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -42,7 +42,7 @@ func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 	return request, nil
 }
 
-//DecodeCheckTokenRequest ...
+// DecodeCheckTokenRequest ...
 func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request CheckTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -51,7 +51,7 @@ func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, e
 	return request, nil
 }
 
-//EncodeResponse ...
+// EncodeResponse ...
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	return json.NewEncoder(w).Encode(response)
 }
