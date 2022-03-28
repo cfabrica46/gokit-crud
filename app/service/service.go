@@ -55,7 +55,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 		return
 	}
 
-	id, err := PetitionGetIDByUsername(
+	userID, err := PetitionGetIDByUsername(
 		s.client,
 		dbURL+"/id/username",
 		dbapp.GetIDByUsernameRequest{
@@ -69,7 +69,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 	token, err = PetitionGenerateToken(s.client,
 		tokenURL+"/generate",
 		tokenapp.GenerateTokenRequest{
-			ID:       id,
+			ID:       userID,
 			Username: username,
 			Email:    email,
 			Secret:   s.secret,
@@ -152,6 +152,7 @@ func (s Service) LogOut(token string) (err error) {
 	if err != nil {
 		return
 	}
+
 	if !check {
 		err = ErrTokenNotValid
 
@@ -199,13 +200,14 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 	if err != nil {
 		return
 	}
+
 	if !check {
 		err = ErrTokenNotValid
 
 		return
 	}
 
-	id, _, _, err := PetitionExtractToken(
+	userID, _, _, err := PetitionExtractToken(
 		s.client,
 		tokenURL+"/extract",
 		tokenapp.ExtractTokenRequest{
@@ -221,7 +223,7 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 		s.client,
 		dbURL+"/user/id",
 		dbapp.GetUserByIDRequest{
-			ID: id,
+			ID: userID,
 		},
 	)
 	if err != nil {
@@ -246,13 +248,14 @@ func (s Service) DeleteAccount(token string) (err error) {
 	if err != nil {
 		return
 	}
+
 	if !check {
 		err = ErrTokenNotValid
 
 		return
 	}
 
-	id, _, _, err := PetitionExtractToken(s.client,
+	userID, _, _, err := PetitionExtractToken(s.client,
 		tokenURL+"/extract",
 		tokenapp.ExtractTokenRequest{
 			Token:  token,
@@ -263,7 +266,7 @@ func (s Service) DeleteAccount(token string) (err error) {
 		return
 	}
 
-	err = PetitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: id})
+	err = PetitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: userID})
 	if err != nil {
 		return
 	}

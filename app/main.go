@@ -13,6 +13,7 @@ import (
 
 func main() {
 	log.SetFlags(log.Lshortfile)
+
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println(".env loaded")
 	}
@@ -66,14 +67,14 @@ func runServer(port, dbHost, dbPort, tokenHost, tokenPort, secret string) {
 		service.EncodeResponse,
 	)
 
-	r := mux.NewRouter()
-	r.Methods(http.MethodPost).Path("/signup").Handler(getSignUpHandler)
-	r.Methods(http.MethodPost).Path("/signin").Handler(getSignInHandler)
-	r.Methods(http.MethodPost).Path("/logout").Handler(getLogOutHandler)
-	r.Methods(http.MethodGet).Path("/users").Handler(getAllUsersHandler)
-	r.Methods(http.MethodPost).Path("/profile").Handler(getProfileHandler)
-	r.Methods(http.MethodDelete).Path("/profile").Handler(getDeleteAccountHandler)
+	router := mux.NewRouter()
+	router.Methods(http.MethodPost).Path("/signup").Handler(getSignUpHandler)
+	router.Methods(http.MethodPost).Path("/signin").Handler(getSignInHandler)
+	router.Methods(http.MethodPost).Path("/logout").Handler(getLogOutHandler)
+	router.Methods(http.MethodGet).Path("/users").Handler(getAllUsersHandler)
+	router.Methods(http.MethodPost).Path("/profile").Handler(getProfileHandler)
+	router.Methods(http.MethodDelete).Path("/profile").Handler(getDeleteAccountHandler)
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

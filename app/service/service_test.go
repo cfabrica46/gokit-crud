@@ -38,8 +38,7 @@ var (
 )
 
 func TestSignUp(t *testing.T) {
-	log.SetFlags(log.Lshortfile)
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inUsername, inPassword, inEmail string
 		isError                         bool
 		url                             string
@@ -86,11 +85,11 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodPost,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
-			var resultToken, resultErr string
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			var resultableoken, resultErr string
 			var tokenResponse, errorResponse string
 
-			if tt.isError {
+			if table.isError {
 				errorResponse = errWebServer.Error()
 			} else {
 				tokenResponse = tokenTest
@@ -114,11 +113,11 @@ func TestSignUp(t *testing.T) {
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
+				if req.URL.String() == table.url {
+					if req.Method == table.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+							Body:       io.NopCloser(bytes.NewReader(jsonData)),
 						}
 					}
 				}
@@ -135,20 +134,19 @@ func TestSignUp(t *testing.T) {
 				secretTest,
 			)
 
-			resultToken, err = svc.SignUp(tt.inUsername, tt.inPassword, tt.inEmail)
+			resultableoken, err = svc.SignUp(table.inUsername, table.inPassword, table.inEmail)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			assert.Equal(t, errorResponse, resultErr)
-			assert.Equal(t, tokenResponse, resultToken)
+			assert.Equal(t, tokenResponse, resultableoken)
 		})
 	}
 }
 
 func TestSignIn(t *testing.T) {
-	log.SetFlags(log.Lshortfile)
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inUsername, inPassword string
 		isError                bool
 		url                    string
@@ -183,11 +181,11 @@ func TestSignIn(t *testing.T) {
 			method:     http.MethodPost,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
-			var resultToken, resultErr string
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			var resultableoken, resultErr string
 			var tokenResponse, errorResponse string
 
-			if tt.isError {
+			if table.isError {
 				errorResponse = errWebServer.Error()
 			} else {
 				tokenResponse = tokenTest
@@ -216,11 +214,11 @@ func TestSignIn(t *testing.T) {
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
+				if req.URL.String() == table.url {
+					if req.Method == table.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+							Body:       io.NopCloser(bytes.NewReader(jsonData)),
 						}
 					}
 				}
@@ -237,20 +235,19 @@ func TestSignIn(t *testing.T) {
 				secretTest,
 			)
 
-			resultToken, err = svc.SignIn(tt.inUsername, tt.inPassword)
+			resultableoken, err = svc.SignIn(table.inUsername, table.inPassword)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			assert.Equal(t, errorResponse, resultErr)
-			assert.Equal(t, tokenResponse, resultToken)
+			assert.Equal(t, tokenResponse, resultableoken)
 		})
 	}
 }
 
 func TestLogOut(t *testing.T) {
-	log.SetFlags(log.Lshortfile)
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inToken  string
 		outCheck bool
 
@@ -287,11 +284,11 @@ func TestLogOut(t *testing.T) {
 			http.MethodDelete,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 			var errorMessage string
 
-			if tt.isError {
+			if table.isError {
 				errorMessage = errWebServer.Error()
 			}
 
@@ -299,11 +296,11 @@ func TestLogOut(t *testing.T) {
 				Check bool   `json:"check"`
 				Err   string `json:"err"`
 			}{
-				Check: tt.outCheck,
+				Check: table.outCheck,
 				Err:   errorMessage,
 			}
 
-			if !tt.outCheck {
+			if !table.outCheck {
 				testResp.Err = ""
 				errorMessage = service.ErrTokenNotValid.Error()
 			}
@@ -317,7 +314,7 @@ func TestLogOut(t *testing.T) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
-					Check: tt.outCheck,
+					Check: table.outCheck,
 				}
 
 				jsonCheck, err := json.Marshal(testCheck)
@@ -327,11 +324,11 @@ func TestLogOut(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
+				if req.URL.String() == table.url {
+					if req.Method == table.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+							Body:       io.NopCloser(bytes.NewReader(jsonData)),
 						}
 					}
 				}
@@ -348,7 +345,7 @@ func TestLogOut(t *testing.T) {
 				secretTest,
 			)
 
-			err = svc.LogOut(tt.inToken)
+			err = svc.LogOut(table.inToken)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -361,7 +358,7 @@ func TestLogOut(t *testing.T) {
 func TestGetAllUsers(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inUsers []dbapp.User
 		outErr  string
 	}{
@@ -378,7 +375,7 @@ func TestGetAllUsers(t *testing.T) {
 		},
 		{nil, errWebServer.Error()},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			testResp := struct {
@@ -391,7 +388,7 @@ func TestGetAllUsers(t *testing.T) {
 					Password: passwordTest,
 					Email:    emailTest,
 				}},
-				Err: tt.outErr,
+				Err: table.outErr,
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -402,7 +399,7 @@ func TestGetAllUsers(t *testing.T) {
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader([]byte(jsonData))),
+					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
 				}, nil
 			})
 
@@ -420,14 +417,13 @@ func TestGetAllUsers(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestProfile(t *testing.T) {
-	log.SetFlags(log.Lshortfile)
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inToken  string
 		outCheck bool
 
@@ -441,11 +437,11 @@ func TestProfile(t *testing.T) {
 		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
 		{tokenTest, true, true, "http://db:8080/user/id", http.MethodGet},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 			var errorMessage string
 
-			if tt.isError {
+			if table.isError {
 				errorMessage = errWebServer.Error()
 			}
 
@@ -466,11 +462,11 @@ func TestProfile(t *testing.T) {
 				ID:       idTest,
 				Username: usernameTest,
 				Email:    emailTest,
-				Check:    tt.outCheck,
+				Check:    table.outCheck,
 				Err:      errorMessage,
 			}
 
-			if !tt.outCheck {
+			if !table.outCheck {
 				testResp.Err = ""
 				errorMessage = service.ErrTokenNotValid.Error()
 			}
@@ -484,7 +480,7 @@ func TestProfile(t *testing.T) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
-					Check: tt.outCheck,
+					Check: table.outCheck,
 				}
 
 				jsonCheck, err := json.Marshal(testCheck)
@@ -494,11 +490,11 @@ func TestProfile(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
+				if req.URL.String() == table.url {
+					if req.Method == table.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+							Body:       io.NopCloser(bytes.NewReader((jsonData))),
 						}
 					}
 				}
@@ -515,7 +511,7 @@ func TestProfile(t *testing.T) {
 				secretTest,
 			)
 
-			_, err = svc.Profile(tt.inToken)
+			_, err = svc.Profile(table.inToken)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -526,8 +522,7 @@ func TestProfile(t *testing.T) {
 }
 
 func TestDeleteAccount(t *testing.T) {
-	log.SetFlags(log.Lshortfile)
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inToken  string
 		outCheck bool
 
@@ -541,11 +536,11 @@ func TestDeleteAccount(t *testing.T) {
 		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
 		{tokenTest, true, true, "http://db:8080/user", http.MethodDelete},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 			var errorMessage string
 
-			if tt.isError {
+			if table.isError {
 				errorMessage = errWebServer.Error()
 			}
 
@@ -566,11 +561,11 @@ func TestDeleteAccount(t *testing.T) {
 				ID:       idTest,
 				Username: usernameTest,
 				Email:    emailTest,
-				Check:    tt.outCheck,
+				Check:    table.outCheck,
 				Err:      errorMessage,
 			}
 
-			if !tt.outCheck {
+			if !table.outCheck {
 				testResp.Err = ""
 				errorMessage = service.ErrTokenNotValid.Error()
 			}
@@ -584,7 +579,7 @@ func TestDeleteAccount(t *testing.T) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
-					Check: tt.outCheck,
+					Check: table.outCheck,
 				}
 
 				jsonCheck, err := json.Marshal(testCheck)
@@ -594,11 +589,11 @@ func TestDeleteAccount(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
+				if req.URL.String() == table.url {
+					if req.Method == table.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader([]byte(jsonData))),
+							Body:       io.NopCloser(bytes.NewReader(jsonData)),
 						}
 					}
 				}
@@ -615,7 +610,7 @@ func TestDeleteAccount(t *testing.T) {
 				secretTest,
 			)
 
-			err = svc.DeleteAccount(tt.inToken)
+			err = svc.DeleteAccount(table.inToken)
 			if err != nil {
 				resultErr = err.Error()
 			}

@@ -14,7 +14,7 @@ import (
 )
 
 func TestMakePetition(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inMethod string
 		inBody          interface{}
 		out             []byte
@@ -49,35 +49,35 @@ func TestMakePetition(t *testing.T) {
 			errWebServer.Error(),
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.out)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.out)),
 				}, nil
 			})
 
-			if tt.outErr == errWebServer.Error() {
+			if table.outErr == errWebServer.Error() {
 				mock = service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 					return nil, errWebServer
 				})
 			}
 
-			result, err := service.MakePetition(mock, tt.inURL, tt.inMethod, tt.inBody)
+			result, err := service.MakePetition(mock, table.inURL, table.inMethod, table.inBody)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
-			assert.Equal(t, tt.out, result)
+			assert.Equal(t, table.outErr, resultErr)
+			assert.Equal(t, table.out, result)
 		})
 	}
 }
 
 func TestPetitionGetAllUsers(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL  string
 		inResp []byte
 		outErr string
@@ -87,28 +87,28 @@ func TestPetitionGetAllUsers(t *testing.T) {
 		{urlTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
-			_, err := service.PetitionGetAllUsers(mock, tt.inURL)
+			_, err := service.PetitionGetAllUsers(mock, table.inURL)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionGetIDByUsername(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inUsername string
 		inResp            []byte
 		outErr            string
@@ -118,34 +118,34 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 		{urlTest, usernameTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, usernameTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			_, err := service.PetitionGetIDByUsername(
 				mock,
-				tt.inURL,
+				table.inURL,
 				dbapp.GetIDByUsernameRequest{
-					Username: tt.inUsername,
+					Username: table.inUsername,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionGetUserByID(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL  string
 		inID   int
 		inResp []byte
@@ -156,34 +156,34 @@ func TestPetitionGetUserByID(t *testing.T) {
 		{urlTest, idTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, idTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			_, err := service.PetitionGetUserByID(
 				mock,
-				tt.inURL,
+				table.inURL,
 				dbapp.GetUserByIDRequest{
-					ID: tt.inID,
+					ID: table.inID,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inUsername, inPassword string
 		inResp                        []byte
 		outErr                        string
@@ -217,35 +217,35 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			"error",
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			_, err := service.PetitionGetUserByUsernameAndPassword(
 				mock,
-				tt.inURL,
+				table.inURL,
 				dbapp.GetUserByUsernameAndPasswordRequest{
-					Username: tt.inUsername,
-					Password: tt.inPassword,
+					Username: table.inUsername,
+					Password: table.inPassword,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionInsertUser(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inUsername, inPassword, inEmail string
 		inResp                                 []byte
 		outErr                                 string
@@ -283,36 +283,36 @@ func TestPetitionInsertUser(t *testing.T) {
 			"error",
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			err := service.PetitionInsertUser(
 				mock,
-				tt.inURL,
+				table.inURL,
 				dbapp.InsertUserRequest{
-					Username: tt.inUsername,
-					Password: tt.inPassword,
-					Email:    tt.inEmail,
+					Username: table.inUsername,
+					Password: table.inPassword,
+					Email:    table.inEmail,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionDeleteUser(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL  string
 		inID   int
 		inResp []byte
@@ -323,28 +323,34 @@ func TestPetitionDeleteUser(t *testing.T) {
 		{urlTest, idTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, idTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
-			err := service.PetitionDeleteUser(mock, tt.inURL, dbapp.DeleteUserRequest{ID: tt.inID})
+			err := service.PetitionDeleteUser(
+				mock,
+				table.inURL,
+				dbapp.DeleteUserRequest{
+					ID: table.inID,
+				},
+			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionGenerateToken(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inUsername, inEmail, inSecret string
 		inID                                 int
 		inResp                               []byte
@@ -378,37 +384,37 @@ func TestPetitionGenerateToken(t *testing.T) {
 			"unexpected end of JSON input",
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			_, err := service.PetitionGenerateToken(
 				mock,
-				tt.inURL,
+				table.inURL,
 				tokenapp.GenerateTokenRequest{
-					ID:       tt.inID,
-					Username: tt.inUsername,
-					Email:    tt.inEmail,
-					Secret:   tt.inSecret,
+					ID:       table.inID,
+					Username: table.inUsername,
+					Email:    table.inEmail,
+					Secret:   table.inSecret,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionExtractToken(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inToken, inSecret string
 		inResp                   []byte
 		outErr                   string
@@ -418,35 +424,35 @@ func TestPetitionExtractToken(t *testing.T) {
 		{urlTest, tokenTest, secretTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, tokenTest, secretTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			_, _, _, err := service.PetitionExtractToken(
 				mock,
-				tt.inURL,
+				table.inURL,
 				tokenapp.ExtractTokenRequest{
-					Token:  tt.inToken,
-					Secret: tt.inSecret,
+					Token:  table.inToken,
+					Secret: table.inSecret,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionSetAndDeleteToken(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inToken string
 		inResp         []byte
 		outErr         string
@@ -456,58 +462,34 @@ func TestPetitionSetAndDeleteToken(t *testing.T) {
 		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			err := service.PetitionSetToken(
 				mock,
-				tt.inURL,
+				table.inURL,
 				tokenapp.SetTokenRequest{
-					Token: tt.inToken,
+					Token: table.inToken,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
-
-		// t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
-		// 	var resultErr string
-
-		// 	mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-		// 		return &http.Response{
-		// 			StatusCode: http.StatusOK,
-		// 			Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
-		// 		}, nil
-		// 	})
-
-		// 	err := service.PetitionDeleteToken(
-		// 		mock,
-		// 		tt.inURL,
-		// 		tokenapp.DeleteTokenRequest{
-		// 			Token: tt.inToken,
-		// 		},
-		// 	)
-		// 	if err != nil {
-		// 		resultErr = err.Error()
-		// 	}
-
-		// 	assert.Equal(t, tt.outErr, resultErr)
-		// })
 	}
 }
 
 func TestPetitionDeleteToken(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inToken string
 		inResp         []byte
 		outErr         string
@@ -517,34 +499,34 @@ func TestPetitionDeleteToken(t *testing.T) {
 		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
 		{urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			err := service.PetitionDeleteToken(
 				mock,
-				tt.inURL,
+				table.inURL,
 				tokenapp.DeleteTokenRequest{
-					Token: tt.inToken,
+					Token: table.inToken,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
 
 func TestPetitionCheckToken(t *testing.T) {
-	for i, tt := range []struct {
+	for index, table := range []struct {
 		inURL, inToken string
 		inResp         []byte
 		outErr         string
@@ -554,28 +536,28 @@ func TestPetitionCheckToken(t *testing.T) {
 		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
 		// {urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, i), func(t *testing.T) {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
 				}, nil
 			})
 
 			_, err := service.PetitionCheckToken(
 				mock,
-				tt.inURL,
+				table.inURL,
 				tokenapp.CheckTokenRequest{
-					Token: tt.inToken,
+					Token: table.inToken,
 				},
 			)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, table.outErr, resultErr)
 		})
 	}
 }
