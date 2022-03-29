@@ -14,7 +14,7 @@ import (
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 )
 
-var errPrefix = errors.New("error")
+var ErrPrefix = errors.New("error")
 
 func MakePetition(client httpClient, url, httpMethod string, bodyStruct ...interface{},
 ) (dataResp []byte, err error) {
@@ -61,7 +61,7 @@ func PetitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err 
 
 	if response.Err != "" {
 		// err = errors.New(response.Err)
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 		// fmt.Println(err.Error())
 
 		return
@@ -92,7 +92,7 @@ func PetitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRe
 
 	if response.Err != "" {
 		// err = errors.New(response.Err)
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}
@@ -120,7 +120,7 @@ func PetitionGetUserByUsernameAndPassword(client httpClient, url string,
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 		// err = errors.New(response.Err)
 
 		return
@@ -146,7 +146,7 @@ func PetitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUs
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}
@@ -174,7 +174,7 @@ func PetitionInsertUser(client httpClient, url string, body dbapp.InsertUserRequ
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 		// err = errors.New(response.Err)
 
 		return
@@ -200,7 +200,7 @@ func PetitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequ
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}
@@ -227,7 +227,7 @@ func PetitionGenerateToken(client httpClient, url string, body tokenapp.Generate
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}
@@ -252,7 +252,7 @@ func PetitionExtractToken(client httpClient, url string, body tokenapp.ExtractTo
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}
@@ -278,7 +278,7 @@ func PetitionSetToken(client httpClient, url string, body tokenapp.SetTokenReque
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}
@@ -301,7 +301,7 @@ func PetitionDeleteToken(client httpClient, url string, body tokenapp.DeleteToke
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}
@@ -324,7 +324,7 @@ func PetitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenR
 	}
 
 	if response.Err != "" {
-		err = fmt.Errorf("%w: %s", errPrefix, response.Err)
+		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
 
 		return
 	}

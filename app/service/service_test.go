@@ -86,7 +86,8 @@ func TestSignUp(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-			var resultableoken, resultErr string
+			var resultToken string
+			var resultErr error
 			var tokenResponse, errorResponse string
 
 			if table.isError {
@@ -134,13 +135,14 @@ func TestSignUp(t *testing.T) {
 				secretTest,
 			)
 
-			resultableoken, err = svc.SignUp(table.inUsername, table.inPassword, table.inEmail)
-			if err != nil {
-				resultErr = err.Error()
-			}
+			resultToken, resultErr = svc.SignUp(table.inUsername, table.inPassword, table.inEmail)
 
-			assert.Equal(t, errorResponse, resultErr)
-			assert.Equal(t, tokenResponse, resultableoken)
+			if !table.isError {
+				assert.Nil(t, resultErr)
+			} else {
+				assert.ErrorContains(t, resultErr, errorResponse)
+			}
+			assert.Equal(t, tokenResponse, resultToken)
 		})
 	}
 }
@@ -182,7 +184,8 @@ func TestSignIn(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-			var resultableoken, resultErr string
+			var resultToken string
+			var resultErr error
 			var tokenResponse, errorResponse string
 
 			if table.isError {
@@ -235,13 +238,14 @@ func TestSignIn(t *testing.T) {
 				secretTest,
 			)
 
-			resultableoken, err = svc.SignIn(table.inUsername, table.inPassword)
-			if err != nil {
-				resultErr = err.Error()
-			}
+			resultToken, resultErr = svc.SignIn(table.inUsername, table.inPassword)
 
-			assert.Equal(t, errorResponse, resultErr)
-			assert.Equal(t, tokenResponse, resultableoken)
+			if !table.isError {
+				assert.Nil(t, resultErr)
+			} else {
+				assert.ErrorContains(t, resultErr, errorResponse)
+			}
+			assert.Equal(t, tokenResponse, resultToken)
 		})
 	}
 }
@@ -285,11 +289,11 @@ func TestLogOut(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-			var resultErr string
-			var errorMessage string
+			var resultErr error
+			var errorResponse string
 
 			if table.isError {
-				errorMessage = errWebServer.Error()
+				errorResponse = errWebServer.Error()
 			}
 
 			testResp := struct {
@@ -297,12 +301,12 @@ func TestLogOut(t *testing.T) {
 				Err   string `json:"err"`
 			}{
 				Check: table.outCheck,
-				Err:   errorMessage,
+				Err:   errorResponse,
 			}
 
 			if !table.outCheck {
 				testResp.Err = ""
-				errorMessage = service.ErrTokenNotValid.Error()
+				errorResponse = service.ErrTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -345,12 +349,13 @@ func TestLogOut(t *testing.T) {
 				secretTest,
 			)
 
-			err = svc.LogOut(table.inToken)
-			if err != nil {
-				resultErr = err.Error()
-			}
+			resultErr = svc.LogOut(table.inToken)
 
-			assert.Equal(t, errorMessage, resultErr)
+			if !table.isError {
+				assert.Nil(t, resultErr)
+			} else {
+				assert.ErrorContains(t, resultErr, errorResponse)
+			}
 		})
 	}
 }
@@ -359,11 +364,14 @@ func TestGetAllUsers(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 
 	for index, table := range []struct {
-		inUsers []dbapp.User
-		outErr  string
+		outUsers []dbapp.User
+
+		isError bool
+		url     string
+		method  string
 	}{
 		{
-			[]dbapp.User{
+			outUsers: []dbapp.User{
 				{
 					ID:       idTest,
 					Username: usernameTest,
@@ -371,24 +379,37 @@ func TestGetAllUsers(t *testing.T) {
 					Email:    emailTest,
 				},
 			},
-			"",
+			isError: false,
+			url:     "http://db:8080/users",
+			method:  http.MethodGet,
 		},
-		{nil, errWebServer.Error()},
+		{
+			outUsers: nil,
+			isError:  true,
+			url:      "http://db:8080/users",
+			method:   http.MethodGet,
+		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-			var resultErr string
+			var resultUsers []dbapp.User
+			var resultErr error
+			var errorResponse string
+
+			if table.isError {
+				errorResponse = errWebServer.Error()
+			}
 
 			testResp := struct {
-				User []dbapp.User `json:"user"`
-				Err  string       `json:"err"`
+				Users []dbapp.User `json:"users"`
+				Err   string       `json:"err"`
 			}{
-				User: []dbapp.User{{
+				Users: []dbapp.User{{
 					ID:       idTest,
 					Username: usernameTest,
 					Password: passwordTest,
 					Email:    emailTest,
 				}},
-				Err: table.outErr,
+				Err: errorResponse,
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -412,12 +433,15 @@ func TestGetAllUsers(t *testing.T) {
 				secretTest,
 			)
 
-			_, err = svc.GetAllUsers()
-			if err != nil {
-				resultErr = err.Error()
+			resultUsers, resultErr = svc.GetAllUsers()
+
+			if !table.isError {
+				assert.Nil(t, resultErr)
+			} else {
+				assert.ErrorContains(t, resultErr, errorResponse)
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
+			assert.Equal(t, table.outUsers, resultUsers)
 		})
 	}
 }
@@ -425,24 +449,66 @@ func TestGetAllUsers(t *testing.T) {
 func TestProfile(t *testing.T) {
 	for index, table := range []struct {
 		inToken  string
+		outUser  dbapp.User
 		outCheck bool
 
 		isError bool
 		url     string
 		method  string
 	}{
-		{tokenTest, true, false, "http://token:8080/check", http.MethodPost},
-		{tokenTest, true, true, "http://token:8080/check", http.MethodPost},
-		{tokenTest, false, true, "http://token:8080/check", http.MethodPost},
-		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
-		{tokenTest, true, true, "http://db:8080/user/id", http.MethodGet},
+		{
+			inToken: tokenTest,
+			outUser: dbapp.User{
+				ID:       idTest,
+				Username: usernameTest,
+				Password: passwordTest,
+				Email:    emailTest,
+			},
+			outCheck: true,
+			isError:  false,
+			url:      "http://db:8080/user/id",
+			method:   http.MethodGet,
+		},
+		{
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: false,
+			isError:  true,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/extract",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: true,
+			isError:  true,
+			url:      "http://db:8080/user/id",
+			method:   http.MethodGet,
+		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-			var resultErr string
-			var errorMessage string
+			var resultUser dbapp.User
+			var resultErr error
+			var errorResponse string
 
 			if table.isError {
-				errorMessage = errWebServer.Error()
+				errorResponse = errWebServer.Error()
 			}
 
 			testResp := struct {
@@ -453,22 +519,17 @@ func TestProfile(t *testing.T) {
 				Check    bool       `json:"check"`
 				Err      string     `json:"err"`
 			}{
-				User: dbapp.User{
-					ID:       idTest,
-					Username: usernameTest,
-					Password: passwordTest,
-					Email:    emailTest,
-				},
-				ID:       idTest,
-				Username: usernameTest,
-				Email:    emailTest,
+				User:     table.outUser,
+				ID:       table.outUser.ID,
+				Username: table.outUser.Username,
+				Email:    table.outUser.Email,
 				Check:    table.outCheck,
-				Err:      errorMessage,
+				Err:      errorResponse,
 			}
 
 			if !table.outCheck {
 				testResp.Err = ""
-				errorMessage = service.ErrTokenNotValid.Error()
+				errorResponse = service.ErrTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -511,12 +572,15 @@ func TestProfile(t *testing.T) {
 				secretTest,
 			)
 
-			_, err = svc.Profile(table.inToken)
-			if err != nil {
-				resultErr = err.Error()
+			resultUser, resultErr = svc.Profile(table.inToken)
+
+			if !table.isError {
+				assert.Nil(t, resultErr)
+			} else {
+				assert.ErrorContains(t, resultErr, errorResponse)
 			}
 
-			assert.Equal(t, errorMessage, resultErr)
+			assert.Equal(t, table.outUser, resultUser)
 		})
 	}
 }
@@ -537,11 +601,11 @@ func TestDeleteAccount(t *testing.T) {
 		{tokenTest, true, true, "http://db:8080/user", http.MethodDelete},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-			var resultErr string
-			var errorMessage string
+			var resultErr error
+			var errorResponse string
 
 			if table.isError {
-				errorMessage = errWebServer.Error()
+				errorResponse = errWebServer.Error()
 			}
 
 			testResp := struct {
@@ -562,12 +626,12 @@ func TestDeleteAccount(t *testing.T) {
 				Username: usernameTest,
 				Email:    emailTest,
 				Check:    table.outCheck,
-				Err:      errorMessage,
+				Err:      errorResponse,
 			}
 
 			if !table.outCheck {
 				testResp.Err = ""
-				errorMessage = service.ErrTokenNotValid.Error()
+				errorResponse = service.ErrTokenNotValid.Error()
 			}
 
 			jsonData, err := json.Marshal(testResp)
@@ -610,12 +674,13 @@ func TestDeleteAccount(t *testing.T) {
 				secretTest,
 			)
 
-			err = svc.DeleteAccount(table.inToken)
-			if err != nil {
-				resultErr = err.Error()
-			}
+			resultErr = svc.DeleteAccount(table.inToken)
 
-			assert.Equal(t, errorMessage, resultErr)
+			if !table.isError {
+				assert.Nil(t, resultErr)
+			} else {
+				assert.ErrorContains(t, resultErr, errorResponse)
+			}
 		})
 	}
 }
