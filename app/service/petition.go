@@ -16,12 +16,12 @@ import (
 
 var ErrPrefix = errors.New("error")
 
-func MakePetition(client httpClient, url, httpMethod string, bodyStruct ...interface{},
+func MakePetition(client httpClient, url, httpMethod string, bodyStruct interface{},
 ) (dataResp []byte, err error) {
 	var dataReq []byte
 
-	if len(bodyStruct) > 0 {
-		dataReq, err = json.Marshal(bodyStruct[0])
+	if bodyStruct != nil {
+		dataReq, err = json.Marshal(bodyStruct)
 		if err != nil {
 			return
 		}
@@ -49,7 +49,7 @@ func MakePetition(client httpClient, url, httpMethod string, bodyStruct ...inter
 func PetitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err error) {
 	var response dbapp.GetAllUsersResponse
 
-	dataResp, err := MakePetition(client, url, http.MethodGet)
+	dataResp, err := MakePetition(client, url, http.MethodGet, nil)
 	if err != nil {
 		return
 	}
@@ -60,9 +60,7 @@ func PetitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err 
 	}
 
 	if response.Err != "" {
-		// err = errors.New(response.Err)
 		err = fmt.Errorf("%w: %s", ErrPrefix, response.Err)
-		// fmt.Println(err.Error())
 
 		return
 	}
