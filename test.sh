@@ -22,7 +22,3 @@ curl -X POST -k http://localhost:8080/profile -H "Authorization: $token"
 #Delete
 # curl -X DELETE -k http://localhost:8080/profile -d "{'token':$(token)}" 
 # curl -X DELETE -Lk http://localhost:8080/profile -H "Authorization: $token"
-
-
-golangci-lint run ./...
-gofumpt -w .

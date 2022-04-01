@@ -1,5 +1,8 @@
 # gokit-crud
 
+## Objetive
+CRUD practice in golang using the gokit hexagonal architecture toolkit.
+
 ## Run App
 ~~~
 docker-compose up
@@ -12,22 +15,13 @@ docker-compose down --rmi all
 
 ## Run Test
 ### All Tests
-~~~
-make test
-~~~
+```make test```
 
 ### Test ./app
-~~~
-make test
-~~~
+```make test-app```
 
 ### Test ./database-app
-~~~
-make test-database
-~~~
+```make test-database```
 
 ### Test ./token-app
-~~~
-make test-token
-~~~
-~~~
+```make test-token```
