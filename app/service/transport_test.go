@@ -300,10 +300,11 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 
 func TestEncodeResponse(t *testing.T) {
 	for index, table := range []struct {
-		in     string
+		in     interface{}
 		outErr string
 	}{
 		{"test", ""},
+		{func() {}, "json: unsupported type: func()"},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr string
