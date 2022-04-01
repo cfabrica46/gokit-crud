@@ -46,7 +46,7 @@ func MakePetition(client httpClient, url, httpMethod string, bodyStruct interfac
 	return
 }
 
-func PetitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err error) {
+func PetitionGetAllUsers(client httpClient, url string) (users []dbapp.User, err error) {
 	var response dbapp.GetAllUsersResponse
 
 	dataResp, err := MakePetition(client, url, http.MethodGet, nil)
@@ -65,7 +65,7 @@ func PetitionGetAllUsers(client httpClient, url string) (user []dbapp.User, err 
 		return
 	}
 
-	user = response.Users
+	users = response.Users
 
 	return
 }

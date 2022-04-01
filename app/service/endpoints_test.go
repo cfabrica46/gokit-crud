@@ -1,306 +1,479 @@
 package service_test
 
-// func TestSignUpEndpoint(t *testing.T) {
-// 	for index, table := range []struct {
-// 		in     service.SignUpRequest
-// 		outErr string
-// 	}{
-// 		{
-// 			service.SignUpRequest{
-// 				Username: usernameTest,
-// 				Password: passwordTest,
-// 				Email:    emailTest,
-// 			},
-// 			"",
-// 		},
-// 		{
-// 			service.SignUpRequest{},
-// 			errWebServer.Error(),
-// 		},
-// 	} {
-// 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-// 			testResp := struct {
-// 				ID    int    `json:"id"`
-// 				Token string `json:"token"`
-// 				Err   string `json:"err"`
-// 			}{
-// 				ID:    idTest,
-// 				Token: tokenTest,
-// 				Err:   table.outErr,
-// 			}
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"testing"
 
-// 			jsonData, err := json.Marshal(testResp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+	"github.com/cfabrica46/gokit-crud/app/service"
+	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
+	"github.com/stretchr/testify/assert"
+)
 
-// 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-// 				return &http.Response{
-// 					StatusCode: http.StatusOK,
-// 					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
-// 				}, nil
-// 			})
+func TestSignUpEndpoint(t *testing.T) {
+	for index, table := range []struct {
+		in       service.SignUpRequest
+		outToken string
+		outErr   string
+		isError  bool
+	}{
+		{
+			in: service.SignUpRequest{
+				Username: usernameTest,
+				Password: passwordTest,
+				Email:    emailTest,
+			},
+			outToken: tokenTest,
+			outErr:   "",
+			isError:  false,
+		},
+		{
+			in:       service.SignUpRequest{},
+			outToken: "",
+			outErr:   errWebServer.Error(),
+			isError:  true,
+		},
+	} {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			testResp := struct {
+				ID    int    `json:"id"`
+				Token string `json:"token"`
+				Err   string `json:"err"`
+			}{
+				ID:    idTest,
+				Token: table.outToken,
+				Err:   table.outErr,
+			}
 
-// 			svc := service.NewService(
-// 				mock,
-// 				dbHostTest,
-// 				portTest,
-// 				tokenHostTest,
-// 				portTest,
-// 				secretTest,
-// 			)
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			r, err := service.MakeSignUpEndpoint(svc)(context.TODO(), table.in)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
+				}, nil
+			})
 
-// 			result, ok := r.(service.SignUpResponse)
-// 			if !ok {
-// 				t.Error(errNotTypeIndicated)
-// 			}
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-// 			assert.Equal(t, table.outErr, result.Err)
-// 		})
-// 	}
-// }
+			r, err := service.MakeSignUpEndpoint(svc)(context.TODO(), table.in)
+			if err != nil {
+				t.Error(err)
+			}
 
-// func TestSignInEndpoint(t *testing.T) {
-// 	for index, table := range []struct {
-// 		in     service.SignInRequest
-// 		outErr string
-// 	}{
-// 		{service.SignInRequest{Username: usernameTest, Password: passwordTest}, ""},
-// 		{service.SignInRequest{}, errWebServer.Error()},
-// 	} {
-// 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-// 			testResp := struct {
-// 				User  dbapp.User
-// 				Token string `json:"token"`
-// 				Err   string `json:"err"`
-// 			}{
-// 				User: dbapp.User{
-// 					ID:       idTest,
-// 					Username: usernameTest,
-// 					Password: passwordTest,
-// 					Email:    emailTest,
-// 				},
-// 				Token: tokenTest,
-// 				Err:   table.outErr,
-// 			}
+			result, ok := r.(service.SignUpResponse)
+			if !ok {
+				t.Error(errNotTypeIndicated)
+			}
 
-// 			jsonData, err := json.Marshal(testResp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			if !table.isError {
+				assert.Zero(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, table.outErr)
+			}
 
-// 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-// 				return &http.Response{
-// 					StatusCode: http.StatusOK,
-// 					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
-// 				}, nil
-// 			})
+			assert.Equal(t, table.outToken, result.Token)
+		})
+	}
+}
 
-// 			svc := service.NewService(
-// 				mock,
-// 				dbHostTest,
-// 				portTest,
-// 				tokenHostTest,
-// 				portTest,
-// 				secretTest,
-// 			)
+func TestSignInEndpoint(t *testing.T) {
+	for index, table := range []struct {
+		in       service.SignInRequest
+		outToken string
+		outErr   string
+		isError  bool
+	}{
+		{
+			in: service.SignInRequest{
+				Username: usernameTest,
+				Password: passwordTest,
+			},
+			outToken: tokenTest,
+			outErr:   "",
+			isError:  false,
+		},
+		{
+			in:       service.SignInRequest{},
+			outToken: "",
+			outErr:   errWebServer.Error(),
+			isError:  true,
+		},
+	} {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			testResp := struct {
+				User  dbapp.User
+				Token string `json:"token"`
+				Err   string `json:"err"`
+			}{
+				User: dbapp.User{
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
+				},
+				Token: table.outToken,
+				Err:   table.outErr,
+			}
 
-// 			r, err := service.MakeSignInEndpoint(svc)(context.TODO(), table.in)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			result, ok := r.(service.SignInResponse)
-// 			if !ok {
-// 				t.Error(errNotTypeIndicated)
-// 			}
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
+				}, nil
+			})
 
-// 			assert.Equal(t, table.outErr, result.Err)
-// 		})
-// 	}
-// }
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-// func TestLogOutEndpoint(t *testing.T) {
-// 	for index, table := range []struct {
-// 		in     service.LogOutRequest
-// 		outErr string
-// 	}{
-// 		{service.LogOutRequest{Token: tokenTest}, ""},
-// 		{service.LogOutRequest{}, errWebServer.Error()},
-// 	} {
-// 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-// 			testResp := struct {
-// 				Check bool   `json:"check"`
-// 				Err   string `json:"err"`
-// 			}{
-// 				Check: true,
-// 				Err:   table.outErr,
-// 			}
+			r, err := service.MakeSignInEndpoint(svc)(context.TODO(), table.in)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			jsonData, err := json.Marshal(testResp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			result, ok := r.(service.SignInResponse)
+			if !ok {
+				t.Error(errNotTypeIndicated)
+			}
 
-// 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-// 				return &http.Response{
-// 					StatusCode: http.StatusOK,
-// 					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
-// 				}, nil
-// 			})
+			if !table.isError {
+				assert.Zero(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, table.outErr)
+			}
 
-// 			svc := service.NewService(
-// 				mock,
-// 				dbHostTest,
-// 				portTest,
-// 				tokenHostTest,
-// 				portTest,
-// 				secretTest,
-// 			)
+			assert.Equal(t, table.outToken, result.Token)
+		})
+	}
+}
 
-// 			r, err := service.MakeLogOutEndpoint(svc)(context.TODO(), table.in)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+func TestLogOutEndpoint(t *testing.T) {
+	for index, table := range []struct {
+		in      service.LogOutRequest
+		outErr  string
+		isError bool
+	}{
+		{
+			in: service.LogOutRequest{
+				Token: tokenTest,
+			},
+			outErr:  "",
+			isError: false,
+		},
+		{
+			in:      service.LogOutRequest{},
+			outErr:  errWebServer.Error(),
+			isError: true,
+		},
+	} {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			testResp := struct {
+				Check bool   `json:"check"`
+				Err   string `json:"err"`
+			}{
+				Check: true,
+				Err:   table.outErr,
+			}
 
-// 			result, ok := r.(service.LogOutResponse)
-// 			if !ok {
-// 				t.Error(errNotTypeIndicated)
-// 			}
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			assert.Equal(t, table.outErr, result.Err)
-// 		})
-// 	}
-// }
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
+				}, nil
+			})
 
-// func TestGetAllUsersEndpoint(t *testing.T) {
-// 	for index, table := range []struct {
-// 		in     service.GetAllUsersRequest
-// 		outErr string
-// 	}{
-// 		{service.GetAllUsersRequest{}, ""},
-// 		{service.GetAllUsersRequest{}, errWebServer.Error()},
-// 	} {
-// 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-// 			testResp := struct {
-// 				User []dbapp.User `json:"user"`
-// 				Err  string       `json:"err"`
-// 			}{
-// 				User: []dbapp.User{{
-// 					ID:       idTest,
-// 					Username: usernameTest,
-// 					Password: passwordTest,
-// 					Email:    emailTest,
-// 				}},
-// 				Err: table.outErr,
-// 			}
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-// 			jsonData, err := json.Marshal(testResp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			r, err := service.MakeLogOutEndpoint(svc)(context.TODO(), table.in)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-// 				return &http.Response{
-// 					StatusCode: http.StatusOK,
-// 					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
-// 				}, nil
-// 			})
+			result, ok := r.(service.LogOutResponse)
+			if !ok {
+				t.Error(errNotTypeIndicated)
+			}
 
-// 			svc := service.NewService(
-// 				mock,
-// 				dbHostTest,
-// 				portTest,
-// 				tokenHostTest,
-// 				portTest,
-// 				secretTest,
-// 			)
+			if !table.isError {
+				assert.Zero(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, table.outErr)
+			}
+		})
+	}
+}
 
-// 			r, err := service.MakeGetAllUsersEndpoint(svc)(context.TODO(), table.in)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+func TestGetAllUsersEndpoint(t *testing.T) {
+	for index, table := range []struct {
+		outUsers []dbapp.User
+		outErr   string
+		isError  bool
+	}{
+		{
+			outUsers: []dbapp.User{
+				{
+					ID:       idTest,
+					Username: usernameTest,
+					Password: passwordTest,
+					Email:    emailTest,
+				},
+			},
+			outErr:  "",
+			isError: false,
+		},
+		{
+			outUsers: nil,
+			outErr:   errWebServer.Error(),
+			isError:  true,
+		},
+	} {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			testResp := struct {
+				Users []dbapp.User `json:"users"`
+				Err   string       `json:"err"`
+			}{
+				Users: table.outUsers,
+				Err:   table.outErr,
+			}
 
-// 			result, ok := r.(service.GetAllUsersResponse)
-// 			if !ok {
-// 				t.Error(errNotTypeIndicated)
-// 			}
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			assert.Equal(t, table.outErr, result.Err, "they should be equal")
-// 		})
-// 	}
-// }
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
+				}, nil
+			})
 
-// func TestProfileEndpoint(t *testing.T) {
-// 	for index, table := range []struct {
-// 		in     service.ProfileRequest
-// 		outErr string
-// 	}{
-// 		{service.ProfileRequest{}, ""},
-// 		{service.ProfileRequest{}, errWebServer.Error()},
-// 	} {
-// 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-// 			testResp := struct {
-// 				User     dbapp.User `json:"user"`
-// 				ID       int        `json:"id"`
-// 				Username string     `json:"username"`
-// 				Email    string     `json:"email"`
-// 				Check    bool       `json:"check"`
-// 				Err      string     `json:"err"`
-// 			}{
-// 				User: dbapp.User{
-// 					ID:       idTest,
-// 					Username: usernameTest,
-// 					Password: passwordTest,
-// 					Email:    emailTest,
-// 				},
-// 				ID:       idTest,
-// 				Username: usernameTest,
-// 				Email:    emailTest,
-// 				Check:    true,
-// 				Err:      table.outErr,
-// 			}
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
 
-// 			jsonData, err := json.Marshal(testResp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			r, err := service.MakeGetAllUsersEndpoint(svc)(context.TODO(), nil)
+			if err != nil {
+				t.Error(err)
+			}
 
-// 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-// 				return &http.Response{
-// 					StatusCode: http.StatusOK,
-// 					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
-// 				}, nil
-// 			})
+			result, ok := r.(service.GetAllUsersResponse)
+			if !ok {
+				t.Error(errNotTypeIndicated)
+			}
 
-// 			svc := service.NewService(
-// 				mock,
-// 				dbHostTest,
-// 				portTest,
-// 				tokenHostTest,
-// 				portTest,
-// 				secretTest,
-// 			)
+			if !table.isError {
+				assert.Zero(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, table.outErr)
+			}
 
-// 			r, err := service.MakeProfileEndpoint(svc)(context.TODO(), table.in)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
+			assert.Equal(t, table.outUsers, result.Users)
+		})
+	}
+}
 
-// 			result, ok := r.(service.ProfileResponse)
-// 			if !ok {
-// 				t.Error(errNotTypeIndicated)
-// 			}
+func TestProfileEndpoint(t *testing.T) {
+	for index, table := range []struct {
+		in      service.ProfileRequest
+		outUser dbapp.User
+		outErr  string
+		isError bool
+	}{
+		{
+			in: service.ProfileRequest{
+				Token: tokenTest,
+			},
+			outUser: dbapp.User{
+				ID:       idTest,
+				Username: usernameTest,
+				Password: passwordTest,
+				Email:    emailTest,
+			},
+			outErr:  "",
+			isError: false,
+		},
+		{
+			in:      service.ProfileRequest{},
+			outUser: dbapp.User{},
+			outErr:  errWebServer.Error(),
+			isError: true,
+		},
+	} {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			testResp := struct {
+				User     dbapp.User `json:"user"`
+				ID       int        `json:"id"`
+				Username string     `json:"username"`
+				Email    string     `json:"email"`
+				Check    bool       `json:"check"`
+				Err      string     `json:"err"`
+			}{
+				User:     table.outUser,
+				ID:       table.outUser.ID,
+				Username: table.outUser.Username,
+				Email:    table.outUser.Email,
+				Check:    true,
+				Err:      table.outErr,
+			}
 
-// 			assert.Equal(t, table.outErr, result.Err)
-// 		})
-// 	}
-// }
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
+
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
+				}, nil
+			})
+
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
+
+			r, err := service.MakeProfileEndpoint(svc)(context.TODO(), table.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(service.ProfileResponse)
+			if !ok {
+				t.Error(errNotTypeIndicated)
+			}
+
+			if !table.isError {
+				assert.Zero(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, table.outErr)
+			}
+
+			assert.Equal(t, table.outUser, result.User)
+		})
+	}
+}
+
+func TestDeleteAccountEndpoint(t *testing.T) {
+	for index, table := range []struct {
+		in      service.DeleteAccountRequest
+		outErr  string
+		isError bool
+	}{
+		{
+			in: service.DeleteAccountRequest{
+				Token: tokenTest,
+			},
+			outErr:  "",
+			isError: false,
+		},
+		{
+			in:      service.DeleteAccountRequest{},
+			outErr:  errWebServer.Error(),
+			isError: true,
+		},
+	} {
+		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+			testResp := struct {
+				ID       int    `json:"id"`
+				Username string `json:"username"`
+				Email    string `json:"email"`
+				Check    bool   `json:"check"`
+				Err      string `json:"err"`
+			}{
+				ID:       idTest,
+				Username: usernameTest,
+				Email:    emailTest,
+				Check:    true,
+				Err:      table.outErr,
+			}
+
+			jsonData, err := json.Marshal(testResp)
+			if err != nil {
+				t.Error(err)
+			}
+
+			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
+				}, nil
+			})
+
+			svc := service.NewService(
+				mock,
+				dbHostTest,
+				portTest,
+				tokenHostTest,
+				portTest,
+				secretTest,
+			)
+
+			r, err := service.MakeDeleteAccountEndpoint(svc)(context.TODO(), table.in)
+			if err != nil {
+				t.Error(err)
+			}
+
+			result, ok := r.(service.DeleteAccountResponse)
+			if !ok {
+				t.Error(errNotTypeIndicated)
+			}
+
+			if !table.isError {
+				assert.Zero(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, table.outErr)
+			}
+		})
+	}
+}
 
 // func TestDeleteAccountEndpoint(t *testing.T) {
 // 	for index, table := range []struct {
