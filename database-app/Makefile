@@ -1,8 +1,10 @@
-test: 
+test:
 	@echo "Ejecutando tests database-app..."
-	@go test ./... --cover
+	go test ./... --cover
 
-cover: 
+cover:
 	@echo "Ejecutando tests database-app..."
-	@go test ./... --coverprofile coverage.out
-	@go tool cover -func coverage.out
+	go test ./... --coverprofile coverage.out
+	go tool cover -func coverage.out
+
+.PHONY: all clean test cover

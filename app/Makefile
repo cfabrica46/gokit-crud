@@ -1,9 +1,11 @@
-test: 
+test:
 	@echo "Ejecutando tests app..."
-	@go test ./... --cover
+	go test ./... --cover
 
 
-cover: 
+cover:
 	@echo "Ejecutando tests app..."
-	@go test ./... --coverprofile coverage.out
-	@go tool cover -func coverage.out
+	go test ./... --coverprofile coverage.out
+	go tool cover -func coverage.out
+
+.PHONY: all clean test cover

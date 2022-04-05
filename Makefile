@@ -1,36 +1,27 @@
-tests: 
+tests: test-app test-database test-token
 	@echo "Ejecutando tests..."
-	@make test-app
-	@make test-database
-	@make test-token
 
-test-app: 
-	@echo "Ejecutando test app..."
-	@make -C ./app test
+test-app:
+	make -C ./app test
 
-test-database: 
-	@echo "Ejecutando test database..."
-	@make -C ./database-app test
+test-database:
+	make -C ./database-app test
 
-test-token: 
-	@echo "Ejecutando test token..."
-	@make -C ./token-app test
+test-token:
+	make -C ./token-app test
 
+# ---
 
-cover: 
-	@echo "Ejecutando tests..."
-	@make cover-app
-	@make cover-database
-	@make cover-token
+cover: cover-app cover-database cover-token
+	@echo "Ejecutando covers..."
 
-cover-app: 
-	@echo "Ejecutando test app..."
-	@make -C ./app cover
+cover-app:
+	make -C ./app cover
 
-cover-database: 
-	@echo "Ejecutando test database..."
-	@make -C ./database-app cover
+cover-database:
+	make -C ./database-app cover
 
-cover-token: 
-	@echo "Ejecutando test token..."
-	@make -C ./token-app cover
+cover-token:
+	make -C ./token-app cover
+
+.PHONY: tests test-app test-database test-token cover cover-app cover-database cover-token all clean test
