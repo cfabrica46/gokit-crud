@@ -2,7 +2,6 @@ test:
 	@echo "Ejecutando tests app..."
 	go test ./... --cover
 
-
 cover:
 	@echo "Ejecutando tests app..."
 	go test ./... --coverprofile coverage.out
