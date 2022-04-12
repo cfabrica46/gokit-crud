@@ -16,3 +16,10 @@ services:
             - token
         ports:
             - "9090:9090"
+        # networks:
+        #     - mired
+
+networks:
+    default:
+        external:
+            name: mired

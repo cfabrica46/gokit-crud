@@ -27,3 +27,10 @@ services:
             - database-postgres
         ports:
             - "7070:7070"
+        # networks:
+        #     - bridge
+
+networks:
+    default:
+        external:
+            name: mired
