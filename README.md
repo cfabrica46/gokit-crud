@@ -4,14 +4,10 @@
 CRUD practice in golang using the gokit hexagonal architecture toolkit.
 
 ## Run App
-~~~
-docker-compose up
-~~~
+```bash docker-compose-init.sh```
 
 ## Stop App
-~~~
-docker-compose down --rmi all
-~~~
+```bash docker-compose-stop.sh```
 
 ## Run Test
 ### All Tests

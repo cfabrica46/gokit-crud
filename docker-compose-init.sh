@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# docker-compose down --rmi all
+docker network create mired
 
 cd ./database-app && docker-compose up --build -d
 

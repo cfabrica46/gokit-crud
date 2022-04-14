@@ -9,3 +9,5 @@ cd ./token-app && docker-compose down --rmi all
 cd ..
 
 cd ./app && docker-compose down --rmi all
+
+docker network rm mired

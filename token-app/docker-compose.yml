@@ -1,23 +1,21 @@
 version: "3.7"
 services:
-    token:
+    redis:
         image: redis
         ports:
             - "6378:6379"
 
-    api:
+    token-app:
         build: .
         restart: always
         environment:
             - PORT=9090
-            - REDIS_HOST=token
+            - REDIS_HOST=redis
             - REDIS_PORT=6379
         depends_on:
-            - token
+            - redis
         ports:
             - "9090:9090"
-        # networks:
-        #     - mired
 
 networks:
     default:
