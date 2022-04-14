@@ -11,6 +11,7 @@ import (
 
 const schemaURL = "http://%s:%s"
 
+// ErrTokenNotValid ...
 var ErrTokenNotValid = errors.New("token not validate")
 
 type httpClient interface {

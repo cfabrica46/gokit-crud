@@ -14,8 +14,10 @@ import (
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 )
 
+// ErrPrefix ...
 var ErrPrefix = errors.New("error")
 
+// MakePetition ...
 func MakePetition(client httpClient, url, httpMethod string, bodyStruct interface{},
 ) (dataResp []byte, err error) {
 	var dataReq []byte
@@ -46,6 +48,7 @@ func MakePetition(client httpClient, url, httpMethod string, bodyStruct interfac
 	return
 }
 
+// PetitionGetAllUsers ...
 func PetitionGetAllUsers(client httpClient, url string) (users []dbapp.User, err error) {
 	var response dbapp.GetAllUsersResponse
 
@@ -70,6 +73,7 @@ func PetitionGetAllUsers(client httpClient, url string) (users []dbapp.User, err
 	return
 }
 
+// PetitionGetUserByID ...
 func PetitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRequest,
 ) (user dbapp.User, err error) {
 	var response dbapp.GetUserByIDResponse
@@ -100,6 +104,7 @@ func PetitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRe
 	return
 }
 
+// PetitionGetUserByUsernameAndPassword ...
 func PetitionGetUserByUsernameAndPassword(client httpClient, url string,
 	body dbapp.GetUserByUsernameAndPasswordRequest,
 ) (user dbapp.User, err error) {
@@ -129,6 +134,7 @@ func PetitionGetUserByUsernameAndPassword(client httpClient, url string,
 	return
 }
 
+// PetitionGetIDByUsername ...
 func PetitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUsernameRequest,
 ) (id int, err error) {
 	var response dbapp.GetIDByUsernameResponse
@@ -154,6 +160,7 @@ func PetitionGetIDByUsername(client httpClient, url string, body dbapp.GetIDByUs
 	return
 }
 
+// PetitionInsertUser ...
 func PetitionInsertUser(client httpClient, url string, body dbapp.InsertUserRequest) (err error) {
 	var response dbapp.InsertUserResponse
 
@@ -181,6 +188,7 @@ func PetitionInsertUser(client httpClient, url string, body dbapp.InsertUserRequ
 	return
 }
 
+// PetitionDeleteUser ...
 func PetitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequest) (err error) {
 	var response dbapp.DeleteUserResponse
 
@@ -206,6 +214,7 @@ func PetitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequ
 	return
 }
 
+// PetitionGenerateToken ...
 func PetitionGenerateToken(client httpClient, url string, body tokenapp.GenerateTokenRequest,
 ) (token string, err error) {
 	// var response tokenapp.GenerateTokenResponse
@@ -235,6 +244,7 @@ func PetitionGenerateToken(client httpClient, url string, body tokenapp.Generate
 	return
 }
 
+// PetitionExtractToken ...
 func PetitionExtractToken(client httpClient, url string, body tokenapp.ExtractTokenRequest,
 ) (id int, username, email string, err error) {
 	var response tokenapp.ExtractTokenResponse
@@ -262,6 +272,7 @@ func PetitionExtractToken(client httpClient, url string, body tokenapp.ExtractTo
 	return
 }
 
+// PetitionSetToken ...
 func PetitionSetToken(client httpClient, url string, body tokenapp.SetTokenRequest) (err error) {
 	var response tokenapp.SetTokenResponse
 
@@ -284,6 +295,7 @@ func PetitionSetToken(client httpClient, url string, body tokenapp.SetTokenReque
 	return
 }
 
+// PetitionDeleteToken ...
 func PetitionDeleteToken(client httpClient, url string, body tokenapp.DeleteTokenRequest,
 ) (err error) {
 	var response tokenapp.DeleteTokenResponse
@@ -307,6 +319,7 @@ func PetitionDeleteToken(client httpClient, url string, body tokenapp.DeleteToke
 	return
 }
 
+// PetitionCheckToken ...
 func PetitionCheckToken(client httpClient, url string, body tokenapp.CheckTokenRequest,
 ) (check bool, err error) {
 	var response tokenapp.CheckTokenResponse
