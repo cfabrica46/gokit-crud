@@ -2,6 +2,52 @@ package service
 
 import dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 
+// UEP ...
+type UEP struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+
+// TokenErr ...
+type TokenErr struct {
+	Token string `json:"token"`
+	Err   string `json:"err,omitempty"`
+}
+
+// UP ...
+type UP struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// Token ...
+type Token struct {
+	Token string `json:"token"`
+}
+
+// Err ...
+type Err struct {
+	Err string `json:"err,omitempty"`
+}
+
+// Empyt ...
+type Empyt struct{}
+
+// UsersErr ...
+type UsersErr struct {
+	Users []dbapp.User `json:"users"`
+	Err   string       `json:"err,omitempty"`
+}
+
+// UserErr ...
+type UserErr struct {
+	User dbapp.User `json:"user"`
+	Err  string     `json:"err,omitempty"`
+}
+
+// ---
+/*
 // SignUpRequest (string, string, string) (string, error).
 type SignUpRequest struct {
 	Username string `json:"username"`
@@ -65,4 +111,4 @@ type DeleteAccountRequest struct {
 // DeleteAccountResponse () ([]dbapp.User, error).
 type DeleteAccountResponse struct {
 	Err string `json:"err,omitempty"`
-}
+} */

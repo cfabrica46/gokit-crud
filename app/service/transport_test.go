@@ -41,11 +41,11 @@ func TestDecodeSignUpRequest(t *testing.T) {
 
 	for index, table := range []struct {
 		in     *http.Request
-		out    service.SignUpRequest
+		out    service.UEP
 		outErr string
 	}{
-		{goodReq, service.SignUpRequest{usernameTest, passwordTest, emailTest}, ""},
-		{badReq, service.SignUpRequest{}, "EOF"},
+		{goodReq, service.UEP{usernameTest, passwordTest, emailTest}, ""},
+		{badReq, service.UEP{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var result interface{}
@@ -56,9 +56,9 @@ func TestDecodeSignUpRequest(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.SignUpRequest)
+			result, ok := r.(service.UEP)
 			if !ok {
-				if (table.out != service.SignUpRequest{}) {
+				if (table.out != service.UEP{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -95,11 +95,11 @@ func TestDecodeSignInRequest(t *testing.T) {
 
 	for index, table := range []struct {
 		in     *http.Request
-		out    service.SignInRequest
+		out    service.UP
 		outErr string
 	}{
-		{goodReq, service.SignInRequest{usernameTest, passwordTest}, ""},
-		{badReq, service.SignInRequest{}, "EOF"},
+		{goodReq, service.UP{usernameTest, passwordTest}, ""},
+		{badReq, service.UP{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var result interface{}
@@ -110,9 +110,9 @@ func TestDecodeSignInRequest(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.SignInRequest)
+			result, ok := r.(service.UP)
 			if !ok {
-				if (table.out != service.SignInRequest{}) {
+				if (table.out != service.UP{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -123,7 +123,7 @@ func TestDecodeSignInRequest(t *testing.T) {
 	}
 }
 
-func TestDecodeLogOutRequest(t *testing.T) {
+func TestDecodeTokenByHeaderRequest(t *testing.T) {
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
@@ -142,23 +142,23 @@ func TestDecodeLogOutRequest(t *testing.T) {
 
 	for index, table := range []struct {
 		in     *http.Request
-		out    service.LogOutRequest
+		out    service.Token
 		outErr string
 	}{
-		{goodReq, service.LogOutRequest{}, ""},
+		{goodReq, service.Token{}, ""},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var result interface{}
 			var resultErr string
 
-			r, err := service.DecodeLogOutRequest(context.TODO(), table.in)
+			r, err := service.DecodeTokenByHeaderRequest(context.TODO(), table.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.LogOutRequest)
+			result, ok := r.(service.Token)
 			if !ok {
-				if (table.out != service.LogOutRequest{}) {
+				if (table.out != service.Token{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -179,10 +179,10 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 
 	for index, table := range []struct {
 		in     *http.Request
-		out    service.GetAllUsersRequest
+		out    service.Empyt
 		outErr string
 	}{
-		{goodReq, service.GetAllUsersRequest{}, ""},
+		{goodReq, service.Empyt{}, ""},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var result interface{}
@@ -193,9 +193,9 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.GetAllUsersRequest)
+			result, ok := r.(service.Empyt)
 			if !ok {
-				if (table.out != service.GetAllUsersRequest{}) {
+				if (table.out != service.Empyt{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -206,7 +206,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 	}
 }
 
-func TestDecodeProfileRequest(t *testing.T) {
+/* func TestDecodeProfileRequest(t *testing.T) {
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
@@ -296,7 +296,7 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 			assert.Equal(t, table.out, result)
 		})
 	}
-}
+} */
 
 func TestEncodeResponse(t *testing.T) {
 	for index, table := range []struct {

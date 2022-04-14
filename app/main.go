@@ -45,7 +45,7 @@ func runServer(port, dbHost, dbPort, tokenHost, tokenPort, secret string) {
 
 	getLogOutHandler := httptransport.NewServer(
 		service.MakeLogOutEndpoint(svc),
-		service.DecodeLogOutRequest,
+		service.DecodeTokenByHeaderRequest,
 		service.EncodeResponse,
 	)
 
@@ -57,13 +57,13 @@ func runServer(port, dbHost, dbPort, tokenHost, tokenPort, secret string) {
 
 	getProfileHandler := httptransport.NewServer(
 		service.MakeProfileEndpoint(svc),
-		service.DecodeProfileRequest,
+		service.DecodeTokenByHeaderRequest,
 		service.EncodeResponse,
 	)
 
 	getDeleteAccountHandler := httptransport.NewServer(
 		service.MakeDeleteAccountEndpoint(svc),
-		service.DecodeDeleteAccountRequest,
+		service.DecodeTokenByHeaderRequest,
 		service.EncodeResponse,
 	)
 

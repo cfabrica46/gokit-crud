@@ -16,13 +16,13 @@ import (
 
 func TestSignUpEndpoint(t *testing.T) {
 	for index, table := range []struct {
-		in       service.SignUpRequest
+		in       service.UEP
 		outToken string
 		outErr   string
 		isError  bool
 	}{
 		{
-			in: service.SignUpRequest{
+			in: service.UEP{
 				Username: usernameTest,
 				Password: passwordTest,
 				Email:    emailTest,
@@ -32,7 +32,7 @@ func TestSignUpEndpoint(t *testing.T) {
 			isError:  false,
 		},
 		{
-			in:       service.SignUpRequest{},
+			in:       service.UEP{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
 			isError:  true,
@@ -75,7 +75,7 @@ func TestSignUpEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(service.SignUpResponse)
+			result, ok := r.(service.TokenErr)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -93,13 +93,13 @@ func TestSignUpEndpoint(t *testing.T) {
 
 func TestSignInEndpoint(t *testing.T) {
 	for index, table := range []struct {
-		in       service.SignInRequest
+		in       service.UP
 		outToken string
 		outErr   string
 		isError  bool
 	}{
 		{
-			in: service.SignInRequest{
+			in: service.UP{
 				Username: usernameTest,
 				Password: passwordTest,
 			},
@@ -108,7 +108,7 @@ func TestSignInEndpoint(t *testing.T) {
 			isError:  false,
 		},
 		{
-			in:       service.SignInRequest{},
+			in:       service.UP{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
 			isError:  true,
@@ -156,7 +156,7 @@ func TestSignInEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(service.SignInResponse)
+			result, ok := r.(service.TokenErr)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -174,19 +174,19 @@ func TestSignInEndpoint(t *testing.T) {
 
 func TestLogOutEndpoint(t *testing.T) {
 	for index, table := range []struct {
-		in      service.LogOutRequest
+		in      service.Token
 		outErr  string
 		isError bool
 	}{
 		{
-			in: service.LogOutRequest{
+			in: service.Token{
 				Token: tokenTest,
 			},
 			outErr:  "",
 			isError: false,
 		},
 		{
-			in:      service.LogOutRequest{},
+			in:      service.Token{},
 			outErr:  errWebServer.Error(),
 			isError: true,
 		},
@@ -226,7 +226,7 @@ func TestLogOutEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(service.LogOutResponse)
+			result, ok := r.(service.Err)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -299,7 +299,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(service.GetAllUsersResponse)
+			result, ok := r.(service.UsersErr)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -317,13 +317,13 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 
 func TestProfileEndpoint(t *testing.T) {
 	for index, table := range []struct {
-		in      service.ProfileRequest
+		in      service.Token
 		outUser dbapp.User
 		outErr  string
 		isError bool
 	}{
 		{
-			in: service.ProfileRequest{
+			in: service.Token{
 				Token: tokenTest,
 			},
 			outUser: dbapp.User{
@@ -336,7 +336,7 @@ func TestProfileEndpoint(t *testing.T) {
 			isError: false,
 		},
 		{
-			in:      service.ProfileRequest{},
+			in:      service.Token{},
 			outUser: dbapp.User{},
 			outErr:  errWebServer.Error(),
 			isError: true,
@@ -385,7 +385,7 @@ func TestProfileEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(service.ProfileResponse)
+			result, ok := r.(service.UserErr)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -403,19 +403,19 @@ func TestProfileEndpoint(t *testing.T) {
 
 func TestDeleteAccountEndpoint(t *testing.T) {
 	for index, table := range []struct {
-		in      service.DeleteAccountRequest
+		in      service.Token
 		outErr  string
 		isError bool
 	}{
 		{
-			in: service.DeleteAccountRequest{
+			in: service.Token{
 				Token: tokenTest,
 			},
 			outErr:  "",
 			isError: false,
 		},
 		{
-			in:      service.DeleteAccountRequest{},
+			in:      service.Token{},
 			outErr:  errWebServer.Error(),
 			isError: true,
 		},
@@ -461,7 +461,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 				t.Error(err)
 			}
 
-			result, ok := r.(service.DeleteAccountResponse)
+			result, ok := r.(service.Err)
 			if !ok {
 				t.Error(errNotTypeIndicated)
 			}
@@ -474,62 +474,3 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 		})
 	}
 }
-
-// func TestDeleteAccountEndpoint(t *testing.T) {
-// 	for index, table := range []struct {
-// 		in     service.DeleteAccountRequest
-// 		outErr string
-// 	}{
-// 		{service.DeleteAccountRequest{}, ""},
-// 		{service.DeleteAccountRequest{}, errWebServer.Error()},
-// 	} {
-// 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-// 			testResp := struct {
-// 				ID       int    `json:"id"`
-// 				Username string `json:"username"`
-// 				Email    string `json:"email"`
-// 				Check    bool   `json:"check"`
-// 				Err      string `json:"err"`
-// 			}{
-// 				ID:       idTest,
-// 				Username: usernameTest,
-// 				Email:    emailTest,
-// 				Check:    true,
-// 				Err:      table.outErr,
-// 			}
-
-// 			jsonData, err := json.Marshal(testResp)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
-
-// 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-// 				return &http.Response{
-// 					StatusCode: http.StatusOK,
-// 					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
-// 				}, nil
-// 			})
-
-// 			svc := service.NewService(
-// 				mock,
-// 				dbHostTest,
-// 				portTest,
-// 				tokenHostTest,
-// 				portTest,
-// 				secretTest,
-// 			)
-
-// 			r, err := service.MakeDeleteAccountEndpoint(svc)(context.TODO(), table.in)
-// 			if err != nil {
-// 				t.Error(err)
-// 			}
-
-// 			result, ok := r.(service.DeleteAccountResponse)
-// 			if !ok {
-// 				t.Error(errNotTypeIndicated)
-// 			}
-
-// 			assert.Equal(t, table.outErr, result.Err)
-// 		})
-// 	}
-// }

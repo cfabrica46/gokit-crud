@@ -8,7 +8,7 @@ import (
 
 // DecodeSignUpRequest ...
 func DecodeSignUpRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request SignUpRequest
+	var request UEP
 
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return
@@ -21,7 +21,7 @@ func DecodeSignUpRequest(_ context.Context, r *http.Request) (req interface{}, e
 
 // DecodeSignInRequest ...
 func DecodeSignInRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request SignInRequest
+	var request UP
 
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return
@@ -32,9 +32,9 @@ func DecodeSignInRequest(_ context.Context, r *http.Request) (req interface{}, e
 	return
 }
 
-// DecodeLogOutRequest ...
-func DecodeLogOutRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request LogOutRequest
+// DecodeTokenByHeaderRequest ...
+func DecodeTokenByHeaderRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	var request Token
 
 	request.Token = r.Header.Get("Authorization")
 
@@ -43,15 +43,29 @@ func DecodeLogOutRequest(_ context.Context, r *http.Request) (req interface{}, e
 	return
 }
 
+/*
+// DecodeLogOutRequest ...
+func DecodeLogOutRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	var request Token
+
+	request.Token = r.Header.Get("Authorization")
+
+	req = request
+
+	return
+}
+*/
+
 // DecodeGetAllUsersRequest ...
 func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (req interface{}, err error) {
-	var request GetAllUsersRequest
+	var request Empyt
 
 	req = request
 
 	return
 }
 
+/*
 // DecodeProfileRequest ...
 func DecodeProfileRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
 	var request ProfileRequest
@@ -72,7 +86,7 @@ func DecodeDeleteAccountRequest(_ context.Context, r *http.Request) (req interfa
 	req = request
 
 	return
-}
+} */
 
 // EncodeResponse ...
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) (err error) {
