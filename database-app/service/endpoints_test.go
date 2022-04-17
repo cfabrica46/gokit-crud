@@ -11,26 +11,26 @@ import (
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		inID                            int
-		inUsername, inPassword, inEmail string
-		inRequest                       GetAllUsersRequest
-		outErr                          string
+		outID                              int
+		outUsername, outPassword, outEmail string
+		inRequest                          GetAllUsersRequest
+		outErr                             string
 	}{
 		{
-			inID:       idTest,
-			inUsername: usernameTest,
-			inPassword: passwordTest,
-			inEmail:    emailTest,
-			inRequest:  GetAllUsersRequest{},
-			outErr:     "",
+			outID:       idTest,
+			outUsername: usernameTest,
+			// inPassword: passwordTest,
+			outEmail:  emailTest,
+			inRequest: GetAllUsersRequest{},
+			outErr:    "",
 		},
 		{
-			inID:       idTest,
-			inUsername: usernameTest,
-			inPassword: passwordTest,
-			inEmail:    emailTest,
-			inRequest:  GetAllUsersRequest{},
-			outErr:     "sql: database is closed",
+			outID:       idTest,
+			outUsername: usernameTest,
+			// inPassword: passwordTest,
+			outEmail:  emailTest,
+			inRequest: GetAllUsersRequest{},
+			outErr:    "sql: database is closed",
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -51,13 +51,13 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 				[]string{
 					"id",
 					"username",
-					"password",
+					// "password",
 					"email",
 				}).AddRow(
-				tt.inID,
-				tt.inUsername,
-				tt.inPassword,
-				tt.inEmail,
+				tt.outID,
+				tt.outUsername,
+				// tt.inPassword,
+				tt.outEmail,
 			)
 
 			mock.ExpectQuery("^SELECT id, username, email FROM users").WillReturnRows(rows)

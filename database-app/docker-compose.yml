@@ -28,7 +28,11 @@ services:
         ports:
             - "7070:7070"
 
+# networks:
+#     default:
+#         external:
+#             name: mired
+
 networks:
-    default:
-        external:
-            name: mired
+    uwu:
+        driver: bridge

@@ -17,6 +17,7 @@ import (
 
 func main() {
 	log.SetFlags(log.Lshortfile)
+
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println(err)
 	}
@@ -35,13 +36,17 @@ func main() {
 
 	db, err := sql.Open(os.Getenv("DB_DRIVER"), dbInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+
+		return
 	}
 	defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+
+		return
 	}
 
 	runServer(os.Getenv("PORT"), db)
@@ -86,15 +91,15 @@ func runServer(port string, db *sql.DB) {
 		service.EncodeResponse,
 	)
 
-	r := mux.NewRouter()
-	r.Methods(http.MethodGet).Path("/users").Handler(getAllUsersHandler)
-	r.Methods(http.MethodGet).Path("/user/id").Handler(getUserByIDHandler)
-	r.Methods(http.MethodGet).Path("/user/username_password").
+	router := mux.NewRouter()
+	router.Methods(http.MethodGet).Path("/users").Handler(getAllUsersHandler)
+	router.Methods(http.MethodGet).Path("/user/id").Handler(getUserByIDHandler)
+	router.Methods(http.MethodGet).Path("/user/username_password").
 		Handler(getUserByUsernameAndPasswordHandler)
-	r.Methods(http.MethodGet).Path("/id/username").Handler(getIDByUsernameHandler)
-	r.Methods(http.MethodPost).Path("/user").Handler(insertUserHandler)
-	r.Methods(http.MethodDelete).Path("/user").Handler(deleteUserHandler)
+	router.Methods(http.MethodGet).Path("/id/username").Handler(getIDByUsernameHandler)
+	router.Methods(http.MethodPost).Path("/user").Handler(insertUserHandler)
+	router.Methods(http.MethodDelete).Path("/user").Handler(deleteUserHandler)
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

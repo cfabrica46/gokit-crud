@@ -18,23 +18,23 @@ const (
 
 func TestGetAllUsers(t *testing.T) {
 	for i, tt := range []struct {
-		inID                            int
-		inUsername, inPassword, inEmail string
-		outErr                          string
+		outID                              int
+		outUsername, outPassword, outEmail string
+		outErr                             string
 	}{
 		{
-			inID:       idTest,
-			inUsername: usernameTest,
-			inPassword: passwordTest,
-			inEmail:    emailTest,
-			outErr:     "",
+			outID:       idTest,
+			outUsername: usernameTest,
+			outPassword: passwordTest,
+			outEmail:    emailTest,
+			outErr:      "",
 		},
 		{
-			inID:       idTest,
-			inUsername: usernameTest,
-			inPassword: passwordTest,
-			inEmail:    emailTest,
-			outErr:     "sql: database is closed",
+			outID:       idTest,
+			outUsername: usernameTest,
+			outPassword: passwordTest,
+			outEmail:    emailTest,
+			outErr:      "sql: database is closed",
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -56,13 +56,13 @@ func TestGetAllUsers(t *testing.T) {
 				[]string{
 					"id",
 					"username",
-					"password",
+					// "password",
 					"email",
 				}).AddRow(
-				tt.inID,
-				tt.inUsername,
-				tt.inPassword,
-				tt.inEmail,
+				tt.outID,
+				tt.outUsername,
+				// tt.outPassword,
+				tt.outEmail,
 			)
 
 			mock.ExpectQuery("SELECT id, username, email FROM users").WillReturnRows(rows)

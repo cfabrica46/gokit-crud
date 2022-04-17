@@ -2,7 +2,6 @@ package service
 
 import (
 	"database/sql"
-	"log"
 )
 
 type serviceInterface interface {
@@ -29,17 +28,26 @@ func GetService(db *sql.DB) *Service {
 
 // GetAllUsers ...
 func (s Service) GetAllUsers() (users []User, err error) {
-	log.SetFlags(log.Lshortfile)
 	rows, err := s.db.Query("SELECT id, username, email FROM users")
 	if err != nil {
 		return
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var userBeta User
-		rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
+		err = rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
+		if err != nil {
+			return
+		}
+
 		users = append(users, userBeta)
 	}
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
 	return
 }
 
