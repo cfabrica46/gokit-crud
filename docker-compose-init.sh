@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker network create mired || exit
+# docker network create mired || exit
 
 cd ./database-app && docker-compose up --build -d || exit
 

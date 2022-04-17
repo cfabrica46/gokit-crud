@@ -19,5 +19,5 @@ services:
 
 networks:
     default:
-        external:
-            name: mired
+        name: gokit-crud_network
+        driver: bridge

@@ -28,11 +28,7 @@ services:
         ports:
             - "7070:7070"
 
-# networks:
-#     default:
-#         external:
-#             name: mired
-
 networks:
-    uwu:
+    default:
+        name: gokit-crud_network
         driver: bridge
