@@ -2,12 +2,13 @@
 
 # docker network create mired || exit
 
-cd ./database-app && docker-compose up --build -d || exit
-
+cd ./database-app || exit
+docker-compose up --build -d
 cd ..
 
-cd ./token-app && docker-compose up --build -d || exit
-
+cd ./token-app || exit
+docker-compose up --build -d
 cd ..
 
-cd ./app && docker-compose up --build -d || exit
+cd ./app || exit
+docker-compose up --build -d

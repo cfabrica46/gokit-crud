@@ -2,26 +2,27 @@
 
 # kill Containers
 
-cd ./database-app && docker-compose kill || exit
-
+cd ./database-app || exit
+docker-compose kill
 cd ..
 
-cd ./token-app && docker-compose kill || exit
-
+cd ./token-app || exit
+docker-compose kill
 cd ..
 
-cd ./app && docker-compose kill || exit
-
+cd ./app || exit
+docker-compose kill
 cd ..
 
-# Remove Images/Network/OcultContainers
+# remove images/network/ocultContainers
 
-cd ./database-app && docker-compose down --rmi all || exit
-
+cd ./database-app || exit
+docker-compose down --rmi all
 cd ..
 
-cd ./token-app && docker-compose down --rmi all || exit
-
+cd ./token-app || exit
+docker-compose down --rmi all
 cd ..
 
-cd ./app && docker-compose down --rmi all || exit
+cd ./app || exit
+docker-compose down --rmi all
