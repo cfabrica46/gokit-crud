@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -6,14 +6,15 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/cfabrica46/gokit-crud/database-app/service"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		outID                              int
 		outUsername, outPassword, outEmail string
-		inRequest                          GetAllUsersRequest
+		inRequest                          service.GetAllUsersRequest
 		outErr                             string
 	}{
 		{
@@ -21,7 +22,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			outUsername: usernameTest,
 			// inPassword: passwordTest,
 			outEmail:  emailTest,
-			inRequest: GetAllUsersRequest{},
+			inRequest: service.GetAllUsersRequest{},
 			outErr:    "",
 		},
 		{
@@ -29,11 +30,11 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			outUsername: usernameTest,
 			// inPassword: passwordTest,
 			outEmail:  emailTest,
-			inRequest: GetAllUsersRequest{},
-			outErr:    "sql: database is closed",
+			inRequest: service.GetAllUsersRequest{},
+			outErr:    errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
@@ -41,11 +42,11 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			defer db.Close()
 
 			// generate confict closing db
-			if tt.outErr == "sql: database is closed" {
+			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows(
 				[]string{
@@ -62,12 +63,12 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 
 			mock.ExpectQuery("^SELECT id, username, email FROM users").WillReturnRows(rows)
 
-			r, err := MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.inRequest)
+			r, err := service.MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(GetAllUsersResponse)
+			result, ok := r.(service.GetAllUsersResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -78,10 +79,10 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 }
 
 func TestMakeGetUserByIDEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID                            int
 		inUsername, inPassword, inEmail string
-		inRequest                       GetUserByIDRequest
+		inRequest                       service.GetUserByIDRequest
 		outErr                          string
 	}{
 		{
@@ -89,7 +90,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  GetUserByIDRequest{ID: idTest},
+			inRequest:  service.GetUserByIDRequest{ID: idTest},
 			outErr:     "",
 		},
 		{
@@ -97,11 +98,11 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  GetUserByIDRequest{},
-			outErr:     "sql: database is closed",
+			inRequest:  service.GetUserByIDRequest{},
+			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
@@ -109,11 +110,11 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			defer db.Close()
 
 			// generate confict closing db
-			if tt.outErr == "sql: database is closed" {
+			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows(
 				[]string{
@@ -131,12 +132,12 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			mock.ExpectQuery("^SELECT id, username, password, email FROM users").
 				WithArgs(tt.inID).WillReturnRows(rows)
 
-			r, err := MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.inRequest)
+			r, err := service.MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(GetUserByIDResponse)
+			result, ok := r.(service.GetUserByIDResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -147,10 +148,10 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 }
 
 func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID                            int
 		inUsername, inPassword, inEmail string
-		inRequest                       GetUserByUsernameAndPasswordRequest
+		inRequest                       service.GetUserByUsernameAndPasswordRequest
 		outErr                          string
 	}{
 		{
@@ -158,7 +159,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest: GetUserByUsernameAndPasswordRequest{
+			inRequest: service.GetUserByUsernameAndPasswordRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 			},
@@ -169,11 +170,11 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  GetUserByUsernameAndPasswordRequest{},
-			outErr:     "sql: database is closed",
+			inRequest:  service.GetUserByUsernameAndPasswordRequest{},
+			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
@@ -181,11 +182,11 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			defer db.Close()
 
 			// generate confict closing db
-			if tt.outErr == "sql: database is closed" {
+			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows(
 				[]string{
@@ -203,12 +204,15 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			mock.ExpectQuery("^SELECT id, username, password, email FROM users").
 				WithArgs(tt.inUsername, tt.inPassword).WillReturnRows(rows)
 
-			r, err := MakeGetUserByUsernameAndPasswordEndpoint(svc)(context.TODO(), tt.inRequest)
+			r, err := service.MakeGetUserByUsernameAndPasswordEndpoint(svc)(
+				context.TODO(),
+				tt.inRequest,
+			)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(GetUserByUsernameAndPasswordResponse)
+			result, ok := r.(service.GetUserByUsernameAndPasswordResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -219,16 +223,16 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 }
 
 func TestGetIDByUsernameEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID       int
 		inUsername string
-		inRequest  GetIDByUsernameRequest
+		inRequest  service.GetIDByUsernameRequest
 		outErr     string
 	}{
 		{
 			inID:       idTest,
 			inUsername: usernameTest,
-			inRequest: GetIDByUsernameRequest{
+			inRequest: service.GetIDByUsernameRequest{
 				Username: usernameTest,
 			},
 			outErr: "",
@@ -236,11 +240,11 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 		{
 			inID:       idTest,
 			inUsername: usernameTest,
-			inRequest:  GetIDByUsernameRequest{},
-			outErr:     "sql: database is closed",
+			inRequest:  service.GetIDByUsernameRequest{},
+			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
@@ -248,22 +252,22 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 			defer db.Close()
 
 			// generate confict closing db
-			if tt.outErr == "sql: database is closed" {
+			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows([]string{"id"}).AddRow(tt.inID)
 
 			mock.ExpectQuery("^SELECT id FROM users").WithArgs(tt.inUsername).WillReturnRows(rows)
 
-			r, err := MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.inRequest)
+			r, err := service.MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(GetIDByUsernameResponse)
+			result, ok := r.(service.GetIDByUsernameResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -274,16 +278,16 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 }
 
 func TestMakeInsertUserEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inUsername, inPassword, inEmail string
-		inRequest                       InsertUserRequest
+		inRequest                       service.InsertUserRequest
 		outErr                          string
 	}{
 		{
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest: InsertUserRequest{
+			inRequest: service.InsertUserRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 				Email:    emailTest,
@@ -294,11 +298,11 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  InsertUserRequest{},
-			outErr:     "sql: database is closed",
+			inRequest:  service.InsertUserRequest{},
+			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
@@ -306,21 +310,25 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			defer db.Close()
 
 			// generate confict closing db
-			if tt.outErr == "sql: database is closed" {
+			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			mock.ExpectExec("^INSERT INTO users").
-				WithArgs(tt.inUsername, tt.inPassword, tt.inEmail).WillReturnResult(sqlmock.NewResult(0, 1))
+				WithArgs(
+					tt.inUsername,
+					tt.inPassword,
+					tt.inEmail,
+				).WillReturnResult(sqlmock.NewResult(0, 1))
 
-			r, err := MakeInsertUserEndpoint(svc)(context.TODO(), tt.inRequest)
+			r, err := service.MakeInsertUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(InsertUserResponse)
+			result, ok := r.(service.InsertUserResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -331,25 +339,25 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 }
 
 func TestMakeDeleteUserEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID      int
-		inRequest DeleteUserRequest
+		inRequest service.DeleteUserRequest
 		outErr    string
 	}{
 		{
 			inID: idTest,
-			inRequest: DeleteUserRequest{
+			inRequest: service.DeleteUserRequest{
 				ID: idTest,
 			},
 			outErr: "",
 		},
 		{
 			inID:      idTest,
-			inRequest: DeleteUserRequest{},
-			outErr:    "sql: database is closed",
+			inRequest: service.DeleteUserRequest{},
+			outErr:    errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
@@ -357,21 +365,21 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 			defer db.Close()
 
 			// generate confict closing db
-			if tt.outErr == "sql: database is closed" {
+			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			mock.ExpectExec("^DELETE FROM users").
 				WithArgs(tt.inID).WillReturnResult(sqlmock.NewResult(0, 1))
 
-			r, err := MakeDeleteUserEndpoint(svc)(context.TODO(), tt.inRequest)
+			r, err := service.MakeDeleteUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(DeleteUserResponse)
+			result, ok := r.(service.DeleteUserResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}

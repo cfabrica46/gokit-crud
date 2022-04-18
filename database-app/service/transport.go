@@ -9,6 +9,7 @@ import (
 // DecodeGetAllUsersRequest ...
 func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	var request GetAllUsersRequest
+
 	return request, nil
 }
 
@@ -18,15 +19,23 @@ func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
 // DecodeGetUserByUsernameAndPasswordRequest ...
-func DecodeGetUserByUsernameAndPasswordRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetUserByUsernameAndPasswordRequest(
+	_ context.Context,
+	r *http.Request,
+) (
+	interface{},
+	error,
+) {
 	var request GetUserByUsernameAndPasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -36,6 +45,7 @@ func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -45,6 +55,7 @@ func DecodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -54,6 +65,7 @@ func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 

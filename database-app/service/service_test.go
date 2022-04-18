@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/cfabrica46/gokit-crud/database-app/service"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,10 +15,15 @@ const (
 	usernameTest string = "username"
 	passwordTest string = "password"
 	emailTest    string = "email@email.com"
+
+	noRows  string = "no rows"
+	closeDB string = "close db"
+
+	errDatabaseClosed string = "sql: database is closed"
 )
 
 func TestGetAllUsers(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		outID                              int
 		outUsername, outPassword, outEmail string
 		outErr                             string
@@ -37,7 +43,7 @@ func TestGetAllUsers(t *testing.T) {
 			outErr:      "sql: database is closed",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultErr string
 
 			db, mock, err := sqlmock.New()
@@ -50,7 +56,7 @@ func TestGetAllUsers(t *testing.T) {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows(
 				[]string{
@@ -78,7 +84,7 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestGetUserByID(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID                            int
 		inUsername, inPassword, inEmail string
 		outErr                          string
@@ -98,7 +104,7 @@ func TestGetUserByID(t *testing.T) {
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  "no rows",
+			condition:  noRows,
 		},
 		{
 			inID:       idTest,
@@ -106,10 +112,10 @@ func TestGetUserByID(t *testing.T) {
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "sql: database is closed",
-			condition:  "close db",
+			condition:  closeDB,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			log.SetFlags(log.Lshortfile)
 			var resultErr string
 
@@ -119,11 +125,11 @@ func TestGetUserByID(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == "close db" {
+			if tt.condition == closeDB {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows(
 				[]string{
@@ -138,11 +144,13 @@ func TestGetUserByID(t *testing.T) {
 				tt.inEmail,
 			)
 
-			if tt.condition == "no rows" {
+			if tt.condition == noRows {
 				rows = sqlmock.NewRows([]string{"id", "username", "password", "email"})
 			}
 
-			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(tt.inID).WillReturnRows(rows)
+			mock.ExpectQuery(
+				"^SELECT id, username, password, email FROM users",
+			).WithArgs(tt.inID).WillReturnRows(rows)
 
 			_, err = svc.GetUserByID(tt.inID)
 			if err != nil {
@@ -155,7 +163,7 @@ func TestGetUserByID(t *testing.T) {
 }
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID                            int
 		inUsername, inPassword, inEmail string
 		outErr                          string
@@ -175,7 +183,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  "no rows",
+			condition:  noRows,
 		},
 		{
 			inID:       idTest,
@@ -183,13 +191,13 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "sql: database is closed",
-			condition:  "close db",
+			condition:  closeDB,
 		},
 		// {"", ""},
-		// {"", "no rows"},
-		// {"sql: database is closed", "close db"},
+		// {"", noRows},
+		// {"sql: database is closed", closeDB},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			log.SetFlags(log.Lshortfile)
 			var resultErr string
 
@@ -199,11 +207,11 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == "close db" {
+			if tt.condition == closeDB {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows(
 				[]string{
@@ -218,11 +226,13 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 				tt.inEmail,
 			)
 
-			if tt.condition == "no rows" {
+			if tt.condition == noRows {
 				rows = sqlmock.NewRows([]string{"id", "username", "password", "email"})
 			}
 
-			mock.ExpectQuery("^SELECT id, username, password, email FROM users").WithArgs(tt.inUsername, tt.inPassword).WillReturnRows(rows)
+			mock.ExpectQuery(
+				"^SELECT id, username, password, email FROM users",
+			).WithArgs(tt.inUsername, tt.inPassword).WillReturnRows(rows)
 
 			_, err = svc.GetUserByUsernameAndPassword(tt.inUsername, tt.inPassword)
 			if err != nil {
@@ -235,7 +245,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 }
 
 func TestGetIDByUsername(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID       int
 		inUsername string
 		outErr     string
@@ -251,19 +261,19 @@ func TestGetIDByUsername(t *testing.T) {
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "",
-			condition:  "no rows",
+			condition:  noRows,
 		},
 		{
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "sql: database is closed",
-			condition:  "close db",
+			condition:  closeDB,
 		},
 		/* {"", ""},
-		{"", "no rows"},
-		{"sql: database is closed", "close db"}, */
+		{"", noRows},
+		{"sql: database is closed", closeDB}, */
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			log.SetFlags(log.Lshortfile)
 			var resultErr string
 
@@ -273,15 +283,15 @@ func TestGetIDByUsername(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == "close db" {
+			if tt.condition == closeDB {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
 			rows := sqlmock.NewRows([]string{"id"}).AddRow(tt.inID)
 
-			if tt.condition == "no rows" {
+			if tt.condition == noRows {
 				rows = sqlmock.NewRows([]string{"id"})
 			}
 
@@ -298,7 +308,7 @@ func TestGetIDByUsername(t *testing.T) {
 }
 
 func TestInsertUser(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		condition                       string
@@ -315,20 +325,20 @@ func TestInsertUser(t *testing.T) {
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  "no rows",
+			condition:  noRows,
 		},
 		{
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "sql: database is closed",
-			condition:  "close db",
+			condition:  closeDB,
 		},
 		// {"", ""},
 		// {"", "duplicate key"},
-		// {"sql: database is closed", "close db"},
+		// {"sql: database is closed", closeDB},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			log.SetFlags(log.Lshortfile)
 			var resultErr string
 
@@ -338,13 +348,21 @@ func TestInsertUser(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == "close db" {
+			if tt.condition == closeDB {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
-			mock.ExpectExec("^INSERT INTO users").WithArgs(tt.inUsername, tt.inPassword, tt.inEmail).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec(
+				"^INSERT INTO users",
+			).WithArgs(
+				tt.inUsername,
+				tt.inPassword,
+				tt.inEmail,
+			).WillReturnResult(
+				sqlmock.NewResult(0, 1),
+			)
 
 			err = svc.InsertUser(tt.inUsername, tt.inPassword, tt.inEmail)
 			if err != nil {
@@ -357,7 +375,7 @@ func TestInsertUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID int
 		// inUsername, inPassword, inEmail string
 		outErr    string
@@ -373,17 +391,17 @@ func TestDeleteUser(t *testing.T) {
 		// 	inPassword: passwordTest,
 		// 	inEmail:    emailTest,
 		// 	outErr:     "",
-		// 	condition:  "no rows",
+		// 	condition:  noRows,
 		// },
 		{
 			inID:      idTest,
 			outErr:    "sql: database is closed",
-			condition: "close db",
+			condition: closeDB,
 		},
 		// {"", ""},
-		// {"sql: database is closed", "close db"},
+		// {"sql: database is closed", closeDB},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			log.SetFlags(log.Lshortfile)
 			var resultErr string
 
@@ -393,13 +411,19 @@ func TestDeleteUser(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == "close db" {
+			if tt.condition == closeDB {
 				db.Close()
 			}
 
-			svc := GetService(db)
+			svc := service.GetService(db)
 
-			mock.ExpectExec("^DELETE FROM users").WithArgs(tt.inID).WillReturnResult(sqlmock.NewResult(0, 1))
+			mock.ExpectExec(
+				"^DELETE FROM users",
+			).WithArgs(
+				tt.inID,
+			).WillReturnResult(
+				sqlmock.NewResult(0, 1),
+			)
 
 			_, err = svc.DeleteUser(tt.inID)
 			if err != nil {

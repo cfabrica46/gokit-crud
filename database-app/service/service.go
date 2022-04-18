@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"errors"
 )
 
 type serviceInterface interface {
@@ -16,9 +17,6 @@ type serviceInterface interface {
 // Service ...
 type Service struct {
 	db *sql.DB
-
-	// Data for DB
-	host, port, user, password, dbName, sslmode, driver string
 }
 
 // GetService ...
@@ -36,6 +34,7 @@ func (s Service) GetAllUsers() (users []User, err error) {
 
 	for rows.Next() {
 		var userBeta User
+
 		err = rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
 		if err != nil {
 			return
@@ -57,11 +56,13 @@ func (s Service) GetUserByID(id int) (user User, err error) {
 
 	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			err = nil
 		}
+
 		return
 	}
+
 	return
 }
 
@@ -75,11 +76,13 @@ func (s Service) GetUserByUsernameAndPassword(username, password string) (user U
 
 	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			err = nil
 		}
+
 		return
 	}
+
 	return
 }
 
@@ -89,11 +92,13 @@ func (s Service) GetIDByUsername(username string) (id int, err error) {
 
 	err = row.Scan(&id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			err = nil
 		}
+
 		return
 	}
+
 	return
 }
 
@@ -121,5 +126,6 @@ func (s *Service) DeleteUser(id int) (rowsAffected int, err error) {
 
 	count, _ := r.RowsAffected()
 	rowsAffected = int(count)
+
 	return
 }

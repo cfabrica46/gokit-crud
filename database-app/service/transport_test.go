@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"bytes"
@@ -9,25 +9,27 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/cfabrica46/gokit-crud/database-app/service"
 )
 
 func TestDecodeGetAllUsersRequest(t *testing.T) {
 	for i, tt := range []struct {
 		in       *http.Request
-		out      GetAllUsersRequest
+		out      service.GetAllUsersRequest
 		outError string
 	}{
-		{&http.Request{}, GetAllUsersRequest{}, ""},
+		{&http.Request{}, service.GetAllUsersRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result GetAllUsersRequest
+			var result service.GetAllUsersRequest
 			var resultErr string
 
-			r, err := DecodeGetAllUsersRequest(context.TODO(), tt.in)
+			r, err := service.DecodeGetAllUsersRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
-			result, ok := r.(GetAllUsersRequest)
+			result, ok := r.(service.GetAllUsersRequest)
 			if !ok {
 				t.Error("result is not of the type indicated")
 			}
@@ -43,7 +45,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 }
 
 func TestDecodeGetUserByIDRequest(t *testing.T) {
-	dataJSON, err := json.Marshal(GetUserByIDRequest{ID: 1})
+	dataJSON, err := json.Marshal(service.GetUserByIDRequest{ID: 1})
 	if err != nil {
 		t.Error(err)
 	}
@@ -52,6 +54,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	badReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -59,24 +62,24 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      GetUserByIDRequest
+		out      service.GetUserByIDRequest
 		outError string
 	}{
-		{goodReq, GetUserByIDRequest{ID: 1}, ""},
-		{badReq, GetUserByIDRequest{ID: 0}, "EOF"},
+		{goodReq, service.GetUserByIDRequest{ID: 1}, ""},
+		{badReq, service.GetUserByIDRequest{ID: 0}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result GetUserByIDRequest
+			var result service.GetUserByIDRequest
 			var resultErr string
 
-			r, err := DecodeGetUserByIDRequest(context.TODO(), tt.in)
+			r, err := service.DecodeGetUserByIDRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(GetUserByIDRequest)
+			result, ok := r.(service.GetUserByIDRequest)
 			if !ok {
-				if (tt.out != GetUserByIDRequest{}) {
+				if (tt.out != service.GetUserByIDRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -93,7 +96,8 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 	url := "localhost:8080/user/username_password"
-	dataJSON, err := json.Marshal(GetUserByUsernameAndPasswordRequest{"cesar", "01234"})
+
+	dataJSON, err := json.Marshal(service.GetUserByUsernameAndPasswordRequest{"cesar", "01234"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -102,6 +106,7 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -109,23 +114,23 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      GetUserByUsernameAndPasswordRequest
+		out      service.GetUserByUsernameAndPasswordRequest
 		outError string
 	}{
-		{goodReq, GetUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
-		{badReq, GetUserByUsernameAndPasswordRequest{}, "EOF"},
+		{goodReq, service.GetUserByUsernameAndPasswordRequest{"cesar", "01234"}, ""},
+		{badReq, service.GetUserByUsernameAndPasswordRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result GetUserByUsernameAndPasswordRequest
+			var result service.GetUserByUsernameAndPasswordRequest
 			var resultErr string
 
-			r, err := DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
+			r, err := service.DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
-			result, ok := r.(GetUserByUsernameAndPasswordRequest)
+			result, ok := r.(service.GetUserByUsernameAndPasswordRequest)
 			if !ok {
-				if (tt.out != GetUserByUsernameAndPasswordRequest{}) {
+				if (tt.out != service.GetUserByUsernameAndPasswordRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -141,7 +146,7 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 }
 
 func TestDecodeGetIDByUsernameRequest(t *testing.T) {
-	dataJSON, err := json.Marshal(GetIDByUsernameRequest{Username: "cesar"})
+	dataJSON, err := json.Marshal(service.GetIDByUsernameRequest{Username: "cesar"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -150,6 +155,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	badReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -157,23 +163,23 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      GetIDByUsernameRequest
+		out      service.GetIDByUsernameRequest
 		outError string
 	}{
-		{goodReq, GetIDByUsernameRequest{Username: "cesar"}, ""},
-		{badReq, GetIDByUsernameRequest{}, ""},
+		{goodReq, service.GetIDByUsernameRequest{Username: "cesar"}, ""},
+		{badReq, service.GetIDByUsernameRequest{}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result GetIDByUsernameRequest
+			var result service.GetIDByUsernameRequest
 			var resultErr string
 
-			r, err := DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
+			r, err := service.DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
-			result, ok := r.(GetIDByUsernameRequest)
+			result, ok := r.(service.GetIDByUsernameRequest)
 			if !ok {
-				if (tt.out != GetIDByUsernameRequest{}) {
+				if (tt.out != service.GetIDByUsernameRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -191,7 +197,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 func TestDecodeInsertUserRequest(t *testing.T) {
 	url := "localhost:8080/user"
 
-	dataJSON, err := json.Marshal(InsertUserRequest{"cesar", "01234", "cesar@email.com"})
+	dataJSON, err := json.Marshal(service.InsertUserRequest{"cesar", "01234", "cesar@email.com"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -200,6 +206,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		t.Error(err)
@@ -207,23 +214,23 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      InsertUserRequest
+		out      service.InsertUserRequest
 		outError string
 	}{
-		{goodReq, InsertUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
-		{badReq, InsertUserRequest{}, "EOF"},
+		{goodReq, service.InsertUserRequest{"cesar", "01234", "cesar@email.com"}, ""},
+		{badReq, service.InsertUserRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result InsertUserRequest
+			var result service.InsertUserRequest
 			var resultErr string
 
-			r, err := DecodeInsertUserRequest(context.TODO(), tt.in)
+			r, err := service.DecodeInsertUserRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
-			result, ok := r.(InsertUserRequest)
+			result, ok := r.(service.InsertUserRequest)
 			if !ok {
-				if (tt.out != InsertUserRequest{}) {
+				if (tt.out != service.InsertUserRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -241,7 +248,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 func TestDecodeDeleteUserRequest(t *testing.T) {
 	url := "localhost:8080/user"
 
-	dataJSON, err := json.Marshal(DeleteUserRequest{1})
+	dataJSON, err := json.Marshal(service.DeleteUserRequest{1})
 	if err != nil {
 		t.Error(err)
 	}
@@ -258,23 +265,23 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 
 	for i, tt := range []struct {
 		in       *http.Request
-		out      DeleteUserRequest
+		out      service.DeleteUserRequest
 		outError string
 	}{
-		{goodReq, DeleteUserRequest{1}, ""},
-		{badReq, DeleteUserRequest{}, "EOF"},
+		{goodReq, service.DeleteUserRequest{1}, ""},
+		{badReq, service.DeleteUserRequest{}, "EOF"},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			var result DeleteUserRequest
+			var result service.DeleteUserRequest
 			var resultErr string
 
-			r, err := DecodeDeleteUserRequest(context.TODO(), tt.in)
+			r, err := service.DecodeDeleteUserRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
-			result, ok := r.(DeleteUserRequest)
+			result, ok := r.(service.DeleteUserRequest)
 			if !ok {
-				if (tt.out != DeleteUserRequest{}) {
+				if (tt.out != service.DeleteUserRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
@@ -299,7 +306,7 @@ func TestEncodeResponse(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			var resultErr string
 
-			err := EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
+			err := service.EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
