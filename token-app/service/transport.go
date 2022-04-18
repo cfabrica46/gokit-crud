@@ -12,6 +12,7 @@ func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -21,6 +22,7 @@ func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{},
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -30,6 +32,7 @@ func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, err
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -39,6 +42,7 @@ func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 
@@ -48,6 +52,7 @@ func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, e
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
 

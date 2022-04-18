@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -6,16 +6,19 @@ import (
 	"testing"
 
 	"github.com/alicebob/miniredis"
+	"github.com/cfabrica46/gokit-crud/token-app/service"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMakeGenerateTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in  GenerateTokenRequest
+		in  service.GenerateTokenRequest
 		out string
 	}{
-		{GenerateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
+		{service.GenerateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			mr, err := miniredis.Run()
@@ -25,14 +28,14 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
-			r, err := MakeGenerateTokenEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeGenerateTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(GenerateTokenResponse)
+			result, ok := r.(service.GenerateTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -47,14 +50,26 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeExtractTokenEndpoint(t *testing.T) {
-	for i, tt := range []struct {
-		in     ExtractTokenRequest
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       idTest,
+		"username": usernameTest,
+		"email":    emailTest,
+		"uuid":     uuid.NewString(),
+	})
+
+	tokenSigned, _ := token.SignedString([]byte(secretTest))
+
+	for indx, tt := range []struct {
+		in     service.ExtractTokenRequest
 		outErr string
 	}{
-		{ExtractTokenRequest{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", "secret"}, ""},
-		{ExtractTokenRequest{"", "secret"}, "token contains an invalid number of segments"},
+		{service.ExtractTokenRequest{tokenSigned, secretTest}, ""},
+		{service.ExtractTokenRequest{
+			"",
+			secretTest,
+		}, "token contains an invalid number of segments"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -62,14 +77,14 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
-			r, err := MakeExtractTokenEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeExtractTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(ExtractTokenResponse)
+			result, ok := r.(service.ExtractTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -81,11 +96,11 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 func TestMakeSetTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     SetTokenRequest
+		in     service.SetTokenRequest
 		outErr string
 	}{
-		{SetTokenRequest{"token"}, ""},
-		{SetTokenRequest{""}, "redis: client is closed"},
+		{service.SetTokenRequest{"token"}, ""},
+		{service.SetTokenRequest{""}, errRedisClosed},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			mr, err := miniredis.Run()
@@ -95,19 +110,19 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			// Generate Conflict
-			if tt.outErr == "redis: client is closed" {
-				svc.db.Close()
+			if tt.outErr == errRedisClosed {
+				svc.DB.Close()
 			}
 
-			r, err := MakeSetTokenEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeSetTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(SetTokenResponse)
+			result, ok := r.(service.SetTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -119,11 +134,11 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 
 func TestMakeDeleteTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     DeleteTokenRequest
+		in     service.DeleteTokenRequest
 		outErr string
 	}{
-		{DeleteTokenRequest{"token"}, ""},
-		{DeleteTokenRequest{""}, "redis: client is closed"},
+		{service.DeleteTokenRequest{"token"}, ""},
+		{service.DeleteTokenRequest{""}, errRedisClosed},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			mr, err := miniredis.Run()
@@ -133,19 +148,19 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			// Generate Conflict
-			if tt.outErr == "redis: client is closed" {
-				svc.db.Close()
+			if tt.outErr == errRedisClosed {
+				svc.DB.Close()
 			}
 
-			r, err := MakeDeleteTokenEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeDeleteTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(DeleteTokenResponse)
+			result, ok := r.(service.DeleteTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}
@@ -157,11 +172,11 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 
 func TestMakeCheckTokenEndpoint(t *testing.T) {
 	for i, tt := range []struct {
-		in     CheckTokenRequest
+		in     service.CheckTokenRequest
 		outErr string
 	}{
-		{CheckTokenRequest{"token"}, ""},
-		{CheckTokenRequest{""}, "redis: client is closed"},
+		{service.CheckTokenRequest{"token"}, ""},
+		{service.CheckTokenRequest{""}, errRedisClosed},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
 			mr, err := miniredis.Run()
@@ -171,19 +186,19 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			// Generate Conflict
-			if tt.outErr == "redis: client is closed" {
-				svc.db.Close()
+			if tt.outErr == errRedisClosed {
+				svc.DB.Close()
 			}
 
-			r, err := MakeCheckTokenEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeCheckTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
 				t.Error(err)
 			}
 
-			result, ok := r.(CheckTokenResponse)
+			result, ok := r.(service.CheckTokenResponse)
 			if !ok {
 				t.Error("response is not of the type indicated")
 			}

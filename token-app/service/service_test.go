@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"fmt"
@@ -6,22 +6,39 @@ import (
 	"testing"
 
 	"github.com/alicebob/miniredis"
+	"github.com/cfabrica46/gokit-crud/token-app/service"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	idTest         int    = 1
+	usernameTest   string = "username"
+	passwordTest   string = "password"
+	emailTest      string = "email@email.com"
+	secretTest     string = "secret"
+	errRedisClosed string = "redis: client is closed"
+)
+
 func TestGenerateToken(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inID                int
 		inUsername, inEmail string
 		inSecret            []byte
 		outToken, outErr    string
 	}{
-		{1, "cesar", "cesar@email.com", []byte("secret"), "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.", ""},
+		{
+			1,
+			"cesar",
+			"cesar@email.com",
+			[]byte("secret"),
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.",
+			"",
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var result string
 
 			mr, err := miniredis.Run()
@@ -31,7 +48,7 @@ func TestGenerateToken(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			result = svc.GenerateToken(tt.inID, tt.inUsername, tt.inEmail, tt.inSecret)
 
@@ -43,16 +60,39 @@ func TestGenerateToken(t *testing.T) {
 }
 
 func TestExtractToken(t *testing.T) {
-	for i, tt := range []struct {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       idTest,
+		"username": usernameTest,
+		"email":    emailTest,
+		"uuid":     uuid.NewString(),
+	})
+
+	tokenSigned, _ := token.SignedString([]byte(secretTest))
+
+	for indx, tt := range []struct {
 		inToken                       string
 		inSecret                      []byte
 		outID                         int
 		outUsername, outEmail, outErr string
 	}{
-		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", []byte("secret"), 1, "cesar", "cesar@email.com", ""},
-		{"", nil, 0, "", "", "token contains an invalid number of segments"},
+		{
+			tokenSigned,
+			[]byte(secretTest),
+			idTest,
+			usernameTest,
+			emailTest,
+			"",
+		},
+		{
+			"",
+			nil,
+			0,
+			"",
+			"",
+			"token contains an invalid number of segments",
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultID int
 			var resultUsername, resultEmail, resultErr string
 
@@ -63,7 +103,7 @@ func TestExtractToken(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			resultID, resultUsername, resultEmail, err = svc.ExtractToken(tt.inToken, tt.inSecret)
 			if err != nil {
@@ -79,14 +119,23 @@ func TestExtractToken(t *testing.T) {
 }
 
 func TestSetToken(t *testing.T) {
-	for i, tt := range []struct {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       idTest,
+		"username": usernameTest,
+		"email":    emailTest,
+		"uuid":     uuid.NewString(),
+	})
+
+	tokenSigned, _ := token.SignedString([]byte(secretTest))
+
+	for indx, tt := range []struct {
 		in     string
 		outErr string
 	}{
-		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", ""},
+		{tokenSigned, ""},
 		{"", "redis: client is closed"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultErr string
 
 			mr, err := miniredis.Run()
@@ -96,11 +145,11 @@ func TestSetToken(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			// Generate Conflict
 			if tt.outErr == "redis: client is closed" {
-				svc.db.Close()
+				svc.DB.Close()
 			}
 
 			err = svc.SetToken(tt.in)
@@ -114,13 +163,22 @@ func TestSetToken(t *testing.T) {
 }
 
 func TestDeleteToken(t *testing.T) {
-	for i, tt := range []struct {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       idTest,
+		"username": usernameTest,
+		"email":    emailTest,
+		"uuid":     uuid.NewString(),
+	})
+
+	tokenSigned, _ := token.SignedString([]byte(secretTest))
+
+	for indx, tt := range []struct {
 		in     string
 		outErr string
 	}{
-		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", ""},
+		{tokenSigned, ""},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultErr string
 
 			mr, err := miniredis.Run()
@@ -130,7 +188,7 @@ func TestDeleteToken(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			err = svc.DeleteToken(tt.in)
 			if err != nil {
@@ -143,16 +201,25 @@ func TestDeleteToken(t *testing.T) {
 }
 
 func TestCheckToken(t *testing.T) {
-	for i, tt := range []struct {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       idTest,
+		"username": usernameTest,
+		"email":    emailTest,
+		"uuid":     uuid.NewString(),
+	})
+
+	tokenSigned, _ := token.SignedString([]byte(secretTest))
+
+	for indx, tt := range []struct {
 		in       string
 		outCheck bool
 		outErr   string
 	}{
-		{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNlc2FyQGVtYWlsLmNvbSIsImlkIjoxLCJ1c2VybmFtZSI6ImNlc2FyIiwidXVpZCI6IjcxNzFjZTU2LWIwMzYtNDEzMi1hMDljLWQyZmZiMzgzYjdjMSJ9.V_vEFyz6OAc5eOFgt589CC0OCFf72BU5MuBg2IRl4dg", true, ""},
+		{tokenSigned, true, ""},
 		{"", false, ""},
 		{"", false, "redis: client is closed"},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultCheck bool
 			var resultErr string
 
@@ -163,7 +230,7 @@ func TestCheckToken(t *testing.T) {
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 
-			svc := GetService(client)
+			svc := service.GetService(client)
 
 			// insert
 			if tt.in != "" {
@@ -175,7 +242,7 @@ func TestCheckToken(t *testing.T) {
 
 			// Generate Conflict
 			if tt.outErr == "redis: client is closed" {
-				svc.db.Close()
+				svc.DB.Close()
 			}
 
 			resultCheck, err = svc.CheckToken(tt.in)
@@ -190,17 +257,17 @@ func TestCheckToken(t *testing.T) {
 }
 
 func TestKeyFunc(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		inSecret  []byte
 		outSecret []byte
 		outErr    string
 	}{
-		{[]byte("secret"), []byte("secret"), "unexpected signing method: PS256"},
+		{[]byte("secret"), []byte("secret"), service.ErrUnexpectedSigningMethod.Error()},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultErr string
 
-			kf := keyFunc(tt.inSecret)
+			kf := service.KeyFunc(tt.inSecret)
 
 			// generateToken
 			token := jwt.NewWithClaims(jwt.SigningMethodPS256, jwt.MapClaims{
