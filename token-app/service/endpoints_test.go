@@ -14,13 +14,21 @@ import (
 )
 
 func TestMakeGenerateTokenEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		in  service.GenerateTokenRequest
 		out string
 	}{
-		{service.GenerateTokenRequest{1, "cesar", "cesar@email.com", "secret"}, ""},
+		{
+			in: service.GenerateTokenRequest{
+				idTest,
+				usernameTest,
+				emailTest,
+				secretTest,
+			},
+			out: "",
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -63,11 +71,20 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 		in     service.ExtractTokenRequest
 		outErr string
 	}{
-		{service.ExtractTokenRequest{tokenSigned, secretTest}, ""},
-		{service.ExtractTokenRequest{
-			"",
-			secretTest,
-		}, "token contains an invalid number of segments"},
+		{
+			in: service.ExtractTokenRequest{
+				tokenSigned,
+				secretTest,
+			},
+			outErr: "",
+		},
+		{
+			in: service.ExtractTokenRequest{
+				"",
+				secretTest,
+			},
+			outErr: "token contains an invalid number of segments",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			mr, err := miniredis.Run()
@@ -95,14 +112,20 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeSetTokenEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		in     service.SetTokenRequest
 		outErr string
 	}{
-		{service.SetTokenRequest{"token"}, ""},
-		{service.SetTokenRequest{""}, errRedisClosed},
+		{
+			in:     service.SetTokenRequest{"token"},
+			outErr: "",
+		},
+		{
+			in:     service.SetTokenRequest{""},
+			outErr: errRedisClosed,
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -133,14 +156,20 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeDeleteTokenEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		in     service.DeleteTokenRequest
 		outErr string
 	}{
-		{service.DeleteTokenRequest{"token"}, ""},
-		{service.DeleteTokenRequest{""}, errRedisClosed},
+		{
+			in:     service.DeleteTokenRequest{"token"},
+			outErr: "",
+		},
+		{
+			in:     service.DeleteTokenRequest{""},
+			outErr: errRedisClosed,
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -171,14 +200,20 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeCheckTokenEndpoint(t *testing.T) {
-	for i, tt := range []struct {
+	for indx, tt := range []struct {
 		in     service.CheckTokenRequest
 		outErr string
 	}{
-		{service.CheckTokenRequest{"token"}, ""},
-		{service.CheckTokenRequest{""}, errRedisClosed},
+		{
+			in:     service.CheckTokenRequest{"token"},
+			outErr: "",
+		},
+		{
+			in:     service.CheckTokenRequest{""},
+			outErr: errRedisClosed,
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)

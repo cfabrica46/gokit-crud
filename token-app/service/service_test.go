@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	idTest         int    = 1
-	usernameTest   string = "username"
-	passwordTest   string = "password"
-	emailTest      string = "email@email.com"
-	secretTest     string = "secret"
+	idTest       int    = 1
+	usernameTest string = "username"
+	emailTest    string = "email@email.com"
+	secretTest   string = "secret"
+	tokenTest    string = "token"
+
 	errRedisClosed string = "redis: client is closed"
 )
 
@@ -30,12 +31,12 @@ func TestGenerateToken(t *testing.T) {
 		outToken, outErr    string
 	}{
 		{
-			1,
-			"cesar",
-			"cesar@email.com",
-			[]byte("secret"),
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.",
-			"",
+			inID:       idTest,
+			inUsername: usernameTest,
+			inEmail:    emailTest,
+			inSecret:   []byte(secretTest),
+			outToken:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.",
+			outErr:     "",
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
@@ -67,7 +68,10 @@ func TestExtractToken(t *testing.T) {
 		"uuid":     uuid.NewString(),
 	})
 
-	tokenSigned, _ := token.SignedString([]byte(secretTest))
+	tokenSigned, err := token.SignedString([]byte(secretTest))
+	if err != nil {
+		t.Error(err)
+	}
 
 	for indx, tt := range []struct {
 		inToken                       string
@@ -76,20 +80,20 @@ func TestExtractToken(t *testing.T) {
 		outUsername, outEmail, outErr string
 	}{
 		{
-			tokenSigned,
-			[]byte(secretTest),
-			idTest,
-			usernameTest,
-			emailTest,
-			"",
+			inToken:     tokenSigned,
+			inSecret:    []byte(secretTest),
+			outID:       idTest,
+			outUsername: usernameTest,
+			outEmail:    emailTest,
+			outErr:      "",
 		},
 		{
-			"",
-			nil,
-			0,
-			"",
-			"",
-			"token contains an invalid number of segments",
+			inToken:     "",
+			inSecret:    nil,
+			outID:       0,
+			outUsername: "",
+			outEmail:    "",
+			outErr:      "token contains an invalid number of segments",
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
@@ -132,8 +136,14 @@ func TestSetToken(t *testing.T) {
 		in     string
 		outErr string
 	}{
-		{tokenSigned, ""},
-		{"", "redis: client is closed"},
+		{
+			in:     tokenSigned,
+			outErr: "",
+		},
+		{
+			in:     "",
+			outErr: "redis: client is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultErr string
@@ -176,7 +186,10 @@ func TestDeleteToken(t *testing.T) {
 		in     string
 		outErr string
 	}{
-		{tokenSigned, ""},
+		{
+			in:     tokenSigned,
+			outErr: "",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultErr string
@@ -215,9 +228,21 @@ func TestCheckToken(t *testing.T) {
 		outCheck bool
 		outErr   string
 	}{
-		{tokenSigned, true, ""},
-		{"", false, ""},
-		{"", false, "redis: client is closed"},
+		{
+			in:       tokenSigned,
+			outCheck: true,
+			outErr:   "",
+		},
+		{
+			in:       "",
+			outCheck: false,
+			outErr:   "",
+		},
+		{
+			in:       "",
+			outCheck: false,
+			outErr:   "redis: client is closed",
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultCheck bool
@@ -258,11 +283,20 @@ func TestCheckToken(t *testing.T) {
 
 func TestKeyFunc(t *testing.T) {
 	for indx, tt := range []struct {
-		inSecret  []byte
-		outSecret []byte
-		outErr    string
+		inSecret            []byte
+		inID                int
+		inUsername, inEmail string
+		outSecret           []byte
+		outErr              string
 	}{
-		{[]byte("secret"), []byte("secret"), service.ErrUnexpectedSigningMethod.Error()},
+		{
+			inSecret:   []byte(secretTest),
+			inID:       idTest,
+			inUsername: usernameTest,
+			inEmail:    emailTest,
+			outSecret:  []byte(secretTest),
+			outErr:     service.ErrUnexpectedSigningMethod.Error(),
+		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			var resultErr string
@@ -271,9 +305,9 @@ func TestKeyFunc(t *testing.T) {
 
 			// generateToken
 			token := jwt.NewWithClaims(jwt.SigningMethodPS256, jwt.MapClaims{
-				"id":       1,
-				"username": "cesar",
-				"email":    "cesar@email.com",
+				"id":       tt.inID,
+				"username": tt.inUsername,
+				"email":    tt.inEmail,
 				"uuid":     uuid.NewString(),
 			})
 
