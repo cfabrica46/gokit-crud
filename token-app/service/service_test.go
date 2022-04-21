@@ -7,8 +7,8 @@ import (
 
 	"github.com/alicebob/miniredis"
 	"github.com/cfabrica46/gokit-crud/token-app/service"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -299,6 +299,7 @@ func TestKeyFunc(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+			var result []byte
 			var resultErr string
 
 			kf := service.KeyFunc(tt.inSecret)
@@ -311,13 +312,22 @@ func TestKeyFunc(t *testing.T) {
 				"uuid":     uuid.NewString(),
 			})
 
-			_, err := kf(token)
+			r, err := kf(token)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
+			result, ok := r.([]byte)
+			if !ok {
+				t.Error("response is not of the type indicated")
+			}
+
 			if !strings.Contains(resultErr, tt.outErr) {
 				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			}
+
+			if string(tt.outSecret) != string(result) {
+				t.Errorf("want %v; got %v", tt.outSecret, result)
 			}
 		})
 	}

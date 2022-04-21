@@ -7,8 +7,8 @@ import (
 
 	"github.com/alicebob/miniredis"
 	"github.com/cfabrica46/gokit-crud/token-app/service"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )

@@ -376,8 +376,7 @@ func TestInsertUser(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	for indx, tt := range []struct {
-		inID int
-		// inUsername, inPassword, inEmail string
+		inID      int
 		outErr    string
 		condition string
 	}{
@@ -386,20 +385,11 @@ func TestDeleteUser(t *testing.T) {
 			outErr:    "",
 			condition: "",
 		},
-		// {
-		// 	inUsername: usernameTest,
-		// 	inPassword: passwordTest,
-		// 	inEmail:    emailTest,
-		// 	outErr:     "",
-		// 	condition:  noRows,
-		// },
 		{
 			inID:      idTest,
 			outErr:    "sql: database is closed",
 			condition: closeDB,
 		},
-		// {"", ""},
-		// {"sql: database is closed", closeDB},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
 			log.SetFlags(log.Lshortfile)
