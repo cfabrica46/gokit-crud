@@ -5,8 +5,8 @@ type GetAllUsersRequest struct{}
 
 // GetAllUsersResponse ...
 type GetAllUsersResponse struct {
-	Users []User `json:"users"`
 	Err   string `json:"err,omitempty"`
+	Users []User `json:"users"`
 }
 
 // GetUserByIDRequest ...
@@ -16,8 +16,8 @@ type GetUserByIDRequest struct {
 
 // GetUserByIDResponse ...
 type GetUserByIDResponse struct {
-	User User   `json:"user"`
 	Err  string `json:"err,omitempty"`
+	User User   `json:"user"`
 }
 
 // GetUserByUsernameAndPasswordRequest ...
@@ -28,8 +28,8 @@ type GetUserByUsernameAndPasswordRequest struct {
 
 // GetUserByUsernameAndPasswordResponse ...
 type GetUserByUsernameAndPasswordResponse struct {
-	User User   `json:"user"`
 	Err  string `json:"err,omitempty"`
+	User User   `json:"user"`
 }
 
 // GetIDByUsernameRequest ...
@@ -39,8 +39,8 @@ type GetIDByUsernameRequest struct {
 
 // GetIDByUsernameResponse ...
 type GetIDByUsernameResponse struct {
-	ID  int    `json:"id"`
 	Err string `json:"err,omitempty"`
+	ID  int    `json:"id"`
 }
 
 // InsertUserRequest ...
@@ -62,6 +62,6 @@ type DeleteUserRequest struct {
 
 // DeleteUserResponse ...
 type DeleteUserResponse struct {
-	RowsAffected int    `json:"rowsAffected"`
 	Err          string `json:"err,omitempty"`
+	RowsAffected int    `json:"rowsAffected"`
 }

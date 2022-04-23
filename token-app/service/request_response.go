@@ -2,10 +2,10 @@ package service
 
 // GenerateTokenRequest ...
 type GenerateTokenRequest struct {
-	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Secret   string `json:"secret"`
+	ID       int    `json:"id"`
 }
 
 // GenerateTokenResponse ...
@@ -21,10 +21,10 @@ type ExtractTokenRequest struct {
 
 // ExtractTokenResponse ...
 type ExtractTokenResponse struct {
-	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Err      string `json:"err,omitempty"`
+	ID       int    `json:"id"`
 }
 
 // SetTokenRequest ...
@@ -54,6 +54,6 @@ type CheckTokenRequest struct {
 
 // CheckTokenResponse ...
 type CheckTokenResponse struct {
-	Check bool   `json:"check"`
 	Err   string `json:"err,omitempty"`
+	Check bool   `json:"check"`
 }

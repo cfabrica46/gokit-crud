@@ -24,23 +24,23 @@ const (
 
 func TestGetAllUsers(t *testing.T) {
 	for indx, tt := range []struct {
-		outID                              int
 		outUsername, outPassword, outEmail string
 		outErr                             string
+		outID                              int
 	}{
 		{
 			outID:       idTest,
 			outUsername: usernameTest,
-			outPassword: passwordTest,
-			outEmail:    emailTest,
-			outErr:      "",
+			// outPassword: passwordTest,
+			outEmail: emailTest,
+			outErr:   "",
 		},
 		{
 			outID:       idTest,
 			outUsername: usernameTest,
-			outPassword: passwordTest,
-			outEmail:    emailTest,
-			outErr:      "sql: database is closed",
+			// outPassword: passwordTest,
+			outEmail: emailTest,
+			outErr:   "sql: database is closed",
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
@@ -66,6 +66,7 @@ func TestGetAllUsers(t *testing.T) {
 					"email",
 				}).AddRow(
 				tt.outID,
+				// "oli",
 				tt.outUsername,
 				// tt.outPassword,
 				tt.outEmail,
@@ -85,10 +86,10 @@ func TestGetAllUsers(t *testing.T) {
 
 func TestGetUserByID(t *testing.T) {
 	for indx, tt := range []struct {
-		inID                            int
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		condition                       string
+		inID                            int
 	}{
 		{
 			inID:       idTest,
@@ -164,10 +165,10 @@ func TestGetUserByID(t *testing.T) {
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
 	for indx, tt := range []struct {
-		inID                            int
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		condition                       string
+		inID                            int
 	}{
 		{
 			inID:       idTest,
@@ -246,10 +247,10 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 
 func TestGetIDByUsername(t *testing.T) {
 	for indx, tt := range []struct {
-		inID       int
 		inUsername string
 		outErr     string
 		condition  string
+		inID       int
 	}{
 		{
 			inID:       idTest,
@@ -376,9 +377,9 @@ func TestInsertUser(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	for indx, tt := range []struct {
-		inID      int
 		outErr    string
 		condition string
+		inID      int
 	}{
 		{
 			inID:      idTest,

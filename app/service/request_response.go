@@ -42,8 +42,8 @@ type GetAllUsersRequest struct{}
 
 // GetAllUsersResponse () ([]dbapp.User, error).
 type GetAllUsersResponse struct {
-	Users []dbapp.User `json:"users"`
 	Err   string       `json:"err,omitempty"`
+	Users []dbapp.User `json:"users"`
 }
 
 // ProfileRequest (string) (dbapp.User, error).

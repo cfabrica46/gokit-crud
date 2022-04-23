@@ -18,7 +18,7 @@ func MakeSignUpEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return SignUpResponse{token, errMessage}, nil
+		return SignUpResponse{Token: token, Err: errMessage}, nil
 	}
 }
 
@@ -34,7 +34,7 @@ func MakeSignInEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return SignInResponse{token, errMessage}, nil
+		return SignInResponse{Token: token, Err: errMessage}, nil
 	}
 }
 
@@ -50,7 +50,7 @@ func MakeLogOutEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return LogOutResponse{errMessage}, nil
+		return LogOutResponse{Err: errMessage}, nil
 	}
 }
 
@@ -64,7 +64,7 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetAllUsersResponse{users, errMessage}, nil
+		return GetAllUsersResponse{Users: users, Err: errMessage}, nil
 	}
 }
 
@@ -80,7 +80,7 @@ func MakeProfileEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return ProfileResponse{user, errMessage}, nil
+		return ProfileResponse{User: user, Err: errMessage}, nil
 	}
 }
 
@@ -96,6 +96,6 @@ func MakeDeleteAccountEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return DeleteAccountResponse{errMessage}, nil
+		return DeleteAccountResponse{Err: errMessage}, nil
 	}
 }

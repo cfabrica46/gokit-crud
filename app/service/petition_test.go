@@ -18,9 +18,9 @@ import (
 func TestMakePetition(t *testing.T) {
 	for index, table := range []struct {
 		inURL, inMethod string
+		outErr          string
 		inBody          interface{}
 		out             []byte
-		outErr          string
 		isError         bool
 	}{
 		{
@@ -119,9 +119,9 @@ func TestPetitionGetAllUsers(t *testing.T) {
 
 	for index, table := range []struct {
 		inURL    string
+		outErr   string
 		inResp   []byte
 		outUsers []dbapp.User
-		outErr   string
 		isError  bool
 	}{
 		{
@@ -198,9 +198,9 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 
 	for index, table := range []struct {
 		inURL, inUsername string
+		outErr            string
 		inResp            []byte
 		outID             int
-		outErr            string
 		isError           bool
 	}{
 		{
@@ -292,10 +292,10 @@ func TestPetitionGetUserByID(t *testing.T) {
 
 	for index, table := range []struct {
 		inURL   string
-		inID    int
-		inResp  []byte
-		outUser dbapp.User
 		outErr  string
+		outUser dbapp.User
+		inResp  []byte
+		inID    int
 		isError bool
 	}{
 		{
@@ -389,9 +389,9 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 		inURL      string
 		inUsername string
 		inPassword string
-		inResp     []byte
-		outUser    dbapp.User
 		outErr     string
+		outUser    dbapp.User
+		inResp     []byte
 		isError    bool
 	}{
 		{
@@ -484,8 +484,8 @@ func TestPetitionInsertUser(t *testing.T) {
 		inUsername string
 		inPassword string
 		inEmail    string
-		inResp     []byte
 		outErr     string
+		inResp     []byte
 		isError    bool
 	}{
 		{
@@ -573,9 +573,9 @@ func TestPetitionDeleteUser(t *testing.T) {
 
 	for index, table := range []struct {
 		inURL   string
-		inID    int
-		inResp  []byte
 		outErr  string
+		inResp  []byte
+		inID    int
 		isError bool
 	}{
 		{
@@ -646,13 +646,13 @@ func TestPetitionGenerateToken(t *testing.T) {
 
 	for index, table := range []struct {
 		inURL      string
-		inID       int
 		inUsername string
 		inEmail    string
 		inSecret   string
-		inResp     []byte
 		outToken   string
 		outErr     string
+		inResp     []byte
+		inID       int
 		isError    bool
 	}{
 		{
@@ -747,12 +747,12 @@ func TestPetitionExtractToken(t *testing.T) {
 		inURL       string
 		inToken     string
 		inSecret    string
-		inResp      []byte
-		outID       int
 		outUsername string
 		outEmail    string
 		outErr      string
+		inResp      []byte
 		isError     bool
+		outID       int
 	}{
 		{
 			inURL:       urlTest,
@@ -853,8 +853,8 @@ func TestPetitionSetToken(t *testing.T) {
 	for index, table := range []struct {
 		inURL   string
 		inToken string
-		inResp  []byte
 		outErr  string
+		inResp  []byte
 		isError bool
 	}{
 		{
@@ -933,8 +933,8 @@ func TestPetitionDeleteToken(t *testing.T) {
 	for index, table := range []struct {
 		inURL   string
 		inToken string
-		inResp  []byte
 		outErr  string
+		inResp  []byte
 		isError bool
 	}{
 		{
@@ -1015,9 +1015,9 @@ func TestPetitionCheckToken(t *testing.T) {
 	for index, table := range []struct {
 		inURL    string
 		inToken  string
+		outErr   string
 		inResp   []byte
 		outCheck bool
-		outErr   string
 		isError  bool
 	}{
 		{

@@ -32,6 +32,8 @@ func (s Service) GetAllUsers() (users []User, err error) {
 	}
 	defer rows.Close()
 
+	// TODO: verify scan erros type values
+	// TODO: rows.Err not rows
 	for rows.Next() {
 		var userBeta User
 

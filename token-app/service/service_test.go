@@ -25,10 +25,10 @@ const (
 
 func TestGenerateToken(t *testing.T) {
 	for indx, tt := range []struct {
-		inID                int
 		inUsername, inEmail string
-		inSecret            []byte
 		outToken, outErr    string
+		inSecret            []byte
+		inID                int
 	}{
 		{
 			inID:       idTest,
@@ -75,9 +75,9 @@ func TestExtractToken(t *testing.T) {
 
 	for indx, tt := range []struct {
 		inToken                       string
+		outUsername, outEmail, outErr string
 		inSecret                      []byte
 		outID                         int
-		outUsername, outEmail, outErr string
 	}{
 		{
 			inToken:     tokenSigned,
@@ -225,8 +225,8 @@ func TestCheckToken(t *testing.T) {
 
 	for indx, tt := range []struct {
 		in       string
-		outCheck bool
 		outErr   string
+		outCheck bool
 	}{
 		{
 			in:       tokenSigned,
@@ -283,11 +283,11 @@ func TestCheckToken(t *testing.T) {
 
 func TestKeyFunc(t *testing.T) {
 	for indx, tt := range []struct {
-		inSecret            []byte
-		inID                int
 		inUsername, inEmail string
-		outSecret           []byte
 		outErr              string
+		inSecret            []byte
+		outSecret           []byte
+		inID                int
 	}{
 		{
 			inSecret:   []byte(secretTest),

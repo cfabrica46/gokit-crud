@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -82,7 +83,11 @@ func (s *Service) SetToken(token string) (err error) {
 
 // DeleteToken ...
 func (s *Service) DeleteToken(token string) error {
-	return s.DB.Del(token).Err()
+	if err := s.DB.Del(token).Err(); err != nil {
+		return fmt.Errorf("failed to delete token: %w", err)
+	}
+
+	return nil
 }
 
 // CheckToken ...

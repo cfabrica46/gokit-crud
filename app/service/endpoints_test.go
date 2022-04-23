@@ -40,9 +40,9 @@ func TestSignUpEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			testResp := struct {
-				ID    int    `json:"id"`
 				Token string `json:"token"`
 				Err   string `json:"err"`
+				ID    int    `json:"id"`
 			}{
 				ID:    idTest,
 				Token: table.outToken,
@@ -193,8 +193,8 @@ func TestLogOutEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			testResp := struct {
-				Check bool   `json:"check"`
 				Err   string `json:"err"`
+				Check bool   `json:"check"`
 			}{
 				Check: true,
 				Err:   table.outErr,
@@ -242,8 +242,8 @@ func TestLogOutEndpoint(t *testing.T) {
 
 func TestGetAllUsersEndpoint(t *testing.T) {
 	for index, table := range []struct {
-		outUsers []dbapp.User
 		outErr   string
+		outUsers []dbapp.User
 		isError  bool
 	}{
 		{
@@ -266,8 +266,8 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			testResp := struct {
-				Users []dbapp.User `json:"users"`
 				Err   string       `json:"err"`
+				Users []dbapp.User `json:"users"`
 			}{
 				Users: table.outUsers,
 				Err:   table.outErr,
@@ -344,12 +344,12 @@ func TestProfileEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			testResp := struct {
-				User     dbapp.User `json:"user"`
-				ID       int        `json:"id"`
 				Username string     `json:"username"`
 				Email    string     `json:"email"`
-				Check    bool       `json:"check"`
 				Err      string     `json:"err"`
+				User     dbapp.User `json:"user"`
+				ID       int        `json:"id"`
+				Check    bool       `json:"check"`
 			}{
 				User:     table.outUser,
 				ID:       table.outUser.ID,
@@ -422,11 +422,11 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			testResp := struct {
-				ID       int    `json:"id"`
 				Username string `json:"username"`
 				Email    string `json:"email"`
-				Check    bool   `json:"check"`
 				Err      string `json:"err"`
+				ID       int    `json:"id"`
+				Check    bool   `json:"check"`
 			}{
 				ID:       idTest,
 				Username: usernameTest,

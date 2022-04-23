@@ -12,26 +12,24 @@ import (
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	for indx, tt := range []struct {
-		outID                              int
 		outUsername, outPassword, outEmail string
-		inRequest                          service.GetAllUsersRequest
 		outErr                             string
+		inRequest                          service.GetAllUsersRequest
+		outID                              int
 	}{
 		{
 			outID:       idTest,
 			outUsername: usernameTest,
-			// inPassword: passwordTest,
-			outEmail:  emailTest,
-			inRequest: service.GetAllUsersRequest{},
-			outErr:    "",
+			outEmail:    emailTest,
+			inRequest:   service.GetAllUsersRequest{},
+			outErr:      "",
 		},
 		{
 			outID:       idTest,
 			outUsername: usernameTest,
-			// inPassword: passwordTest,
-			outEmail:  emailTest,
-			inRequest: service.GetAllUsersRequest{},
-			outErr:    errDatabaseClosed,
+			outEmail:    emailTest,
+			inRequest:   service.GetAllUsersRequest{},
+			outErr:      errDatabaseClosed,
 		},
 	} {
 		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
@@ -52,12 +50,10 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 				[]string{
 					"id",
 					"username",
-					// "password",
 					"email",
 				}).AddRow(
 				tt.outID,
 				tt.outUsername,
-				// tt.inPassword,
 				tt.outEmail,
 			)
 
@@ -80,10 +76,10 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 
 func TestMakeGetUserByIDEndpoint(t *testing.T) {
 	for indx, tt := range []struct {
-		inID                            int
 		inUsername, inPassword, inEmail string
-		inRequest                       service.GetUserByIDRequest
 		outErr                          string
+		inRequest                       service.GetUserByIDRequest
+		inID                            int
 	}{
 		{
 			inID:       idTest,
@@ -149,10 +145,10 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 
 func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 	for indx, tt := range []struct {
-		inID                            int
 		inUsername, inPassword, inEmail string
-		inRequest                       service.GetUserByUsernameAndPasswordRequest
 		outErr                          string
+		inRequest                       service.GetUserByUsernameAndPasswordRequest
+		inID                            int
 	}{
 		{
 			inID:       idTest,
@@ -224,10 +220,10 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 
 func TestGetIDByUsernameEndpoint(t *testing.T) {
 	for indx, tt := range []struct {
-		inID       int
 		inUsername string
-		inRequest  service.GetIDByUsernameRequest
 		outErr     string
+		inRequest  service.GetIDByUsernameRequest
+		inID       int
 	}{
 		{
 			inID:       idTest,
@@ -340,9 +336,9 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 
 func TestMakeDeleteUserEndpoint(t *testing.T) {
 	for indx, tt := range []struct {
-		inID      int
-		inRequest service.DeleteUserRequest
 		outErr    string
+		inRequest service.DeleteUserRequest
+		inID      int
 	}{
 		{
 			inID: idTest,

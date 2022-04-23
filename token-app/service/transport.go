@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -10,7 +11,7 @@ import (
 func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GenerateTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode request: %w", err)
 	}
 
 	return request, nil
@@ -20,7 +21,7 @@ func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}
 func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request ExtractTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode request: %w", err)
 	}
 
 	return request, nil
@@ -30,7 +31,7 @@ func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{},
 func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request SetTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode request: %w", err)
 	}
 
 	return request, nil
@@ -40,7 +41,7 @@ func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, err
 func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request DeleteTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode request: %w", err)
 	}
 
 	return request, nil
@@ -50,7 +51,7 @@ func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request CheckTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode request: %w", err)
 	}
 
 	return request, nil
@@ -58,5 +59,9 @@ func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, e
 
 // EncodeResponse ...
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	return json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		return fmt.Errorf("failed to encode response: %w", err)
+	}
+
+	return nil
 }

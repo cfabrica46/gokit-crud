@@ -16,7 +16,7 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetAllUsersResponse{users, errMessage}, nil
+		return GetAllUsersResponse{Users: users, Err: errMessage}, nil
 	}
 }
 
@@ -32,7 +32,7 @@ func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetUserByIDResponse{user, errMessage}, nil
+		return GetUserByIDResponse{User: user, Err: errMessage}, nil
 	}
 }
 
@@ -48,7 +48,7 @@ func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.End
 			errMessage = err.Error()
 		}
 
-		return GetUserByUsernameAndPasswordResponse{user, errMessage}, nil
+		return GetUserByUsernameAndPasswordResponse{User: user, Err: errMessage}, nil
 	}
 }
 
@@ -64,7 +64,7 @@ func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetIDByUsernameResponse{id, errMessage}, nil
+		return GetIDByUsernameResponse{ID: id, Err: errMessage}, nil
 	}
 }
 
@@ -96,6 +96,6 @@ func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return DeleteUserResponse{rowsAffected, errMessage}, nil
+		return DeleteUserResponse{RowsAffected: rowsAffected, Err: errMessage}, nil
 	}
 }

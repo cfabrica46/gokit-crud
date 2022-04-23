@@ -40,9 +40,9 @@ var (
 func TestSignUp(t *testing.T) {
 	for index, table := range []struct {
 		inUsername, inPassword, inEmail string
-		isError                         bool
 		url                             string
 		method                          string
+		isError                         bool
 	}{
 		{
 			inUsername: usernameTest,
@@ -97,9 +97,9 @@ func TestSignUp(t *testing.T) {
 			}
 
 			testResp := struct {
-				ID    int    `json:"id"`
 				Token string `json:"token"`
 				Err   string `json:"err"`
+				ID    int    `json:"id"`
 			}{
 				ID:    idTest,
 				Token: tokenResponse,
@@ -150,9 +150,9 @@ func TestSignUp(t *testing.T) {
 func TestSignIn(t *testing.T) {
 	for index, table := range []struct {
 		inUsername, inPassword string
-		isError                bool
 		url                    string
 		method                 string
+		isError                bool
 	}{
 		{
 			inUsername: usernameTest,
@@ -253,11 +253,10 @@ func TestSignIn(t *testing.T) {
 func TestLogOut(t *testing.T) {
 	for index, table := range []struct {
 		inToken  string
+		url      string
+		method   string
 		outCheck bool
-
-		isError bool
-		url     string
-		method  string
+		isError  bool
 	}{
 		{
 			inToken:  tokenTest,
@@ -281,11 +280,11 @@ func TestLogOut(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
-			tokenTest,
-			true,
-			true,
-			"http://token:8080/token",
-			http.MethodDelete,
+			inToken:  tokenTest,
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/token",
+			method:   http.MethodDelete,
 		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
@@ -297,8 +296,8 @@ func TestLogOut(t *testing.T) {
 			}
 
 			testResp := struct {
-				Check bool   `json:"check"`
 				Err   string `json:"err"`
+				Check bool   `json:"check"`
 			}{
 				Check: table.outCheck,
 				Err:   errorResponse,
@@ -364,11 +363,10 @@ func TestGetAllUsers(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
 
 	for index, table := range []struct {
+		url      string
+		method   string
 		outUsers []dbapp.User
-
-		isError bool
-		url     string
-		method  string
+		isError  bool
 	}{
 		{
 			outUsers: []dbapp.User{
@@ -400,8 +398,8 @@ func TestGetAllUsers(t *testing.T) {
 			}
 
 			testResp := struct {
-				Users []dbapp.User `json:"users"`
 				Err   string       `json:"err"`
+				Users []dbapp.User `json:"users"`
 			}{
 				Users: []dbapp.User{{
 					ID:       idTest,
@@ -449,12 +447,11 @@ func TestGetAllUsers(t *testing.T) {
 func TestProfile(t *testing.T) {
 	for index, table := range []struct {
 		inToken  string
+		url      string
+		method   string
 		outUser  dbapp.User
 		outCheck bool
-
-		isError bool
-		url     string
-		method  string
+		isError  bool
 	}{
 		{
 			inToken: tokenTest,
@@ -512,12 +509,12 @@ func TestProfile(t *testing.T) {
 			}
 
 			testResp := struct {
-				User     dbapp.User `json:"user"`
-				ID       int        `json:"id"`
 				Username string     `json:"username"`
 				Email    string     `json:"email"`
-				Check    bool       `json:"check"`
 				Err      string     `json:"err"`
+				User     dbapp.User `json:"user"`
+				ID       int        `json:"id"`
+				Check    bool       `json:"check"`
 			}{
 				User:     table.outUser,
 				ID:       table.outUser.ID,
@@ -588,17 +585,47 @@ func TestProfile(t *testing.T) {
 func TestDeleteAccount(t *testing.T) {
 	for index, table := range []struct {
 		inToken  string
+		url      string
+		method   string
 		outCheck bool
-
-		isError bool
-		url     string
-		method  string
+		isError  bool
 	}{
-		{tokenTest, true, false, "http://token:8080/check", http.MethodPost},
-		{tokenTest, true, true, "http://token:8080/check", http.MethodPost},
-		{tokenTest, false, true, "http://token:8080/check", http.MethodPost},
-		{tokenTest, true, true, "http://token:8080/extract", http.MethodPost},
-		{tokenTest, true, true, "http://db:8080/user", http.MethodDelete},
+		{
+			inToken:  tokenTest,
+			outCheck: true,
+			isError:  false,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+
+		{
+			inToken:  tokenTest,
+			outCheck: false,
+			isError:  true,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/extract",
+			method:   http.MethodPost,
+		},
+		{
+			inToken:  tokenTest,
+			outCheck: true,
+			isError:  true,
+			url:      "http://db:8080/user",
+			method:   http.MethodDelete,
+		},
 	} {
 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
 			var resultErr error
@@ -609,12 +636,12 @@ func TestDeleteAccount(t *testing.T) {
 			}
 
 			testResp := struct {
-				User     dbapp.User `json:"user"`
-				ID       int        `json:"id"`
 				Username string     `json:"username"`
 				Email    string     `json:"email"`
-				Check    bool       `json:"check"`
 				Err      string     `json:"err"`
+				User     dbapp.User `json:"user"`
+				Check    bool       `json:"check"`
+				ID       int        `json:"id"`
 			}{
 				User: dbapp.User{
 					ID:       idTest,

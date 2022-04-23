@@ -12,7 +12,7 @@ func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 		req, _ := request.(GenerateTokenRequest)
 		token := svc.GenerateToken(req.ID, req.Username, req.Email, []byte(req.Secret))
 
-		return GenerateTokenResponse{token}, nil
+		return GenerateTokenResponse{Token: token}, nil
 	}
 }
 
@@ -28,7 +28,7 @@ func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return ExtractTokenResponse{id, username, email, errMessage}, nil
+		return ExtractTokenResponse{ID: id, Username: username, Email: email, Err: errMessage}, nil
 	}
 }
 
@@ -44,7 +44,7 @@ func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return SetTokenResponse{errMessage}, nil
+		return SetTokenResponse{Err: errMessage}, nil
 	}
 }
 
@@ -60,7 +60,7 @@ func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return DeleteTokenResponse{errMessage}, nil
+		return DeleteTokenResponse{Err: errMessage}, nil
 	}
 }
 
@@ -76,6 +76,6 @@ func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return CheckTokenResponse{check, errMessage}, nil
+		return CheckTokenResponse{Check: check, Err: errMessage}, nil
 	}
 }

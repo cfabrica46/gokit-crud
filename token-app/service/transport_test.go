@@ -38,16 +38,16 @@ func TestDecodeGenerateToken(t *testing.T) {
 
 	for indx, tt := range []struct {
 		in       *http.Request
-		out      service.GenerateTokenRequest
 		outError string
+		out      service.GenerateTokenRequest
 	}{
 		{
 			in: goodReq,
 			out: service.GenerateTokenRequest{
-				idTest,
-				usernameTest,
-				emailTest,
-				secretTest,
+				ID:       idTest,
+				Username: usernameTest,
+				Email:    emailTest,
+				Secret:   secretTest,
 			},
 			outError: "",
 		},

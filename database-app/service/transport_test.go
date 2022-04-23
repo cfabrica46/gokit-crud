@@ -66,8 +66,8 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 	for indx, tt := range []struct {
 		in       *http.Request
-		out      service.GetUserByIDRequest
 		outError string
+		out      service.GetUserByIDRequest
 	}{
 		{
 			in: goodReq,
@@ -189,8 +189,8 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 
 	for indx, tt := range []struct {
 		in       *http.Request
-		out      service.GetIDByUsernameRequest
 		outError string
+		out      service.GetIDByUsernameRequest
 	}{
 		{
 			in: goodReq,
@@ -313,8 +313,8 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 
 	for indx, tt := range []struct {
 		in       *http.Request
-		out      service.DeleteUserRequest
 		outError string
+		out      service.DeleteUserRequest
 	}{
 		{
 			in: goodReq,

@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/alicebob/miniredis"
@@ -15,15 +16,15 @@ import (
 
 func TestMakeGenerateTokenEndpoint(t *testing.T) {
 	for indx, tt := range []struct {
-		in  service.GenerateTokenRequest
 		out string
+		in  service.GenerateTokenRequest
 	}{
 		{
 			in: service.GenerateTokenRequest{
-				idTest,
-				usernameTest,
-				emailTest,
-				secretTest,
+				ID:       idTest,
+				Username: usernameTest,
+				Email:    emailTest,
+				Secret:   secretTest,
 			},
 			out: "",
 		},
@@ -113,8 +114,8 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 func TestMakeSetTokenEndpoint(t *testing.T) {
 	for indx, tt := range []struct {
-		in     service.SetTokenRequest
 		outErr string
+		in     service.SetTokenRequest
 	}{
 		{
 			in:     service.SetTokenRequest{"token"},
@@ -169,7 +170,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 			outErr: errRedisClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		t.Run(strconv.Itoa(indx), func(t *testing.T) {
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
