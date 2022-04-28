@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -294,7 +295,7 @@ func TestKeyFunc(t *testing.T) {
 			inID:       idTest,
 			inUsername: usernameTest,
 			inEmail:    emailTest,
-			outSecret:  []byte(secretTest),
+			outSecret:  []byte{},
 			outErr:     service.ErrUnexpectedSigningMethod.Error(),
 		},
 	} {
@@ -317,16 +318,20 @@ func TestKeyFunc(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.([]byte)
-			if !ok {
-				t.Error("response is not of the type indicated")
-			}
-
 			if !strings.Contains(resultErr, tt.outErr) {
 				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 
-			if string(tt.outSecret) != string(result) {
+			// log.Println(r)
+
+			result, ok := r.([]byte)
+			if resultErr == "" {
+				if !ok {
+					t.Error("response is not of the type indicated")
+				}
+			}
+
+			if !bytes.Equal(tt.outSecret, result) {
 				t.Errorf("want %v; got %v", tt.outSecret, result)
 			}
 		})

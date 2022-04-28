@@ -195,7 +195,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			assert.Contains(t, result.Err, tt.outErr)
 		})
 	}
 }
