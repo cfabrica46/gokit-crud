@@ -313,7 +313,7 @@ func TestKeyFunc(t *testing.T) {
 				"uuid":     uuid.NewString(),
 			})
 
-			r, err := kf(token)
+			res, err := kf(token)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -324,7 +324,7 @@ func TestKeyFunc(t *testing.T) {
 
 			// log.Println(r)
 
-			result, ok := r.([]byte)
+			result, ok := res.([]byte)
 			if resultErr == "" {
 				if !ok {
 					t.Error("response is not of the type indicated")

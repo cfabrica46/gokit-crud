@@ -8,7 +8,7 @@ import (
 
 // MakeGenerateTokenEndpoint ...
 func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		req, _ := request.(GenerateTokenRequest)
 		token := svc.GenerateToken(req.ID, req.Username, req.Email, []byte(req.Secret))
 
@@ -18,7 +18,7 @@ func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 // MakeExtractTokenEndpoint ...
 func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
 		req, _ := request.(ExtractTokenRequest)
@@ -34,7 +34,7 @@ func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 // MakeSetTokenEndpoint ...
 func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
 		req, _ := request.(SetTokenRequest)
@@ -50,7 +50,7 @@ func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 // MakeDeleteTokenEndpoint ...
 func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
 		req, _ := request.(DeleteTokenRequest)
@@ -66,7 +66,7 @@ func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 // MakeCheckTokenEndpoint ...
 func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
 		req, _ := request.(CheckTokenRequest)

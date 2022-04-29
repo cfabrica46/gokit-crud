@@ -35,7 +35,7 @@ func GetService(db *redis.Client) *Service {
 }
 
 // GenerateToken ...
-func (Service) GenerateToken(id int, username, email string, secret []byte) (token string) {
+func (Service) GenerateToken(id int, username, email string, secret []byte) string {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       id,
 		"username": username,
@@ -43,23 +43,16 @@ func (Service) GenerateToken(id int, username, email string, secret []byte) (tok
 		"uuid":     uuid.NewString(),
 	})
 
-	token, _ = t.SignedString(secret)
+	token, _ := t.SignedString(secret)
 
-	return
+	return token
 }
 
 // ExtractToken ...
-func (Service) ExtractToken(
-	token string, secret []byte,
-) (
-	id int,
-	username,
-	email string,
-	err error,
-) {
+func (Service) ExtractToken(token string, secret []byte) (id int, username, email string, err error) {
 	t, err := jwt.Parse(token, KeyFunc(secret))
 	if err != nil {
-		return
+		return 0, "", "", fmt.Errorf("error to extract token: %w", err)
 	}
 
 	claims, _ := t.Claims.(jwt.MapClaims)
@@ -68,17 +61,17 @@ func (Service) ExtractToken(
 	username, _ = claims["username"].(string)
 	email, _ = claims["email"].(string)
 
-	return
+	return id, username, email, nil
 }
 
 // SetToken ...
-func (s *Service) SetToken(token string) (err error) {
-	err = s.DB.Set(token, true, time.Minute*time.Duration(lifeOfToken)).Err()
+func (s *Service) SetToken(token string) error {
+	err := s.DB.Set(token, true, time.Minute*time.Duration(lifeOfToken)).Err()
 	if err != nil {
-		return
+		return fmt.Errorf("error to set token: %w", err)
 	}
 
-	return
+	return nil
 }
 
 // DeleteToken ...
@@ -91,23 +84,23 @@ func (s *Service) DeleteToken(token string) error {
 }
 
 // CheckToken ...
-func (s Service) CheckToken(token string) (check bool, err error) {
+func (s Service) CheckToken(token string) (bool, error) {
+	var check bool
+
 	result, err := s.DB.Get(token).Result()
 	if err != nil {
 		if err.Error() == redis.Nil.Error() {
-			err = nil
-
-			return
+			return false, nil
 		}
 
-		return
+		return false, fmt.Errorf("error to get token: %w", err)
 	}
 
 	if result == "1" {
 		check = true
 	}
 
-	return
+	return check, nil
 }
 
 func KeyFunc(secret []byte) func(token *jwt.Token) (interface{}, error) {
