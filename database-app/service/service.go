@@ -3,6 +3,7 @@ package service
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 type serviceInterface interface {
@@ -28,106 +29,112 @@ func GetService(db *sql.DB) *Service {
 func (s Service) GetAllUsers() (users []User, err error) {
 	rows, err := s.db.Query("SELECT id, username, email FROM users")
 	if err != nil {
-		return
+		return nil, fmt.Errorf("error to get all users: %w", err)
 	}
 	defer rows.Close()
 
-	// TODO: verify scan erros type values
-	// TODO: rows.Err not rows
+	/*  verify scan erros type values
+	rows.Err not rows */
+
 	for rows.Next() {
 		var userBeta User
 
 		err = rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
 		if err != nil {
-			return
+			return nil, fmt.Errorf("error to get all users: %w", err)
 		}
 
 		users = append(users, userBeta)
 	}
 
 	if err = rows.Err(); err != nil {
-		return
+		return nil, fmt.Errorf("error to get all users: %w", err)
 	}
 
-	return
+	return users, nil
 }
 
 // GetUserByID ...
-func (s Service) GetUserByID(id int) (user User, err error) {
+func (s Service) GetUserByID(id int) (User, error) {
+	var user User
+
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE id = $1", id)
 
-	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			err = nil
+			return User{}, nil
 		}
 
-		return
+		return User{}, fmt.Errorf("error to get user by ID: %w", err)
 	}
 
-	return
+	return user, nil
 }
 
 // GetUserByUsernameAndPassword ...
-func (s Service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
+func (s Service) GetUserByUsernameAndPassword(username, password string) (User, error) {
+	var user User
+
 	row := s.db.QueryRow(
 		"SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2",
 		username,
 		password,
 	)
 
-	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			err = nil
+			return User{}, nil
 		}
 
-		return
+		return User{}, fmt.Errorf("error to get user by username and password: %w", err)
 	}
 
-	return
+	return user, nil
 }
 
 // GetIDByUsername ...
-func (s Service) GetIDByUsername(username string) (id int, err error) {
+func (s Service) GetIDByUsername(username string) (int, error) {
+	var id int
+
 	row := s.db.QueryRow("SELECT id FROM users WHERE username = $1", username)
 
-	err = row.Scan(&id)
+	err := row.Scan(&id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			err = nil
+			return 0, nil
 		}
 
-		return
+		return 0, fmt.Errorf("error to get ID by username: %w", err)
 	}
 
-	return
+	return id, nil
 }
 
 // InsertUser ...
-func (s *Service) InsertUser(username, password, email string) (err error) {
-	_, err = s.db.Exec(
+func (s *Service) InsertUser(username, password, email string) error {
+	_, err := s.db.Exec(
 		"INSERT INTO users(username, password, email) VALUES ($1,$2,$3)",
 		username,
 		password,
 		email,
 	)
 	if err != nil {
-		return
+		return fmt.Errorf("error to insert user: %w", err)
 	}
 
-	return
+	return nil
 }
 
 // DeleteUser ...
-func (s *Service) DeleteUser(id int) (rowsAffected int, err error) {
+func (s *Service) DeleteUser(id int) (int, error) {
 	r, err := s.db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {
-		return
+		return 0, fmt.Errorf("error to delete user: %w", err)
 	}
 
 	count, _ := r.RowsAffected()
-	rowsAffected = int(count)
 
-	return
+	return int(count), nil
 }

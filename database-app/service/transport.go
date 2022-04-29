@@ -8,14 +8,14 @@ import (
 )
 
 // DecodeGetAllUsersRequest ...
-func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (interface{}, error) {
+func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (any, error) {
 	var request GetAllUsersRequest
 
 	return request, nil
 }
 
 // DecodeGetUserByIDRequest ...
-func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (any, error) {
 	var request GetUserByIDRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -30,7 +30,7 @@ func DecodeGetUserByUsernameAndPasswordRequest(
 	_ context.Context,
 	r *http.Request,
 ) (
-	interface{},
+	any,
 	error,
 ) {
 	var request GetUserByUsernameAndPasswordRequest
@@ -43,7 +43,7 @@ func DecodeGetUserByUsernameAndPasswordRequest(
 }
 
 // DecodeGetIDByUsernameRequest ...
-func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (any, error) {
 	var request GetIDByUsernameRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -54,7 +54,7 @@ func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (interface
 }
 
 // DecodeInsertUserRequest ...
-func DecodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeInsertUserRequest(_ context.Context, r *http.Request) (any, error) {
 	var request InsertUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -65,7 +65,7 @@ func DecodeInsertUserRequest(_ context.Context, r *http.Request) (interface{}, e
 }
 
 // DecodeDeleteUserRequest ...
-func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (any, error) {
 	var request DeleteUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -76,7 +76,7 @@ func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (interface{}, e
 }
 
 // EncodeResponse ...
-func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response any) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return fmt.Errorf("failed to encode response: %w", err)
 	}

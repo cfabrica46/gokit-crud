@@ -8,7 +8,7 @@ import (
 )
 
 // DecodeGenerateTokenRequest ...
-func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (any, error) {
 	var request GenerateTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
@@ -18,7 +18,7 @@ func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (interface{}
 }
 
 // DecodeExtractTokenRequest ...
-func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (any, error) {
 	var request ExtractTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
@@ -28,7 +28,7 @@ func DecodeExtractTokenRequest(_ context.Context, r *http.Request) (interface{},
 }
 
 // DecodeSetTokenRequest ...
-func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeSetTokenRequest(_ context.Context, r *http.Request) (any, error) {
 	var request SetTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
@@ -38,7 +38,7 @@ func DecodeSetTokenRequest(_ context.Context, r *http.Request) (interface{}, err
 }
 
 // DecodeDeleteTokenRequest ...
-func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (any, error) {
 	var request DeleteTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
@@ -48,7 +48,7 @@ func DecodeDeleteTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 }
 
 // DecodeCheckTokenRequest ...
-func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (any, error) {
 	var request CheckTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
@@ -58,7 +58,7 @@ func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (interface{}, e
 }
 
 // EncodeResponse ...
-func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response any) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return fmt.Errorf("failed to encode response: %w", err)
 	}

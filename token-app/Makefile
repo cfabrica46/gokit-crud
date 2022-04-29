@@ -1,10 +1,14 @@
 test:
-	@echo "Ejecutando tests token-app..."
+	@echo "Running tests token-app..."
 	go test ./... --cover
 
 cover:
-	@echo "Ejecutando tests token-app..."
+	@echo "Running tests token-app..."
 	go test ./... --coverprofile coverage.out
 	go tool cover -func coverage.out
 
-.PHONY: all clean test cover
+lint:
+	@echo "Running golangci-lint token-app..."
+	golangci-lint run
+
+.PHONY: all clean test cover lint
