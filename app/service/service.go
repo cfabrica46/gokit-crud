@@ -39,7 +39,7 @@ func NewService(client httpClient, dbHost, dbPort, tokenHost, tokenPort, secret 
 }
 
 // SignUp ...
-func (s Service) SignUp(username, password, email string) (token string, err error) {
+func (s *Service) SignUp(username, password, email string) (token string, err error) {
 	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
 	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
@@ -95,7 +95,7 @@ func (s Service) SignUp(username, password, email string) (token string, err err
 }
 
 // SignIn ...
-func (s Service) SignIn(username, password string) (token string, err error) {
+func (s *Service) SignIn(username, password string) (token string, err error) {
 	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
 	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
@@ -140,7 +140,7 @@ func (s Service) SignIn(username, password string) (token string, err error) {
 }
 
 // LogOut ...
-func (s Service) LogOut(token string) (err error) {
+func (s *Service) LogOut(token string) (err error) {
 	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
 	check, err := PetitionCheckToken(
@@ -175,7 +175,7 @@ func (s Service) LogOut(token string) (err error) {
 }
 
 // GetAllUsers  ...
-func (s Service) GetAllUsers() (users []dbapp.User, err error) {
+func (s *Service) GetAllUsers() (users []dbapp.User, err error) {
 	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
 
 	users, err = PetitionGetAllUsers(s.client, dbURL+"/users")
@@ -187,7 +187,7 @@ func (s Service) GetAllUsers() (users []dbapp.User, err error) {
 }
 
 // Profile  ...
-func (s Service) Profile(token string) (user dbapp.User, err error) {
+func (s *Service) Profile(token string) (user dbapp.User, err error) {
 	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
 	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 
@@ -235,7 +235,7 @@ func (s Service) Profile(token string) (user dbapp.User, err error) {
 }
 
 // DeleteAccount  ...
-func (s Service) DeleteAccount(token string) (err error) {
+func (s *Service) DeleteAccount(token string) (err error) {
 	dbURL := fmt.Sprintf(schemaURL, s.dbHost, s.dbPort)
 	tokenURL := fmt.Sprintf(schemaURL, s.tokenHost, s.tokenPort)
 

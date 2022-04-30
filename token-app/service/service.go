@@ -35,7 +35,7 @@ func GetService(db *redis.Client) *Service {
 }
 
 // GenerateToken ...
-func (Service) GenerateToken(id int, username, email string, secret []byte) string {
+func (Service) GenerateToken(id int, username, email string, secret []byte) (token string) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       id,
 		"username": username,
@@ -43,7 +43,7 @@ func (Service) GenerateToken(id int, username, email string, secret []byte) stri
 		"uuid":     uuid.NewString(),
 	})
 
-	token, _ := t.SignedString(secret)
+	token, _ = t.SignedString(secret)
 
 	return token
 }
@@ -65,8 +65,8 @@ func (Service) ExtractToken(token string, secret []byte) (id int, username, emai
 }
 
 // SetToken ...
-func (s *Service) SetToken(token string) error {
-	err := s.DB.Set(token, true, time.Minute*time.Duration(lifeOfToken)).Err()
+func (s *Service) SetToken(token string) (err error) {
+	err = s.DB.Set(token, true, time.Minute*time.Duration(lifeOfToken)).Err()
 	if err != nil {
 		return fmt.Errorf("error to set token: %w", err)
 	}
@@ -75,7 +75,7 @@ func (s *Service) SetToken(token string) error {
 }
 
 // DeleteToken ...
-func (s *Service) DeleteToken(token string) error {
+func (s *Service) DeleteToken(token string) (err error) {
 	if err := s.DB.Del(token).Err(); err != nil {
 		return fmt.Errorf("failed to delete token: %w", err)
 	}
@@ -84,12 +84,10 @@ func (s *Service) DeleteToken(token string) error {
 }
 
 // CheckToken ...
-func (s Service) CheckToken(token string) (bool, error) {
-	var check bool
-
+func (s Service) CheckToken(token string) (check bool, err error) {
 	result, err := s.DB.Get(token).Result()
 	if err != nil {
-		if err.Error() == redis.Nil.Error() {
+		if errors.Is(err, redis.Nil) {
 			return false, nil
 		}
 

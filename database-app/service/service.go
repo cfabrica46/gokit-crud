@@ -55,12 +55,10 @@ func (s Service) GetAllUsers() (users []User, err error) {
 }
 
 // GetUserByID ...
-func (s Service) GetUserByID(id int) (User, error) {
-	var user User
-
+func (s Service) GetUserByID(id int) (user User, err error) {
 	row := s.db.QueryRow("SELECT id, username, password, email FROM users WHERE id = $1", id)
 
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
+	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return User{}, nil
@@ -73,16 +71,14 @@ func (s Service) GetUserByID(id int) (User, error) {
 }
 
 // GetUserByUsernameAndPassword ...
-func (s Service) GetUserByUsernameAndPassword(username, password string) (User, error) {
-	var user User
-
+func (s Service) GetUserByUsernameAndPassword(username, password string) (user User, err error) {
 	row := s.db.QueryRow(
 		"SELECT id, username, password, email FROM users WHERE username = $1 AND password = $2",
 		username,
 		password,
 	)
 
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
+	err = row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return User{}, nil
@@ -95,12 +91,10 @@ func (s Service) GetUserByUsernameAndPassword(username, password string) (User, 
 }
 
 // GetIDByUsername ...
-func (s Service) GetIDByUsername(username string) (int, error) {
-	var id int
-
+func (s Service) GetIDByUsername(username string) (id int, err error) {
 	row := s.db.QueryRow("SELECT id FROM users WHERE username = $1", username)
 
-	err := row.Scan(&id)
+	err = row.Scan(&id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, nil
@@ -113,8 +107,8 @@ func (s Service) GetIDByUsername(username string) (int, error) {
 }
 
 // InsertUser ...
-func (s *Service) InsertUser(username, password, email string) error {
-	_, err := s.db.Exec(
+func (s *Service) InsertUser(username, password, email string) (err error) {
+	_, err = s.db.Exec(
 		"INSERT INTO users(username, password, email) VALUES ($1,$2,$3)",
 		username,
 		password,
@@ -128,7 +122,7 @@ func (s *Service) InsertUser(username, password, email string) error {
 }
 
 // DeleteUser ...
-func (s *Service) DeleteUser(id int) (int, error) {
+func (s *Service) DeleteUser(id int) (rowsAffected int, err error) {
 	r, err := s.db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {
 		return 0, fmt.Errorf("error to delete user: %w", err)
@@ -136,5 +130,7 @@ func (s *Service) DeleteUser(id int) (int, error) {
 
 	count, _ := r.RowsAffected()
 
-	return int(count), nil
+	rowsAffected = int(count)
+
+	return rowsAffected, nil
 }
