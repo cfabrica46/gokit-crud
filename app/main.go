@@ -11,6 +11,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type infoServices struct {
+	dbHost    string
+	dbPort    string
+	tokenHost string
+	tokenPort string
+	secret    string
+}
+
 func main() {
 	log.SetFlags(log.Lshortfile)
 
@@ -18,18 +26,29 @@ func main() {
 		log.Println(".env loaded")
 	}
 
+	infServ := infoServices{
+		dbHost:    os.Getenv("DB_HOST"),
+		dbPort:    os.Getenv("DB_PORT"),
+		tokenHost: os.Getenv("TOKEN_HOST"),
+		tokenPort: os.Getenv("TOKEN_PORT"),
+		secret:    os.Getenv("SECRET"),
+	}
+
 	runServer(
 		os.Getenv("PORT"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("TOKEN_HOST"),
-		os.Getenv("TOKEN_PORT"),
-		os.Getenv("SECRET"),
+		&infServ,
 	)
 }
 
-func runServer(port, dbHost, dbPort, tokenHost, tokenPort, secret string) {
-	svc := service.NewService(&http.Client{}, dbHost, dbPort, tokenHost, tokenPort, secret)
+func runServer(port string, infServ *infoServices) {
+	svc := service.NewService(
+		&http.Client{},
+		infServ.dbHost,
+		infServ.dbHost,
+		infServ.tokenHost,
+		infServ.tokenPort,
+		infServ.secret,
+	)
 
 	getSignUpHandler := httptransport.NewServer(
 		service.MakeSignUpEndpoint(svc),
@@ -76,5 +95,5 @@ func runServer(port, dbHost, dbPort, tokenHost, tokenPort, secret string) {
 	router.Methods(http.MethodDelete).Path("/profile").Handler(getDeleteAccountHandler)
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Println(http.ListenAndServe(":"+port, router))
 }
