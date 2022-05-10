@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -25,13 +24,17 @@ const (
 )
 
 func TestGenerateToken(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                string
 		inUsername, inEmail string
 		outToken, outErr    string
 		inSecret            []byte
 		inID                int
 	}{
 		{
+			name:       "NoError",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inEmail:    emailTest,
@@ -40,7 +43,10 @@ func TestGenerateToken(t *testing.T) {
 			outErr:     "",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result string
 
 			mr, err := miniredis.Run()
@@ -62,6 +68,8 @@ func TestGenerateToken(t *testing.T) {
 }
 
 func TestExtractToken(t *testing.T) {
+	t.Parallel()
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       idTest,
 		"username": usernameTest,
@@ -74,13 +82,15 @@ func TestExtractToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name                          string
 		inToken                       string
 		outUsername, outEmail, outErr string
 		inSecret                      []byte
 		outID                         int
 	}{
 		{
+			name:        "NoError",
 			inToken:     tokenSigned,
 			inSecret:    []byte(secretTest),
 			outID:       idTest,
@@ -89,6 +99,7 @@ func TestExtractToken(t *testing.T) {
 			outErr:      "",
 		},
 		{
+			name:        "NotValidToken",
 			inToken:     "",
 			inSecret:    nil,
 			outID:       0,
@@ -97,7 +108,10 @@ func TestExtractToken(t *testing.T) {
 			outErr:      "token contains an invalid number of segments",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultID int
 			var resultUsername, resultEmail, resultErr string
 
@@ -124,6 +138,8 @@ func TestExtractToken(t *testing.T) {
 }
 
 func TestSetToken(t *testing.T) {
+	t.Parallel()
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       idTest,
 		"username": usernameTest,
@@ -133,20 +149,26 @@ func TestSetToken(t *testing.T) {
 
 	tokenSigned, _ := token.SignedString([]byte(secretTest))
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     string
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     tokenSigned,
 			outErr: "",
 		},
 		{
+			name:   "ErrorRedisClose",
 			in:     "",
 			outErr: "redis: client is closed",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			mr, err := miniredis.Run()
@@ -158,7 +180,7 @@ func TestSetToken(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict
+			// Generate Conflict.
 			if tt.outErr == "redis: client is closed" {
 				svc.DB.Close()
 			}
@@ -174,6 +196,8 @@ func TestSetToken(t *testing.T) {
 }
 
 func TestDeleteToken(t *testing.T) {
+	t.Parallel()
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       idTest,
 		"username": usernameTest,
@@ -183,16 +207,21 @@ func TestDeleteToken(t *testing.T) {
 
 	tokenSigned, _ := token.SignedString([]byte(secretTest))
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     string
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     tokenSigned,
 			outErr: "",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			mr, err := miniredis.Run()
@@ -215,6 +244,8 @@ func TestDeleteToken(t *testing.T) {
 }
 
 func TestCheckToken(t *testing.T) {
+	t.Parallel()
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       idTest,
 		"username": usernameTest,
@@ -224,28 +255,35 @@ func TestCheckToken(t *testing.T) {
 
 	tokenSigned, _ := token.SignedString([]byte(secretTest))
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       string
 		outErr   string
 		outCheck bool
 	}{
 		{
+			name:     "NoError",
 			in:       tokenSigned,
 			outCheck: true,
 			outErr:   "",
 		},
 		{
+			name:     "NoError",
 			in:       "",
 			outCheck: false,
 			outErr:   "",
 		},
 		{
+			name:     "ErrorRedisClose",
 			in:       "",
 			outCheck: false,
 			outErr:   "redis: client is closed",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultCheck bool
 			var resultErr string
 
@@ -258,7 +296,7 @@ func TestCheckToken(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// insert
+			// insert.
 			if tt.in != "" {
 				err = svc.SetToken(tt.in)
 				if err != nil {
@@ -266,7 +304,7 @@ func TestCheckToken(t *testing.T) {
 				}
 			}
 
-			// Generate Conflict
+			// Generate Conflict.
 			if tt.outErr == "redis: client is closed" {
 				svc.DB.Close()
 			}
@@ -283,7 +321,10 @@ func TestCheckToken(t *testing.T) {
 }
 
 func TestKeyFunc(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                string
 		inUsername, inEmail string
 		outErr              string
 		inSecret            []byte
@@ -291,6 +332,7 @@ func TestKeyFunc(t *testing.T) {
 		inID                int
 	}{
 		{
+			name:       "Error",
 			inSecret:   []byte(secretTest),
 			inID:       idTest,
 			inUsername: usernameTest,
@@ -299,13 +341,16 @@ func TestKeyFunc(t *testing.T) {
 			outErr:     service.ErrUnexpectedSigningMethod.Error(),
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result []byte
 			var resultErr string
 
 			kf := service.KeyFunc(tt.inSecret)
 
-			// generateToken
+			// generateToken.
 			token := jwt.NewWithClaims(jwt.SigningMethodPS256, jwt.MapClaims{
 				"id":       tt.inID,
 				"username": tt.inUsername,
@@ -322,7 +367,7 @@ func TestKeyFunc(t *testing.T) {
 				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 
-			// log.Println(r)
+			// log.Println(r).
 
 			result, ok := res.([]byte)
 			if resultErr == "" {

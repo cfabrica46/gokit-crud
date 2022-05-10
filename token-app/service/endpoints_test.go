@@ -2,8 +2,6 @@ package service_test
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/alicebob/miniredis"
@@ -15,11 +13,15 @@ import (
 )
 
 func TestMakeGenerateTokenEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
-		out string
-		in  service.GenerateTokenRequest
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name string
+		out  string
+		in   service.GenerateTokenRequest
 	}{
 		{
+			name: "NoError",
 			in: service.GenerateTokenRequest{
 				ID:       idTest,
 				Username: usernameTest,
@@ -29,7 +31,10 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 			out: "",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -59,6 +64,8 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeExtractTokenEndpoint(t *testing.T) {
+	t.Parallel()
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       idTest,
 		"username": usernameTest,
@@ -66,13 +73,18 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 		"uuid":     uuid.NewString(),
 	})
 
-	tokenSigned, _ := token.SignedString([]byte(secretTest))
+	tokenSigned, err := token.SignedString([]byte(secretTest))
+	if err != nil {
+		t.Error(err)
+	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     service.ExtractTokenRequest
 		outErr string
 	}{
 		{
+			name: "NoError",
 			in: service.ExtractTokenRequest{
 				tokenSigned,
 				secretTest,
@@ -80,6 +92,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name: "ErrorNotValidToken",
 			in: service.ExtractTokenRequest{
 				"",
 				secretTest,
@@ -87,7 +100,10 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 			outErr: "token contains an invalid number of segments",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -113,20 +129,28 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeSetTokenEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name   string
 		outErr string
 		in     service.SetTokenRequest
 	}{
 		{
+			name:   "NoError",
 			in:     service.SetTokenRequest{"token"},
 			outErr: "",
 		},
 		{
+			name:   "ErrorRedisClose",
 			in:     service.SetTokenRequest{""},
 			outErr: errRedisClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -136,7 +160,7 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict
+			// Generate Conflict.
 			if tt.outErr == errRedisClosed {
 				svc.DB.Close()
 			}
@@ -157,20 +181,28 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeDeleteTokenEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name   string
 		in     service.DeleteTokenRequest
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     service.DeleteTokenRequest{"token"},
 			outErr: "",
 		},
 		{
+			name:   "ErrorRedisClose",
 			in:     service.DeleteTokenRequest{""},
 			outErr: errRedisClosed,
 		},
 	} {
-		t.Run(strconv.Itoa(indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -180,7 +212,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict
+			// Generate Conflict.
 			if tt.outErr == errRedisClosed {
 				svc.DB.Close()
 			}
@@ -201,20 +233,28 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 }
 
 func TestMakeCheckTokenEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name   string
 		in     service.CheckTokenRequest
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     service.CheckTokenRequest{"token"},
 			outErr: "",
 		},
 		{
+			name:   "ErrorRedisClose",
 			in:     service.CheckTokenRequest{""},
 			outErr: errRedisClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mr, err := miniredis.Run()
 			if err != nil {
 				t.Error(err)
@@ -224,7 +264,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict
+			// Generate Conflict.
 			if tt.outErr == errRedisClosed {
 				svc.DB.Close()
 			}

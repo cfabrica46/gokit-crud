@@ -68,5 +68,5 @@ func runServer(port string, db *redis.Client) {
 	r.Methods(http.MethodPost).Path("/check").Handler(getCheckTokenHandler)
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Println(http.ListenAndServe(":"+port, r))
 }

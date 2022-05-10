@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -14,6 +13,8 @@ import (
 )
 
 func TestDecodeGenerateToken(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/generate"
 
 	dataJSON, err := json.Marshal(service.GenerateTokenRequest{
@@ -36,13 +37,15 @@ func TestDecodeGenerateToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		outError string
 		out      service.GenerateTokenRequest
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.GenerateTokenRequest{
 				ID:       idTest,
 				Username: usernameTest,
@@ -52,12 +55,16 @@ func TestDecodeGenerateToken(t *testing.T) {
 			outError: "",
 		},
 		{
+			name:     "BadRequest",
 			in:       badReq,
 			out:      service.GenerateTokenRequest{},
 			outError: "EOF",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.GenerateTokenRequest
 			var resultErr string
 
@@ -83,6 +90,8 @@ func TestDecodeGenerateToken(t *testing.T) {
 }
 
 func TestDecodeExtractToken(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/extract"
 
 	dataJSON, err := json.Marshal(service.ExtractTokenRequest{tokenTest, secretTest})
@@ -100,13 +109,15 @@ func TestDecodeExtractToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		out      service.ExtractTokenRequest
 		outError string
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.ExtractTokenRequest{
 				Token:  tokenTest,
 				Secret: secretTest,
@@ -114,11 +125,15 @@ func TestDecodeExtractToken(t *testing.T) {
 			outError: "",
 		},
 		{
-			in:  badReq,
-			out: service.ExtractTokenRequest{}, outError: "EOF",
+			name: "BadRequest",
+			in:   badReq,
+			out:  service.ExtractTokenRequest{}, outError: "EOF",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.ExtractTokenRequest
 			var resultErr string
 
@@ -144,6 +159,8 @@ func TestDecodeExtractToken(t *testing.T) {
 }
 
 func TestDecodeSetToken(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/token"
 
 	dataJSON, err := json.Marshal(service.SetTokenRequest{tokenTest})
@@ -161,25 +178,31 @@ func TestDecodeSetToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		out      service.SetTokenRequest
 		outError string
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.SetTokenRequest{
 				Token: tokenTest,
 			},
 			outError: "",
 		},
 		{
+			name:     "BadRequest",
 			in:       badReq,
 			out:      service.SetTokenRequest{},
 			outError: "EOF",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.SetTokenRequest
 			var resultErr string
 
@@ -205,6 +228,8 @@ func TestDecodeSetToken(t *testing.T) {
 }
 
 func TestDecodeDeleteToken(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/token"
 
 	dataJSON, err := json.Marshal(service.DeleteTokenRequest{tokenTest})
@@ -222,25 +247,31 @@ func TestDecodeDeleteToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		out      service.DeleteTokenRequest
 		outError string
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.DeleteTokenRequest{
 				Token: tokenTest,
 			},
 			outError: "",
 		},
 		{
+			name:     "BadRequest",
 			in:       badReq,
 			out:      service.DeleteTokenRequest{},
 			outError: "EOF",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.DeleteTokenRequest
 			var resultErr string
 
@@ -266,6 +297,8 @@ func TestDecodeDeleteToken(t *testing.T) {
 }
 
 func TestDecodeCheckToken(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/Check"
 
 	dataJSON, err := json.Marshal(service.CheckTokenRequest{tokenTest})
@@ -283,15 +316,29 @@ func TestDecodeCheckToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for i, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		out      service.CheckTokenRequest
 		outError string
 	}{
-		{goodReq, service.CheckTokenRequest{tokenTest}, ""},
-		{badReq, service.CheckTokenRequest{}, "EOF"},
+		{
+			name:     "NoError",
+			in:       goodReq,
+			out:      service.CheckTokenRequest{tokenTest},
+			outError: "",
+		},
+		{
+			name:     "BadRequest",
+			in:       badReq,
+			out:      service.CheckTokenRequest{},
+			outError: "EOF",
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.CheckTokenRequest
 			var resultErr string
 
@@ -317,16 +364,23 @@ func TestDecodeCheckToken(t *testing.T) {
 }
 
 func TestEncodeResponse(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name     string
 		in       string
 		outError string
 	}{
 		{
+			name:     "NoError",
 			in:       "test",
 			outError: "",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			err := service.EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
