@@ -14,6 +14,14 @@ const schemaURL = "http://%s:%s"
 // ErrTokenNotValid ...
 var ErrTokenNotValid = errors.New("token not validate")
 
+type InfoServices struct {
+	DBHost    string
+	DBPort    string
+	TokenHost string
+	TokenPort string
+	Secret    string
+}
+
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
@@ -34,8 +42,8 @@ type Service struct {
 }
 
 // NewService ...
-func NewService(client httpClient, dbHost, dbPort, tokenHost, tokenPort, secret string) *Service {
-	return &Service{client, dbHost, dbPort, tokenHost, tokenPort, secret}
+func NewService(client httpClient, is *InfoServices) *Service {
+	return &Service{client, is.DBHost, is.DBPort, is.TokenHost, is.TokenPort, is.Secret}
 }
 
 // SignUp ...
@@ -53,7 +61,7 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 		},
 	)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	userID, err := PetitionGetIDByUsername(
@@ -64,7 +72,7 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 		},
 	)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	token, err = PetitionGenerateToken(s.client,
@@ -77,7 +85,7 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 		},
 	)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	err = PetitionSetToken(
@@ -88,10 +96,10 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 		},
 	)
 	if err != nil {
-		return
+		return "", err
 	}
 
-	return token, err
+	return token, nil
 }
 
 // SignIn ...
@@ -108,7 +116,7 @@ func (s *Service) SignIn(username, password string) (token string, err error) {
 		},
 	)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	token, err = PetitionGenerateToken(
@@ -122,7 +130,7 @@ func (s *Service) SignIn(username, password string) (token string, err error) {
 		},
 	)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	err = PetitionSetToken(
@@ -133,10 +141,10 @@ func (s *Service) SignIn(username, password string) (token string, err error) {
 		},
 	)
 	if err != nil {
-		return
+		return "", err
 	}
 
-	return token, err
+	return token, nil
 }
 
 // LogOut ...
@@ -151,13 +159,13 @@ func (s *Service) LogOut(token string) (err error) {
 		},
 	)
 	if err != nil {
-		return
+		return err
 	}
 
 	if !check {
 		err = ErrTokenNotValid
 
-		return
+		return err
 	}
 
 	err = PetitionDeleteToken(
@@ -168,10 +176,10 @@ func (s *Service) LogOut(token string) (err error) {
 		},
 	)
 	if err != nil {
-		return
+		return err
 	}
 
-	return err
+	return nil
 }
 
 // GetAllUsers  ...
@@ -180,10 +188,10 @@ func (s *Service) GetAllUsers() (users []dbapp.User, err error) {
 
 	users, err = PetitionGetAllUsers(s.client, dbURL+"/users")
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	return
+	return users, nil
 }
 
 // Profile  ...
@@ -199,13 +207,13 @@ func (s *Service) Profile(token string) (user dbapp.User, err error) {
 		},
 	)
 	if err != nil {
-		return
+		return dbapp.User{}, err
 	}
 
 	if !check {
 		err = ErrTokenNotValid
 
-		return
+		return dbapp.User{}, err
 	}
 
 	userID, _, _, err := PetitionExtractToken(
@@ -217,7 +225,7 @@ func (s *Service) Profile(token string) (user dbapp.User, err error) {
 		},
 	)
 	if err != nil {
-		return
+		return dbapp.User{}, err
 	}
 
 	user, err = PetitionGetUserByID(
@@ -228,10 +236,10 @@ func (s *Service) Profile(token string) (user dbapp.User, err error) {
 		},
 	)
 	if err != nil {
-		return
+		return dbapp.User{}, err
 	}
 
-	return user, err
+	return user, nil
 }
 
 // DeleteAccount  ...
@@ -247,13 +255,13 @@ func (s *Service) DeleteAccount(token string) (err error) {
 		},
 	)
 	if err != nil {
-		return
+		return err
 	}
 
 	if !check {
 		err = ErrTokenNotValid
 
-		return
+		return err
 	}
 
 	userID, _, _, err := PetitionExtractToken(s.client,
@@ -264,12 +272,12 @@ func (s *Service) DeleteAccount(token string) (err error) {
 		},
 	)
 	if err != nil {
-		return
+		return err
 	}
 
 	err = PetitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: userID})
 	if err != nil {
-		return
+		return err
 	}
 
 	return err

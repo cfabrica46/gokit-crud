@@ -3,7 +3,6 @@ package service_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -16,7 +15,10 @@ import (
 )
 
 func TestMakePetition(t *testing.T) {
-	for index, table := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name            string
 		inURL, inMethod string
 		outErr          string
 		inBody          interface{}
@@ -56,18 +58,21 @@ func TestMakePetition(t *testing.T) {
 			isError:  true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result []byte
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.out)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.out)),
 				}, nil
 			})
 
-			if table.outErr == errWebServer.Error() {
+			if tt.outErr == errWebServer.Error() {
 				mock = service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 					return nil, errWebServer
 				})
@@ -75,23 +80,25 @@ func TestMakePetition(t *testing.T) {
 
 			result, resultErr = service.MakePetition(
 				mock,
-				table.inURL,
-				table.inMethod,
-				table.inBody,
+				tt.inURL,
+				tt.inMethod,
+				tt.inBody,
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.out, result)
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
 
 func TestPetitionGetAllUsers(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := dbapp.GetAllUsersResponse{
 		Users: []dbapp.User{
 			{
@@ -117,7 +124,8 @@ func TestPetitionGetAllUsers(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name     string
 		inURL    string
 		outErr   string
 		inResp   []byte
@@ -153,31 +161,36 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			isError:  true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultUsers []dbapp.User
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
-			resultUsers, resultErr = service.PetitionGetAllUsers(mock, table.inURL)
+			resultUsers, resultErr = service.PetitionGetAllUsers(mock, tt.inURL)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.outUsers, resultUsers)
+			assert.Equal(t, tt.outUsers, resultUsers)
 		})
 	}
 }
 
 func TestPetitionGetIDByUsername(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := dbapp.GetIDByUsernameResponse{
 		ID: idTest,
 	}
@@ -196,7 +209,8 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name              string
 		inURL, inUsername string
 		outErr            string
 		inResp            []byte
@@ -236,37 +250,42 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			isError:    true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultID int
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultID, resultErr = service.PetitionGetIDByUsername(
 				mock,
-				table.inURL,
+				tt.inURL,
 				dbapp.GetIDByUsernameRequest{
-					Username: table.inUsername,
+					Username: tt.inUsername,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.outID, resultID)
+			assert.Equal(t, tt.outID, resultID)
 		})
 	}
 }
 
 func TestPetitionGetUserByID(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := dbapp.GetUserByIDResponse{
 		User: dbapp.User{
 			ID:       idTest,
@@ -290,7 +309,8 @@ func TestPetitionGetUserByID(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name    string
 		inURL   string
 		outErr  string
 		outUser dbapp.User
@@ -331,37 +351,42 @@ func TestPetitionGetUserByID(t *testing.T) {
 			isError: true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultUser dbapp.User
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultUser, resultErr = service.PetitionGetUserByID(
 				mock,
-				table.inURL,
+				tt.inURL,
 				dbapp.GetUserByIDRequest{
-					ID: table.inID,
+					ID: tt.inID,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.outUser, resultUser)
+			assert.Equal(t, tt.outUser, resultUser)
 		})
 	}
 }
 
 func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := dbapp.GetUserByIDResponse{
 		User: dbapp.User{
 			ID:       idTest,
@@ -385,7 +410,8 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name       string
 		inURL      string
 		inUsername string
 		inPassword string
@@ -431,38 +457,43 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			isError:    true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultUser dbapp.User
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultUser, resultErr = service.PetitionGetUserByUsernameAndPassword(
 				mock,
-				table.inURL,
+				tt.inURL,
 				dbapp.GetUserByUsernameAndPasswordRequest{
-					Username: table.inUsername,
-					Password: table.inPassword,
+					Username: tt.inUsername,
+					Password: tt.inPassword,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.outUser, resultUser)
+			assert.Equal(t, tt.outUser, resultUser)
 		})
 	}
 }
 
 func TestPetitionInsertUser(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := dbapp.InsertUserResponse{}
 
 	badResponseTest := dbapp.InsertUserResponse{
@@ -479,7 +510,8 @@ func TestPetitionInsertUser(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name       string
 		inURL      string
 		inUsername string
 		inPassword string
@@ -525,36 +557,41 @@ func TestPetitionInsertUser(t *testing.T) {
 			isError:    true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultErr = service.PetitionInsertUser(
 				mock,
-				table.inURL,
+				tt.inURL,
 				dbapp.InsertUserRequest{
-					Username: table.inUsername,
-					Password: table.inPassword,
-					Email:    table.inEmail,
+					Username: tt.inUsername,
+					Password: tt.inPassword,
+					Email:    tt.inEmail,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 		})
 	}
 }
 
 func TestPetitionDeleteUser(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := dbapp.DeleteUserResponse{}
 
 	badResponseTest := dbapp.DeleteUserResponse{
@@ -571,7 +608,8 @@ func TestPetitionDeleteUser(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name    string
 		inURL   string
 		outErr  string
 		inResp  []byte
@@ -607,34 +645,39 @@ func TestPetitionDeleteUser(t *testing.T) {
 			isError: true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultErr = service.PetitionDeleteUser(
 				mock,
-				table.inURL,
+				tt.inURL,
 				dbapp.DeleteUserRequest{
-					ID: table.inID,
+					ID: tt.inID,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 		})
 	}
 }
 
 func TestPetitionGenerateToken(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := tokenapp.GenerateTokenResponse{
 		Token: tokenTest,
 	}
@@ -644,7 +687,8 @@ func TestPetitionGenerateToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name       string
 		inURL      string
 		inUsername string
 		inEmail    string
@@ -689,40 +733,45 @@ func TestPetitionGenerateToken(t *testing.T) {
 			isError:    true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultToken string
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultToken, resultErr = service.PetitionGenerateToken(
 				mock,
-				table.inURL,
+				tt.inURL,
 				tokenapp.GenerateTokenRequest{
-					ID:       table.inID,
-					Username: table.inUsername,
-					Email:    table.inEmail,
-					Secret:   table.inSecret,
+					ID:       tt.inID,
+					Username: tt.inUsername,
+					Email:    tt.inEmail,
+					Secret:   tt.inSecret,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.outToken, resultToken)
+			assert.Equal(t, tt.outToken, resultToken)
 		})
 	}
 }
 
 func TestPetitionExtractToken(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := tokenapp.ExtractTokenResponse{
 		ID:       idTest,
 		Username: usernameTest,
@@ -743,7 +792,8 @@ func TestPetitionExtractToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name        string
 		inURL       string
 		inToken     string
 		inSecret    string
@@ -799,7 +849,10 @@ func TestPetitionExtractToken(t *testing.T) {
 			isError:     true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultID int
 			var resultUsername, resultEmail string
 			var resultErr error
@@ -807,33 +860,35 @@ func TestPetitionExtractToken(t *testing.T) {
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultID, resultUsername, resultEmail, resultErr = service.PetitionExtractToken(
 				mock,
-				table.inURL,
+				tt.inURL,
 				tokenapp.ExtractTokenRequest{
-					Token:  table.inToken,
-					Secret: table.inSecret,
+					Token:  tt.inToken,
+					Secret: tt.inSecret,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.outID, resultID)
-			assert.Equal(t, table.outUsername, resultUsername)
-			assert.Equal(t, table.outEmail, resultEmail)
+			assert.Equal(t, tt.outID, resultID)
+			assert.Equal(t, tt.outUsername, resultUsername)
+			assert.Equal(t, tt.outEmail, resultEmail)
 		})
 	}
 }
 
 func TestPetitionSetToken(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := tokenapp.SetTokenResponse{}
 
 	badResponseTest := tokenapp.SetTokenResponse{
@@ -850,7 +905,8 @@ func TestPetitionSetToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name    string
 		inURL   string
 		inToken string
 		outErr  string
@@ -886,34 +942,39 @@ func TestPetitionSetToken(t *testing.T) {
 			isError: true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultErr = service.PetitionSetToken(
 				mock,
-				table.inURL,
+				tt.inURL,
 				tokenapp.SetTokenRequest{
-					Token: table.inToken,
+					Token: tt.inToken,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 		})
 	}
 }
 
 func TestPetitionDeleteToken(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := tokenapp.DeleteTokenResponse{}
 
 	badResponseTest := tokenapp.DeleteTokenResponse{
@@ -930,7 +991,8 @@ func TestPetitionDeleteToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name    string
 		inURL   string
 		inToken string
 		outErr  string
@@ -966,34 +1028,39 @@ func TestPetitionDeleteToken(t *testing.T) {
 			isError: true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultErr = service.PetitionDeleteToken(
 				mock,
-				table.inURL,
+				tt.inURL,
 				tokenapp.DeleteTokenRequest{
-					Token: table.inToken,
+					Token: tt.inToken,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 		})
 	}
 }
 
 func TestPetitionCheckToken(t *testing.T) {
+	t.Parallel()
+
 	goodResponseTest := tokenapp.CheckTokenResponse{
 		Check: true,
 	}
@@ -1012,7 +1079,8 @@ func TestPetitionCheckToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name     string
 		inURL    string
 		inToken  string
 		outErr   string
@@ -1053,69 +1121,35 @@ func TestPetitionCheckToken(t *testing.T) {
 			isError:  true,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultCheck bool
 			var resultErr error
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
+					Body:       ioutil.NopCloser(bytes.NewReader(tt.inResp)),
 				}, nil
 			})
 
 			resultCheck, resultErr = service.PetitionCheckToken(
 				mock,
-				table.inURL,
+				tt.inURL,
 				tokenapp.CheckTokenRequest{
-					Token: table.inToken,
+					Token: tt.inToken,
 				},
 			)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, table.outErr)
+				assert.ErrorContains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, table.outCheck, resultCheck)
+			assert.Equal(t, tt.outCheck, resultCheck)
 		})
 	}
 }
-
-// func TestPetitionCheckToken(t *testing.T) {
-// 	for index, table := range []struct {
-// 		inURL, inToken string
-// 		inResp         []byte
-// 		outErr         string
-// 	}{
-// 		{urlTest, tokenTest, []byte("{}"), ""},
-// 		{"%%", tokenTest, []byte("{}"), `parse "%%": invalid URL escape "%%"`},
-// 		{urlTest, tokenTest, []byte(""), "unexpected end of JSON input"},
-// 		// {urlTest, tokenTest, []byte(`{"err":"error"}`), "error"},
-// 	} {
-// 		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
-// 			var resultErr string
-
-// 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-// 				return &http.Response{
-// 					StatusCode: http.StatusOK,
-// 					Body:       ioutil.NopCloser(bytes.NewReader(table.inResp)),
-// 				}, nil
-// 			})
-
-// 			_, err := service.PetitionCheckToken(
-// 				mock,
-// 				table.inURL,
-// 				tokenapp.CheckTokenRequest{
-// 					Token: table.inToken,
-// 				},
-// 			)
-// 			if err != nil {
-// 				resultErr = err.Error()
-// 			}
-
-// 			assert.Equal(t, table.outErr, resultErr)
-// 		})
-// 	}
-// }

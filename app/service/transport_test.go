@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +13,8 @@ import (
 )
 
 func TestDecodeSignUpRequest(t *testing.T) {
+	t.Parallel()
+
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
@@ -39,37 +40,55 @@ func TestDecodeSignUpRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     *http.Request
 		out    service.SignUpRequest
 		outErr string
 	}{
-		{goodReq, service.SignUpRequest{usernameTest, passwordTest, emailTest}, ""},
-		{badReq, service.SignUpRequest{}, "EOF"},
+		{
+			in: goodReq,
+			out: service.SignUpRequest{
+				Username: usernameTest,
+				Password: passwordTest,
+				Email:    emailTest,
+			},
+			outErr: "",
+		},
+		{
+			in:     badReq,
+			out:    service.SignUpRequest{},
+			outErr: "EOF",
+		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result interface{}
 			var resultErr string
 
-			r, err := service.DecodeSignUpRequest(context.TODO(), table.in)
+			r, err := service.DecodeSignUpRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.SignUpRequest)
 			if !ok {
-				if (table.out != service.SignUpRequest{}) {
+				if (tt.out != service.SignUpRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
-			assert.Equal(t, table.out, result)
+			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
 
 func TestDecodeSignInRequest(t *testing.T) {
+	t.Parallel()
+
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
@@ -93,37 +112,53 @@ func TestDecodeSignInRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     *http.Request
 		out    service.SignInRequest
 		outErr string
 	}{
-		{goodReq, service.SignInRequest{usernameTest, passwordTest}, ""},
-		{badReq, service.SignInRequest{}, "EOF"},
+		{
+			in: goodReq,
+			out: service.SignInRequest{
+				usernameTest, passwordTest,
+			},
+			outErr: "",
+		},
+		{
+			in:     badReq,
+			out:    service.SignInRequest{},
+			outErr: "EOF",
+		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result interface{}
 			var resultErr string
 
-			r, err := service.DecodeSignInRequest(context.TODO(), table.in)
+			r, err := service.DecodeSignInRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.SignInRequest)
 			if !ok {
-				if (table.out != service.SignInRequest{}) {
+				if (tt.out != service.SignInRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
-			assert.Equal(t, table.out, result)
+			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
 
 func TestDecodeLogOutRequest(t *testing.T) {
+	t.Parallel()
+
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
@@ -140,36 +175,46 @@ func TestDecodeLogOutRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     *http.Request
 		out    service.LogOutRequest
 		outErr string
 	}{
-		{goodReq, service.LogOutRequest{}, ""},
+		{
+			in:     goodReq,
+			out:    service.LogOutRequest{},
+			outErr: "",
+		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result interface{}
 			var resultErr string
 
-			r, err := service.DecodeLogOutRequest(context.TODO(), table.in)
+			r, err := service.DecodeLogOutRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.LogOutRequest)
 			if !ok {
-				if (table.out != service.LogOutRequest{}) {
+				if (tt.out != service.LogOutRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
-			assert.Equal(t, table.out, result)
+			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
 
 func TestDecodeGetAllUsersRequest(t *testing.T) {
+	t.Parallel()
+
 	url := urlTest
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, nil)
@@ -177,36 +222,46 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     *http.Request
 		out    service.GetAllUsersRequest
 		outErr string
 	}{
-		{goodReq, service.GetAllUsersRequest{}, ""},
+		{
+			in:     goodReq,
+			out:    service.GetAllUsersRequest{},
+			outErr: "",
+		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result interface{}
 			var resultErr string
 
-			r, err := service.DecodeGetAllUsersRequest(context.TODO(), table.in)
+			r, err := service.DecodeGetAllUsersRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.GetAllUsersRequest)
 			if !ok {
-				if (table.out != service.GetAllUsersRequest{}) {
+				if (tt.out != service.GetAllUsersRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
-			assert.Equal(t, table.out, result)
+			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
 
 func TestDecodeProfileRequest(t *testing.T) {
+	t.Parallel()
+
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
@@ -223,36 +278,46 @@ func TestDecodeProfileRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     *http.Request
 		out    service.ProfileRequest
 		outErr string
 	}{
-		{goodReq, service.ProfileRequest{}, ""},
+		{
+			in:     goodReq,
+			out:    service.ProfileRequest{},
+			outErr: "",
+		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result interface{}
 			var resultErr string
 
-			r, err := service.DecodeProfileRequest(context.TODO(), table.in)
+			r, err := service.DecodeProfileRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.ProfileRequest)
 			if !ok {
-				if (table.out != service.ProfileRequest{}) {
+				if (tt.out != service.ProfileRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
-			assert.Equal(t, table.out, result)
+			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
 
 func TestDecodeDeleteAccountRequest(t *testing.T) {
+	t.Parallel()
+
 	url := urlTest
 
 	dataJSON, err := json.Marshal(struct {
@@ -269,52 +334,72 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name   string
 		in     *http.Request
 		out    service.DeleteAccountRequest
 		outErr string
 	}{
-		{goodReq, service.DeleteAccountRequest{}, ""},
+		{
+			in:     goodReq,
+			out:    service.DeleteAccountRequest{},
+			outErr: "",
+		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result interface{}
 			var resultErr string
 
-			r, err := service.DecodeDeleteAccountRequest(context.TODO(), table.in)
+			r, err := service.DecodeDeleteAccountRequest(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.DeleteAccountRequest)
 			if !ok {
-				if (table.out != service.DeleteAccountRequest{}) {
+				if (tt.out != service.DeleteAccountRequest{}) {
 					t.Error("result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
-			assert.Equal(t, table.out, result)
+			assert.Equal(t, tt.outErr, resultErr)
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
 
 func TestEncodeResponse(t *testing.T) {
-	for index, table := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name   string
 		in     interface{}
 		outErr string
 	}{
-		{"test", ""},
-		{func() {}, "json: unsupported type: func()"},
+		{
+			in:     "test",
+			outErr: "",
+		},
+		{
+			in:     func() {},
+			outErr: "json: unsupported type: func()",
+		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
-			err := service.EncodeResponse(context.TODO(), httptest.NewRecorder(), table.in)
+			err := service.EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, table.outErr, resultErr)
+			assert.Equal(t, tt.outErr, resultErr)
 		})
 	}
 }

@@ -11,14 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type infoServices struct {
-	dbHost    string
-	dbPort    string
-	tokenHost string
-	tokenPort string
-	secret    string
-}
-
 func main() {
 	log.SetFlags(log.Lshortfile)
 
@@ -26,12 +18,12 @@ func main() {
 		log.Println(".env loaded")
 	}
 
-	infServ := infoServices{
-		dbHost:    os.Getenv("DB_HOST"),
-		dbPort:    os.Getenv("DB_PORT"),
-		tokenHost: os.Getenv("TOKEN_HOST"),
-		tokenPort: os.Getenv("TOKEN_PORT"),
-		secret:    os.Getenv("SECRET"),
+	infServ := service.InfoServices{
+		DBHost:    os.Getenv("DB_HOST"),
+		DBPort:    os.Getenv("DB_PORT"),
+		TokenHost: os.Getenv("TOKEN_HOST"),
+		TokenPort: os.Getenv("TOKEN_PORT"),
+		Secret:    os.Getenv("SECRET"),
 	}
 
 	runServer(
@@ -40,14 +32,10 @@ func main() {
 	)
 }
 
-func runServer(port string, infServ *infoServices) {
+func runServer(port string, infServ *service.InfoServices) {
 	svc := service.NewService(
 		&http.Client{},
-		infServ.dbHost,
-		infServ.dbHost,
-		infServ.tokenHost,
-		infServ.tokenPort,
-		infServ.secret,
+		infServ,
 	)
 
 	getSignUpHandler := httptransport.NewServer(

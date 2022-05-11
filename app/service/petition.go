@@ -77,7 +77,7 @@ func PetitionGetUserByID(client httpClient, url string, body dbapp.GetUserByIDRe
 
 	// convert password to Sha256
 	// in ENDPOINT
-	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
+	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password))).
 
 	dataResp, err := MakePetition(client, url, http.MethodGet, body)
 	if err != nil {
@@ -105,7 +105,7 @@ func PetitionGetUserByUsernameAndPassword(client httpClient, url string,
 	var response dbapp.GetUserByUsernameAndPasswordResponse
 
 	// convert password to Sha256
-	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
+	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password))).
 	dataResp, err := MakePetition(client, url, http.MethodGet, body)
 	if err != nil {
 		return dbapp.User{}, fmt.Errorf("error to petition get user by username and password: %w", err)
@@ -155,7 +155,7 @@ func PetitionInsertUser(client httpClient, url string, body dbapp.InsertUserRequ
 
 	// convert password to Sha256
 	// in ENDPOINT
-	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
+	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password))).
 
 	dataResp, err := MakePetition(client, url, http.MethodPost, body)
 	if err != nil {
@@ -179,7 +179,7 @@ func PetitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequ
 	var response dbapp.DeleteUserResponse
 
 	// convert password to Sha256
-	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
+	// password = fmt.Sprintf("%x", sha256.Sum256([]byte(password))).
 
 	dataResp, err := MakePetition(client, url, http.MethodDelete, body)
 	if err != nil {
@@ -201,7 +201,7 @@ func PetitionDeleteUser(client httpClient, url string, body dbapp.DeleteUserRequ
 // PetitionGenerateToken ...
 func PetitionGenerateToken(client httpClient, url string, body tokenapp.GenerateTokenRequest,
 ) (token string, err error) {
-	// var response tokenapp.GenerateTokenResponse
+	// var response tokenapp.GenerateTokenResponse.
 	var response struct {
 		Err string
 		tokenapp.GenerateTokenResponse

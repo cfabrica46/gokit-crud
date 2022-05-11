@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -28,8 +27,6 @@ const (
 	tokenHostTest string = "token"
 	portTest      string = "8080"
 	tokenTest     string = "token"
-
-	schemaNameTest string = "%v"
 )
 
 var (
@@ -38,7 +35,18 @@ var (
 )
 
 func TestSignUp(t *testing.T) {
-	for index, table := range []struct {
+	t.Parallel()
+
+	infoServiceTest := service.InfoServices{
+		DBHost:    dbHostTest,
+		DBPort:    portTest,
+		TokenHost: tokenHostTest,
+		TokenPort: portTest,
+		Secret:    secretTest,
+	}
+
+	for _, tt := range []struct {
+		name                            string
 		inUsername, inPassword, inEmail string
 		url                             string
 		method                          string
@@ -85,12 +93,15 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodPost,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultToken string
 			var resultErr error
 			var tokenResponse, errorResponse string
 
-			if table.isError {
+			if tt.isError {
 				errorResponse = errWebServer.Error()
 			} else {
 				tokenResponse = tokenTest
@@ -114,8 +125,8 @@ func TestSignUp(t *testing.T) {
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
-				if req.URL.String() == table.url {
-					if req.Method == table.method {
+				if req.URL.String() == tt.url {
+					if req.Method == tt.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader(jsonData)),
@@ -128,16 +139,12 @@ func TestSignUp(t *testing.T) {
 
 			svc := service.NewService(
 				mock,
-				dbHostTest,
-				portTest,
-				tokenHostTest,
-				portTest,
-				secretTest,
+				&infoServiceTest,
 			)
 
-			resultToken, resultErr = svc.SignUp(table.inUsername, table.inPassword, table.inEmail)
+			resultToken, resultErr = svc.SignUp(tt.inUsername, tt.inPassword, tt.inEmail)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
@@ -148,7 +155,18 @@ func TestSignUp(t *testing.T) {
 }
 
 func TestSignIn(t *testing.T) {
-	for index, table := range []struct {
+	t.Parallel()
+
+	infoServiceTest := service.InfoServices{
+		DBHost:    dbHostTest,
+		DBPort:    portTest,
+		TokenHost: tokenHostTest,
+		TokenPort: portTest,
+		Secret:    secretTest,
+	}
+
+	for _, tt := range []struct {
+		name                   string
 		inUsername, inPassword string
 		url                    string
 		method                 string
@@ -183,12 +201,15 @@ func TestSignIn(t *testing.T) {
 			method:     http.MethodPost,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultToken string
 			var resultErr error
 			var tokenResponse, errorResponse string
 
-			if table.isError {
+			if tt.isError {
 				errorResponse = errWebServer.Error()
 			} else {
 				tokenResponse = tokenTest
@@ -217,8 +238,8 @@ func TestSignIn(t *testing.T) {
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
 
-				if req.URL.String() == table.url {
-					if req.Method == table.method {
+				if req.URL.String() == tt.url {
+					if req.Method == tt.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader(jsonData)),
@@ -231,16 +252,12 @@ func TestSignIn(t *testing.T) {
 
 			svc := service.NewService(
 				mock,
-				dbHostTest,
-				portTest,
-				tokenHostTest,
-				portTest,
-				secretTest,
+				&infoServiceTest,
 			)
 
-			resultToken, resultErr = svc.SignIn(table.inUsername, table.inPassword)
+			resultToken, resultErr = svc.SignIn(tt.inUsername, tt.inPassword)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
@@ -251,7 +268,10 @@ func TestSignIn(t *testing.T) {
 }
 
 func TestLogOut(t *testing.T) {
-	for index, table := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name     string
 		inToken  string
 		url      string
 		method   string
@@ -287,11 +307,22 @@ func TestLogOut(t *testing.T) {
 			method:   http.MethodDelete,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			infoServiceTest := service.InfoServices{
+				DBHost:    dbHostTest,
+				DBPort:    portTest,
+				TokenHost: tokenHostTest,
+				TokenPort: portTest,
+				Secret:    secretTest,
+			}
+
 			var resultErr error
 			var errorResponse string
 
-			if table.isError {
+			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
@@ -299,11 +330,11 @@ func TestLogOut(t *testing.T) {
 				Err   string `json:"err"`
 				Check bool   `json:"check"`
 			}{
-				Check: table.outCheck,
+				Check: tt.outCheck,
 				Err:   errorResponse,
 			}
 
-			if !table.outCheck {
+			if !tt.outCheck {
 				testResp.Err = ""
 				errorResponse = service.ErrTokenNotValid.Error()
 			}
@@ -317,7 +348,7 @@ func TestLogOut(t *testing.T) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
-					Check: table.outCheck,
+					Check: tt.outCheck,
 				}
 
 				jsonCheck, err := json.Marshal(testCheck)
@@ -327,8 +358,8 @@ func TestLogOut(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				if req.URL.String() == table.url {
-					if req.Method == table.method {
+				if req.URL.String() == tt.url {
+					if req.Method == tt.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader(jsonData)),
@@ -341,16 +372,12 @@ func TestLogOut(t *testing.T) {
 
 			svc := service.NewService(
 				mock,
-				dbHostTest,
-				portTest,
-				tokenHostTest,
-				portTest,
-				secretTest,
+				&infoServiceTest,
 			)
 
-			resultErr = svc.LogOut(table.inToken)
+			resultErr = svc.LogOut(tt.inToken)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
@@ -360,9 +387,12 @@ func TestLogOut(t *testing.T) {
 }
 
 func TestGetAllUsers(t *testing.T) {
+	t.Parallel()
+
 	log.SetFlags(log.Lshortfile)
 
-	for index, table := range []struct {
+	for _, tt := range []struct {
+		name     string
 		url      string
 		method   string
 		outUsers []dbapp.User
@@ -388,12 +418,23 @@ func TestGetAllUsers(t *testing.T) {
 			method:   http.MethodGet,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			infoServiceTest := service.InfoServices{
+				DBHost:    dbHostTest,
+				DBPort:    portTest,
+				TokenHost: tokenHostTest,
+				TokenPort: portTest,
+				Secret:    secretTest,
+			}
+
 			var resultUsers []dbapp.User
 			var resultErr error
 			var errorResponse string
 
-			if table.isError {
+			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
@@ -424,28 +465,27 @@ func TestGetAllUsers(t *testing.T) {
 
 			svc := service.NewService(
 				mock,
-				dbHostTest,
-				portTest,
-				tokenHostTest,
-				portTest,
-				secretTest,
+				&infoServiceTest,
 			)
 
 			resultUsers, resultErr = svc.GetAllUsers()
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
 			}
 
-			assert.Equal(t, table.outUsers, resultUsers)
+			assert.Equal(t, tt.outUsers, resultUsers)
 		})
 	}
 }
 
 func TestProfile(t *testing.T) {
-	for index, table := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name     string
 		inToken  string
 		url      string
 		method   string
@@ -499,12 +539,23 @@ func TestProfile(t *testing.T) {
 			method:   http.MethodGet,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			infoServiceTest := service.InfoServices{
+				DBHost:    dbHostTest,
+				DBPort:    portTest,
+				TokenHost: tokenHostTest,
+				TokenPort: portTest,
+				Secret:    secretTest,
+			}
+
 			var resultUser dbapp.User
 			var resultErr error
 			var errorResponse string
 
-			if table.isError {
+			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
@@ -516,15 +567,15 @@ func TestProfile(t *testing.T) {
 				ID       int        `json:"id"`
 				Check    bool       `json:"check"`
 			}{
-				User:     table.outUser,
-				ID:       table.outUser.ID,
-				Username: table.outUser.Username,
-				Email:    table.outUser.Email,
-				Check:    table.outCheck,
+				User:     tt.outUser,
+				ID:       tt.outUser.ID,
+				Username: tt.outUser.Username,
+				Email:    tt.outUser.Email,
+				Check:    tt.outCheck,
 				Err:      errorResponse,
 			}
 
-			if !table.outCheck {
+			if !tt.outCheck {
 				testResp.Err = ""
 				errorResponse = service.ErrTokenNotValid.Error()
 			}
@@ -538,7 +589,7 @@ func TestProfile(t *testing.T) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
-					Check: table.outCheck,
+					Check: tt.outCheck,
 				}
 
 				jsonCheck, err := json.Marshal(testCheck)
@@ -548,8 +599,8 @@ func TestProfile(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				if req.URL.String() == table.url {
-					if req.Method == table.method {
+				if req.URL.String() == tt.url {
+					if req.Method == tt.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader((jsonData))),
@@ -562,28 +613,27 @@ func TestProfile(t *testing.T) {
 
 			svc := service.NewService(
 				mock,
-				dbHostTest,
-				portTest,
-				tokenHostTest,
-				portTest,
-				secretTest,
+				&infoServiceTest,
 			)
 
-			resultUser, resultErr = svc.Profile(table.inToken)
+			resultUser, resultErr = svc.Profile(tt.inToken)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
 			}
 
-			assert.Equal(t, table.outUser, resultUser)
+			assert.Equal(t, tt.outUser, resultUser)
 		})
 	}
 }
 
 func TestDeleteAccount(t *testing.T) {
-	for index, table := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name     string
 		inToken  string
 		url      string
 		method   string
@@ -627,11 +677,22 @@ func TestDeleteAccount(t *testing.T) {
 			method:   http.MethodDelete,
 		},
 	} {
-		t.Run(fmt.Sprintf(schemaNameTest, index), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			infoServiceTest := service.InfoServices{
+				DBHost:    dbHostTest,
+				DBPort:    portTest,
+				TokenHost: tokenHostTest,
+				TokenPort: portTest,
+				Secret:    secretTest,
+			}
+
 			var resultErr error
 			var errorResponse string
 
-			if table.isError {
+			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
@@ -652,11 +713,11 @@ func TestDeleteAccount(t *testing.T) {
 				ID:       idTest,
 				Username: usernameTest,
 				Email:    emailTest,
-				Check:    table.outCheck,
+				Check:    tt.outCheck,
 				Err:      errorResponse,
 			}
 
-			if !table.outCheck {
+			if !tt.outCheck {
 				testResp.Err = ""
 				errorResponse = service.ErrTokenNotValid.Error()
 			}
@@ -670,7 +731,7 @@ func TestDeleteAccount(t *testing.T) {
 				testCheck := struct {
 					Check bool `json:"check"`
 				}{
-					Check: table.outCheck,
+					Check: tt.outCheck,
 				}
 
 				jsonCheck, err := json.Marshal(testCheck)
@@ -680,8 +741,8 @@ func TestDeleteAccount(t *testing.T) {
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
 
-				if req.URL.String() == table.url {
-					if req.Method == table.method {
+				if req.URL.String() == tt.url {
+					if req.Method == tt.method {
 						response = &http.Response{
 							StatusCode: http.StatusOK,
 							Body:       io.NopCloser(bytes.NewReader(jsonData)),
@@ -694,16 +755,12 @@ func TestDeleteAccount(t *testing.T) {
 
 			svc := service.NewService(
 				mock,
-				dbHostTest,
-				portTest,
-				tokenHostTest,
-				portTest,
-				secretTest,
+				&infoServiceTest,
 			)
 
-			resultErr = svc.DeleteAccount(table.inToken)
+			resultErr = svc.DeleteAccount(tt.inToken)
 
-			if !table.isError {
+			if !tt.isError {
 				assert.Nil(t, resultErr)
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
