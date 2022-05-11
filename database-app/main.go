@@ -101,5 +101,5 @@ func runServer(port string, db *sql.DB) {
 	router.Methods(http.MethodDelete).Path("/user").Handler(deleteUserHandler)
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Println(http.ListenAndServe(":"+port, router))
 }

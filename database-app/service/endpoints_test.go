@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,13 +10,17 @@ import (
 )
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                               string
 		outUsername, outPassword, outEmail string
 		outErr                             string
 		inRequest                          service.GetAllUsersRequest
 		outID                              int
 	}{
 		{
+			name:        "NoError",
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
@@ -25,6 +28,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			outErr:      "",
 		},
 		{
+			name:        "ErrorDBClose",
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
@@ -32,14 +36,16 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			outErr:      errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
 			defer db.Close()
 
-			// generate confict closing db
+			// generate confict closing db.
 			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
@@ -75,13 +81,17 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 }
 
 func TestMakeGetUserByIDEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		inRequest                       service.GetUserByIDRequest
 		inID                            int
 	}{
 		{
+			name:       "NoError",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -90,6 +100,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			outErr:     "",
 		},
 		{
+			name:       "ErrorDBClose",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -98,14 +109,16 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
 			defer db.Close()
 
-			// generate confict closing db
+			// generate confict closing db.
 			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
@@ -144,13 +157,17 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 }
 
 func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		inRequest                       service.GetUserByUsernameAndPasswordRequest
 		inID                            int
 	}{
 		{
+			name:       "NoError",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -162,6 +179,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name:       "ErrorDBClose",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -170,14 +188,16 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
 			defer db.Close()
 
-			// generate confict closing db
+			// generate confict closing db.
 			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
@@ -219,13 +239,17 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 }
 
 func TestGetIDByUsernameEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name       string
 		inUsername string
 		outErr     string
 		inRequest  service.GetIDByUsernameRequest
 		inID       int
 	}{
 		{
+			name:       "NoError",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inRequest: service.GetIDByUsernameRequest{
@@ -234,20 +258,23 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name:       "ErrorDBClose",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inRequest:  service.GetIDByUsernameRequest{},
 			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
 			defer db.Close()
 
-			// generate confict closing db
+			// generate confict closing db.
 			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
@@ -274,12 +301,16 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 }
 
 func TestMakeInsertUserEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                            string
 		inUsername, inPassword, inEmail string
 		inRequest                       service.InsertUserRequest
 		outErr                          string
 	}{
 		{
+			name:       "NoError",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -291,6 +322,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name:       "ErrorDBClose",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -298,14 +330,17 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			outErr:     errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
 			defer db.Close()
 
-			// generate confict closing db
+			// generate confict closing db.
 			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}
@@ -335,12 +370,16 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 }
 
 func TestMakeDeleteUserEndpoint(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name      string
 		outErr    string
 		inRequest service.DeleteUserRequest
 		inID      int
 	}{
 		{
+			name: "NoError",
 			inID: idTest,
 			inRequest: service.DeleteUserRequest{
 				ID: idTest,
@@ -348,19 +387,23 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name:      "ErrorDBClose",
 			inID:      idTest,
 			inRequest: service.DeleteUserRequest{},
 			outErr:    errDatabaseClosed,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Error(err)
 			}
 			defer db.Close()
 
-			// generate confict closing db
+			// generate confict closing db.
 			if tt.outErr == errDatabaseClosed {
 				db.Close()
 			}

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -14,18 +13,25 @@ import (
 )
 
 func TestDecodeGetAllUsersRequest(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		out      service.GetAllUsersRequest
 		outError string
 	}{
 		{
+			name:     "NoError",
 			in:       &http.Request{},
 			out:      service.GetAllUsersRequest{},
 			outError: "",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.GetAllUsersRequest
 			var resultErr string
 
@@ -49,6 +55,8 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 }
 
 func TestDecodeGetUserByIDRequest(t *testing.T) {
+	t.Parallel()
+
 	dataJSON, err := json.Marshal(service.GetUserByIDRequest{ID: idTest})
 	if err != nil {
 		t.Error(err)
@@ -64,27 +72,33 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		outError string
 		out      service.GetUserByIDRequest
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.GetUserByIDRequest{
 				ID: idTest,
 			},
 			outError: "",
 		},
 		{
-			in: badReq,
+			name: "ErrRequestBody",
+			in:   badReq,
 			out: service.GetUserByIDRequest{
 				ID: 0,
 			},
 			outError: "EOF",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.GetUserByIDRequest
 			var resultErr string
 
@@ -111,6 +125,8 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 }
 
 func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/user/username_password"
 
 	dataJSON, err := json.Marshal(service.GetUserByUsernameAndPasswordRequest{
@@ -131,22 +147,32 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		out      service.GetUserByUsernameAndPasswordRequest
 		outError string
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.GetUserByUsernameAndPasswordRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 			},
 			outError: "",
 		},
-		{badReq, service.GetUserByUsernameAndPasswordRequest{}, "EOF"},
+		{
+			name:     "ErrRequestBody",
+			in:       badReq,
+			out:      service.GetUserByUsernameAndPasswordRequest{},
+			outError: "EOF",
+		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.GetUserByUsernameAndPasswordRequest
 			var resultErr string
 
@@ -172,6 +198,8 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 }
 
 func TestDecodeGetIDByUsernameRequest(t *testing.T) {
+	t.Parallel()
+
 	dataJSON, err := json.Marshal(service.GetIDByUsernameRequest{Username: usernameTest})
 	if err != nil {
 		t.Error(err)
@@ -187,25 +215,31 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		outError string
 		out      service.GetIDByUsernameRequest
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.GetIDByUsernameRequest{
 				Username: usernameTest,
 			},
 			outError: "",
 		},
 		{
+			name:     "ErrRequestBody",
 			in:       badReq,
 			out:      service.GetIDByUsernameRequest{},
 			outError: "",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.GetIDByUsernameRequest
 			var resultErr string
 
@@ -231,6 +265,8 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 }
 
 func TestDecodeInsertUserRequest(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/user"
 
 	dataJSON, err := json.Marshal(service.InsertUserRequest{usernameTest, "0idTest234", emailTest})
@@ -248,13 +284,15 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		out      service.InsertUserRequest
 		outError string
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.InsertUserRequest{
 				Username: usernameTest,
 				Password: "0idTest234",
@@ -263,12 +301,16 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 			outError: "",
 		},
 		{
+			name:     "ErrRequestBody",
 			in:       badReq,
 			out:      service.InsertUserRequest{},
 			outError: "EOF",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.InsertUserRequest
 			var resultErr string
 
@@ -294,6 +336,8 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 }
 
 func TestDecodeDeleteUserRequest(t *testing.T) {
+	t.Parallel()
+
 	url := "localhost:8080/user"
 
 	dataJSON, err := json.Marshal(service.DeleteUserRequest{idTest})
@@ -311,25 +355,31 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 		t.Error(err)
 	}
 
-	for indx, tt := range []struct {
+	for _, tt := range []struct {
+		name     string
 		in       *http.Request
 		outError string
 		out      service.DeleteUserRequest
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.DeleteUserRequest{
 				ID: idTest,
 			},
 			outError: "",
 		},
 		{
+			name:     "ErrRequestBody",
 			in:       badReq,
 			out:      service.DeleteUserRequest{},
 			outError: "EOF",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var result service.DeleteUserRequest
 			var resultErr string
 
@@ -355,16 +405,22 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 }
 
 func TestEncodeResponse(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name     string
 		in       string
 		outError string
 	}{
 		{
+			name:     "NoError",
 			in:       "test",
 			outError: "",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			var resultErr string
 
 			err := service.EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)

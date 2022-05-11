@@ -1,8 +1,6 @@
 package service_test
 
 import (
-	"fmt"
-	"log"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -23,27 +21,35 @@ const (
 )
 
 func TestGetAllUsers(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                               string
 		outUsername, outPassword, outEmail string
 		outErr                             string
 		outID                              int
 	}{
 		{
+			name:        "NoError",
 			outID:       idTest,
 			outUsername: usernameTest,
-			// outPassword: passwordTest,
+			// outPassword: passwordTest,.
 			outEmail: emailTest,
 			outErr:   "",
 		},
 		{
+			name:        "ErrorDBClose",
 			outID:       idTest,
 			outUsername: usernameTest,
-			// outPassword: passwordTest,
+			// outPassword: passwordTest,.
 			outEmail: emailTest,
 			outErr:   "sql: database is closed",
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			db, mock, err := sqlmock.New()
@@ -62,13 +68,13 @@ func TestGetAllUsers(t *testing.T) {
 				[]string{
 					"id",
 					"username",
-					// "password",
+					// "password",.
 					"email",
 				}).AddRow(
 				tt.outID,
-				// "oli",
+				// "oli",.
 				tt.outUsername,
-				// tt.outPassword,
+				// tt.outPassword,.
 				tt.outEmail,
 			)
 
@@ -85,13 +91,17 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestGetUserByID(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		condition                       string
 		inID                            int
 	}{
 		{
+			name:       "NoError",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -100,6 +110,7 @@ func TestGetUserByID(t *testing.T) {
 			condition:  "",
 		},
 		{
+			name:       "ErrorNoRows",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -108,6 +119,7 @@ func TestGetUserByID(t *testing.T) {
 			condition:  noRows,
 		},
 		{
+			name:       "ErrorDBClose",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -116,8 +128,10 @@ func TestGetUserByID(t *testing.T) {
 			condition:  closeDB,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
-			log.SetFlags(log.Lshortfile)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			db, mock, err := sqlmock.New()
@@ -164,13 +178,17 @@ func TestGetUserByID(t *testing.T) {
 }
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		condition                       string
 		inID                            int
 	}{
 		{
+			name:       "NoError",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -179,6 +197,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 			condition:  "",
 		},
 		{
+			name:       "ErrorNoRows",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -187,6 +206,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 			condition:  noRows,
 		},
 		{
+			name:       "ErrorDBClose",
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -196,10 +216,12 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 		},
 		// {"", ""},
 		// {"", noRows},
-		// {"sql: database is closed", closeDB},
+		// {"sql: database is closed", closeDB},.
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
-			log.SetFlags(log.Lshortfile)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			db, mock, err := sqlmock.New()
@@ -246,25 +268,31 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 }
 
 func TestGetIDByUsername(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name       string
 		inUsername string
 		outErr     string
 		condition  string
 		inID       int
 	}{
 		{
+			name:       "NoError",
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "",
 			condition:  "",
 		},
 		{
+			name:       "ErrorNoRows",
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "",
 			condition:  noRows,
 		},
 		{
+			name:       "ErrorDBClose",
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "sql: database is closed",
@@ -274,8 +302,10 @@ func TestGetIDByUsername(t *testing.T) {
 		{"", noRows},
 		{"sql: database is closed", closeDB}, */
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
-			log.SetFlags(log.Lshortfile)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			db, mock, err := sqlmock.New()
@@ -309,12 +339,16 @@ func TestGetIDByUsername(t *testing.T) {
 }
 
 func TestInsertUser(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
 		condition                       string
 	}{
 		{
+			name:       "NoError",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -322,6 +356,7 @@ func TestInsertUser(t *testing.T) {
 			condition:  "",
 		},
 		{
+			name:       "ErrorNoRows",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -329,6 +364,7 @@ func TestInsertUser(t *testing.T) {
 			condition:  noRows,
 		},
 		{
+			name:       "ErrorDBClose",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -337,10 +373,12 @@ func TestInsertUser(t *testing.T) {
 		},
 		// {"", ""},
 		// {"", "duplicate key"},
-		// {"sql: database is closed", closeDB},
+		// {"sql: database is closed", closeDB},.
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
-			log.SetFlags(log.Lshortfile)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			db, mock, err := sqlmock.New()
@@ -376,24 +414,31 @@ func TestInsertUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	for indx, tt := range []struct {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name      string
 		outErr    string
 		condition string
 		inID      int
 	}{
 		{
+			name:      "NoError",
 			inID:      idTest,
 			outErr:    "",
 			condition: "",
 		},
 		{
+			name:      "ErrorDBClose",
 			inID:      idTest,
 			outErr:    "sql: database is closed",
 			condition: closeDB,
 		},
 	} {
-		t.Run(fmt.Sprintf("%v", indx), func(t *testing.T) {
-			log.SetFlags(log.Lshortfile)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			var resultErr string
 
 			db, mock, err := sqlmock.New()
