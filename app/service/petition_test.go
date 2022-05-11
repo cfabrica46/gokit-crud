@@ -26,6 +26,7 @@ func TestMakePetition(t *testing.T) {
 		isError         bool
 	}{
 		{
+			name:     "NoError",
 			inURL:    urlTest,
 			inMethod: http.MethodGet,
 			inBody:   []byte("body"),
@@ -34,6 +35,7 @@ func TestMakePetition(t *testing.T) {
 			isError:  false,
 		},
 		{
+			name:     "ErrorBadBodyRequest",
 			inURL:    urlTest,
 			inMethod: http.MethodGet,
 			inBody:   func() {},
@@ -42,6 +44,7 @@ func TestMakePetition(t *testing.T) {
 			isError:  true,
 		},
 		{
+			name:     "ErrorBadURL",
 			inURL:    "%%",
 			inMethod: http.MethodGet,
 			inBody:   []byte("body"),
@@ -50,6 +53,7 @@ func TestMakePetition(t *testing.T) {
 			isError:  true,
 		},
 		{
+			name:     "ErrorWebService",
 			inURL:    urlTest,
 			inMethod: http.MethodGet,
 			inBody:   []byte("body"),
@@ -133,6 +137,7 @@ func TestPetitionGetAllUsers(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name:     "NoError",
 			inURL:    urlTest,
 			inResp:   goodJSONTest,
 			outUsers: goodResponseTest.Users,
@@ -140,6 +145,7 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			isError:  false,
 		},
 		{
+			name:     "ErrorBadURL",
 			inURL:    "%%",
 			inResp:   []byte("{}"),
 			outUsers: nil,
@@ -147,6 +153,7 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			isError:  true,
 		},
 		{
+			name:     "ErrorNoJSON",
 			inURL:    urlTest,
 			inResp:   []byte(""),
 			outUsers: nil,
@@ -154,6 +161,7 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			isError:  true,
 		},
 		{
+			name:     "ErrorBadJSON",
 			inURL:    urlTest,
 			inResp:   badJSONTest,
 			outUsers: nil,
@@ -218,6 +226,7 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 		isError           bool
 	}{
 		{
+			name:       "NoError",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inResp:     goodJSONTest,
@@ -226,6 +235,7 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			isError:    false,
 		},
 		{
+			name:       "ErrorBadURL",
 			inURL:      "%%",
 			inUsername: usernameTest,
 			inResp:     []byte("{}"),
@@ -234,6 +244,7 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			isError:    true,
 		},
 		{
+			name:       "ErrorNoJSON",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inResp:     []byte(""),
@@ -242,6 +253,7 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			isError:    true,
 		},
 		{
+			name:       "ErrorBadJSON",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inResp:     badJSONTest,
@@ -319,6 +331,7 @@ func TestPetitionGetUserByID(t *testing.T) {
 		isError bool
 	}{
 		{
+			name:    "NoError",
 			inURL:   urlTest,
 			inID:    idTest,
 			inResp:  goodJSONTest,
@@ -327,6 +340,7 @@ func TestPetitionGetUserByID(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:    "ErrorBadURL",
 			inURL:   "%%",
 			inID:    idTest,
 			inResp:  []byte("{}"),
@@ -335,6 +349,7 @@ func TestPetitionGetUserByID(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorNoJSON",
 			inURL:   urlTest,
 			inID:    idTest,
 			inResp:  []byte(""),
@@ -343,6 +358,7 @@ func TestPetitionGetUserByID(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorBadJSON",
 			inURL:   urlTest,
 			inID:    idTest,
 			inResp:  badJSONTest,
@@ -421,6 +437,7 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 		isError    bool
 	}{
 		{
+			name:       "NoError",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -430,6 +447,7 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			isError:    false,
 		},
 		{
+			name:       "ErrorBadURL",
 			inURL:      "%%",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -439,6 +457,7 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			isError:    true,
 		},
 		{
+			name:       "ErrorNoJSON",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -448,6 +467,7 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			isError:    true,
 		},
 		{
+			name:       "ErrorBadJSON",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -521,6 +541,7 @@ func TestPetitionInsertUser(t *testing.T) {
 		isError    bool
 	}{
 		{
+			name:       "NoError",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -530,6 +551,7 @@ func TestPetitionInsertUser(t *testing.T) {
 			isError:    false,
 		},
 		{
+			name:       "ErrorBadURL",
 			inURL:      "%%",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -539,6 +561,7 @@ func TestPetitionInsertUser(t *testing.T) {
 			isError:    true,
 		},
 		{
+			name:       "ErrorNoJSON",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -548,6 +571,7 @@ func TestPetitionInsertUser(t *testing.T) {
 			isError:    true,
 		},
 		{
+			name:       "ErrorBadJSON",
 			inURL:      urlTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -617,6 +641,7 @@ func TestPetitionDeleteUser(t *testing.T) {
 		isError bool
 	}{
 		{
+			name:    "NoError",
 			inURL:   urlTest,
 			inID:    idTest,
 			inResp:  goodJSONTest,
@@ -624,6 +649,7 @@ func TestPetitionDeleteUser(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:    "ErrorBadURL",
 			inURL:   "%%",
 			inID:    idTest,
 			inResp:  []byte("{}"),
@@ -631,6 +657,7 @@ func TestPetitionDeleteUser(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorNoJSON",
 			inURL:   urlTest,
 			inID:    idTest,
 			inResp:  []byte(""),
@@ -638,6 +665,7 @@ func TestPetitionDeleteUser(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorBadJSON",
 			inURL:   urlTest,
 			inID:    idTest,
 			inResp:  badJSONTest,
@@ -700,6 +728,7 @@ func TestPetitionGenerateToken(t *testing.T) {
 		isError    bool
 	}{
 		{
+			name:       "NoError",
 			inURL:      urlTest,
 			inID:       idTest,
 			inUsername: usernameTest,
@@ -711,6 +740,7 @@ func TestPetitionGenerateToken(t *testing.T) {
 			isError:    false,
 		},
 		{
+			name:       "ErrorBadURL",
 			inURL:      "%%",
 			inID:       idTest,
 			inUsername: usernameTest,
@@ -722,6 +752,7 @@ func TestPetitionGenerateToken(t *testing.T) {
 			isError:    true,
 		},
 		{
+			name:       "ErrorNoJSON",
 			inURL:      urlTest,
 			inID:       idTest,
 			inUsername: usernameTest,
@@ -805,6 +836,7 @@ func TestPetitionExtractToken(t *testing.T) {
 		outID       int
 	}{
 		{
+			name:        "NoError",
 			inURL:       urlTest,
 			inToken:     tokenTest,
 			inSecret:    secretTest,
@@ -816,6 +848,7 @@ func TestPetitionExtractToken(t *testing.T) {
 			isError:     false,
 		},
 		{
+			name:        "ErrorBadURL",
 			inURL:       "%%",
 			inToken:     tokenTest,
 			inSecret:    secretTest,
@@ -827,6 +860,7 @@ func TestPetitionExtractToken(t *testing.T) {
 			isError:     true,
 		},
 		{
+			name:        "ErrorNoJSON",
 			inURL:       urlTest,
 			inToken:     tokenTest,
 			inSecret:    secretTest,
@@ -838,6 +872,7 @@ func TestPetitionExtractToken(t *testing.T) {
 			isError:     true,
 		},
 		{
+			name:        "ErrorBadJSON",
 			inURL:       urlTest,
 			inToken:     tokenTest,
 			inSecret:    secretTest,
@@ -914,6 +949,7 @@ func TestPetitionSetToken(t *testing.T) {
 		isError bool
 	}{
 		{
+			name:    "NoError",
 			inURL:   urlTest,
 			inToken: tokenTest,
 			inResp:  goodJSONTest,
@@ -921,6 +957,7 @@ func TestPetitionSetToken(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:    "ErrorBadURL",
 			inURL:   "%%",
 			inToken: tokenTest,
 			inResp:  []byte("{}"),
@@ -928,6 +965,7 @@ func TestPetitionSetToken(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorNoJSON",
 			inURL:   urlTest,
 			inToken: tokenTest,
 			inResp:  []byte(""),
@@ -935,6 +973,7 @@ func TestPetitionSetToken(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorBadJSON",
 			inURL:   urlTest,
 			inToken: tokenTest,
 			inResp:  badJSONTest,
@@ -1000,6 +1039,7 @@ func TestPetitionDeleteToken(t *testing.T) {
 		isError bool
 	}{
 		{
+			name:    "NoError",
 			inURL:   urlTest,
 			inToken: tokenTest,
 			inResp:  goodJSONTest,
@@ -1007,6 +1047,7 @@ func TestPetitionDeleteToken(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:    "ErrorBadURL",
 			inURL:   "%%",
 			inToken: tokenTest,
 			inResp:  []byte("{}"),
@@ -1014,6 +1055,7 @@ func TestPetitionDeleteToken(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorNoJSON",
 			inURL:   urlTest,
 			inToken: tokenTest,
 			inResp:  []byte(""),
@@ -1021,6 +1063,7 @@ func TestPetitionDeleteToken(t *testing.T) {
 			isError: true,
 		},
 		{
+			name:    "ErrorBadJSON",
 			inURL:   urlTest,
 			inToken: tokenTest,
 			inResp:  badJSONTest,
@@ -1089,6 +1132,7 @@ func TestPetitionCheckToken(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name:     "NoError",
 			inURL:    urlTest,
 			inToken:  tokenTest,
 			inResp:   goodJSONTest,
@@ -1097,6 +1141,7 @@ func TestPetitionCheckToken(t *testing.T) {
 			isError:  false,
 		},
 		{
+			name:     "ErrorBadURL",
 			inURL:    "%%",
 			inToken:  tokenTest,
 			inResp:   []byte("{}"),
@@ -1105,6 +1150,7 @@ func TestPetitionCheckToken(t *testing.T) {
 			isError:  true,
 		},
 		{
+			name:     "ErrorNoJSON",
 			inURL:    urlTest,
 			inToken:  tokenTest,
 			inResp:   []byte(""),
@@ -1113,6 +1159,7 @@ func TestPetitionCheckToken(t *testing.T) {
 			isError:  true,
 		},
 		{
+			name:     "ErrorBadJSON",
 			inURL:    urlTest,
 			inToken:  tokenTest,
 			inResp:   badJSONTest,

@@ -53,6 +53,7 @@ func TestSignUp(t *testing.T) {
 		isError                         bool
 	}{
 		{
+			name:       "NoError",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -61,6 +62,7 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodPost,
 		},
 		{
+			name:       "ErrorInsertUser",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -69,6 +71,7 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodPost,
 		},
 		{
+			name:       "ErrorGetID",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -77,6 +80,7 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodGet,
 		},
 		{
+			name:       "ErrorGenerateToken",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -85,6 +89,7 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodPost,
 		},
 		{
+			name:       "ErrorSetToken",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -173,6 +178,7 @@ func TestSignIn(t *testing.T) {
 		isError                bool
 	}{
 		{
+			name:       "NoError",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			isError:    false,
@@ -180,6 +186,7 @@ func TestSignIn(t *testing.T) {
 			method:     http.MethodPost,
 		},
 		{
+			name:       "ErrorGetUser",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			isError:    true,
@@ -187,6 +194,7 @@ func TestSignIn(t *testing.T) {
 			method:     http.MethodGet,
 		},
 		{
+			name:       "ErrorGenerateToken",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			isError:    true,
@@ -194,6 +202,7 @@ func TestSignIn(t *testing.T) {
 			method:     http.MethodPost,
 		},
 		{
+			name:       "ErrorSetToken",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			isError:    true,
@@ -279,6 +288,7 @@ func TestLogOut(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name:     "NoError",
 			inToken:  tokenTest,
 			outCheck: true,
 			isError:  false,
@@ -286,6 +296,7 @@ func TestLogOut(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorCheckToken",
 			inToken:  tokenTest,
 			outCheck: true,
 			isError:  true,
@@ -293,6 +304,7 @@ func TestLogOut(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorCheckToken",
 			inToken:  tokenTest,
 			outCheck: false,
 			isError:  true,
@@ -300,6 +312,7 @@ func TestLogOut(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorDeleteToken",
 			inToken:  tokenTest,
 			outCheck: true,
 			isError:  true,
@@ -399,6 +412,7 @@ func TestGetAllUsers(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name: "NoError",
 			outUsers: []dbapp.User{
 				{
 					ID:       idTest,
@@ -412,6 +426,7 @@ func TestGetAllUsers(t *testing.T) {
 			method:  http.MethodGet,
 		},
 		{
+			name:     "ErrorGetAllUsers",
 			outUsers: nil,
 			isError:  true,
 			url:      "http://db:8080/users",
@@ -494,6 +509,7 @@ func TestProfile(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name:    "NoError",
 			inToken: tokenTest,
 			outUser: dbapp.User{
 				ID:       idTest,
@@ -507,6 +523,7 @@ func TestProfile(t *testing.T) {
 			method:   http.MethodGet,
 		},
 		{
+			name:     "ErrorCheckToken",
 			inToken:  tokenTest,
 			outUser:  dbapp.User{},
 			outCheck: true,
@@ -515,6 +532,7 @@ func TestProfile(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorCheckToken",
 			inToken:  tokenTest,
 			outUser:  dbapp.User{},
 			outCheck: false,
@@ -523,6 +541,7 @@ func TestProfile(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorExtractToken",
 			inToken:  tokenTest,
 			outUser:  dbapp.User{},
 			outCheck: true,
@@ -531,6 +550,7 @@ func TestProfile(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorGetID",
 			inToken:  tokenTest,
 			outUser:  dbapp.User{},
 			outCheck: true,
@@ -641,6 +661,7 @@ func TestDeleteAccount(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name:     "NoError",
 			inToken:  tokenTest,
 			outCheck: true,
 			isError:  false,
@@ -648,6 +669,7 @@ func TestDeleteAccount(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorCheckToken",
 			inToken:  tokenTest,
 			outCheck: true,
 			isError:  true,
@@ -656,6 +678,7 @@ func TestDeleteAccount(t *testing.T) {
 		},
 
 		{
+			name:     "ErrorCheckToken",
 			inToken:  tokenTest,
 			outCheck: false,
 			isError:  true,
@@ -663,6 +686,7 @@ func TestDeleteAccount(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorExtractToken",
 			inToken:  tokenTest,
 			outCheck: true,
 			isError:  true,
@@ -670,6 +694,7 @@ func TestDeleteAccount(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:     "ErrorDeleteToken",
 			inToken:  tokenTest,
 			outCheck: true,
 			isError:  true,

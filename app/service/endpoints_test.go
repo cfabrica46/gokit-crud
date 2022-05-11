@@ -32,6 +32,7 @@ func TestSignUpEndpoint(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name: "NoError",
 			in: service.SignUpRequest{
 				Username: usernameTest,
 				Password: passwordTest,
@@ -42,6 +43,7 @@ func TestSignUpEndpoint(t *testing.T) {
 			isError:  false,
 		},
 		{
+			name:     "ErrorWebService",
 			in:       service.SignUpRequest{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
@@ -119,6 +121,7 @@ func TestSignInEndpoint(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name: "NoError",
 			in: service.SignInRequest{
 				Username: usernameTest,
 				Password: passwordTest,
@@ -128,6 +131,7 @@ func TestSignInEndpoint(t *testing.T) {
 			isError:  false,
 		},
 		{
+			name:     "ErrorWebService",
 			in:       service.SignInRequest{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
@@ -209,6 +213,7 @@ func TestLogOutEndpoint(t *testing.T) {
 		isError bool
 	}{
 		{
+			name: "NoError",
 			in: service.LogOutRequest{
 				Token: tokenTest,
 			},
@@ -216,6 +221,7 @@ func TestLogOutEndpoint(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:    "ErrorWebService",
 			in:      service.LogOutRequest{},
 			outErr:  errWebServer.Error(),
 			isError: true,
@@ -287,6 +293,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 		isError  bool
 	}{
 		{
+			name: "NoError",
 			outUsers: []dbapp.User{
 				{
 					ID:       idTest,
@@ -299,6 +306,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:     "ErrorWebService",
 			outUsers: nil,
 			outErr:   errWebServer.Error(),
 			isError:  true,
@@ -373,6 +381,7 @@ func TestProfileEndpoint(t *testing.T) {
 		isError bool
 	}{
 		{
+			name: "NoError",
 			in: service.ProfileRequest{
 				Token: tokenTest,
 			},
@@ -386,6 +395,7 @@ func TestProfileEndpoint(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:    "ErrorWebService",
 			in:      service.ProfileRequest{},
 			outUser: dbapp.User{},
 			outErr:  errWebServer.Error(),
@@ -468,6 +478,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 		isError bool
 	}{
 		{
+			name: "NoError",
 			in: service.DeleteAccountRequest{
 				Token: tokenTest,
 			},
@@ -475,6 +486,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 			isError: false,
 		},
 		{
+			name:    "ErrorWebService",
 			in:      service.DeleteAccountRequest{},
 			outErr:  errWebServer.Error(),
 			isError: true,

@@ -47,7 +47,8 @@ func TestDecodeSignUpRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.SignUpRequest{
 				Username: usernameTest,
 				Password: passwordTest,
@@ -56,6 +57,7 @@ func TestDecodeSignUpRequest(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name:   "ErrorBadRequest",
 			in:     badReq,
 			out:    service.SignUpRequest{},
 			outErr: "EOF",
@@ -119,13 +121,15 @@ func TestDecodeSignInRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			in: goodReq,
+			name: "NoError",
+			in:   goodReq,
 			out: service.SignInRequest{
 				usernameTest, passwordTest,
 			},
 			outErr: "",
 		},
 		{
+			name:   "ErrorBadRequest",
 			in:     badReq,
 			out:    service.SignInRequest{},
 			outErr: "EOF",
@@ -182,6 +186,7 @@ func TestDecodeLogOutRequest(t *testing.T) {
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     goodReq,
 			out:    service.LogOutRequest{},
 			outErr: "",
@@ -229,6 +234,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     goodReq,
 			out:    service.GetAllUsersRequest{},
 			outErr: "",
@@ -285,6 +291,7 @@ func TestDecodeProfileRequest(t *testing.T) {
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     goodReq,
 			out:    service.ProfileRequest{},
 			outErr: "",
@@ -341,6 +348,7 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     goodReq,
 			out:    service.DeleteAccountRequest{},
 			outErr: "",
@@ -380,10 +388,12 @@ func TestEncodeResponse(t *testing.T) {
 		outErr string
 	}{
 		{
+			name:   "NoError",
 			in:     "test",
 			outErr: "",
 		},
 		{
+			name:   "ErrorBadEncode",
 			in:     func() {},
 			outErr: "json: unsupported type: func()",
 		},
