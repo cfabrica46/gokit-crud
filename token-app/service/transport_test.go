@@ -38,10 +38,10 @@ func TestDecodeGenerateToken(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name     string
-		in       *http.Request
-		outError string
-		out      service.GenerateTokenRequest
+		name   string
+		in     *http.Request
+		outErr string
+		out    service.GenerateTokenRequest
 	}{
 		{
 			name: "NoError",
@@ -52,13 +52,13 @@ func TestDecodeGenerateToken(t *testing.T) {
 				Email:    emailTest,
 				Secret:   secretTest,
 			},
-			outError: "",
+			outErr: "",
 		},
 		{
-			name:     "BadRequest",
-			in:       badReq,
-			out:      service.GenerateTokenRequest{},
-			outError: "EOF",
+			name:   "BadRequest",
+			in:     badReq,
+			out:    service.GenerateTokenRequest{},
+			outErr: "EOF",
 		},
 	} {
 		tt := tt
@@ -79,8 +79,8 @@ func TestDecodeGenerateToken(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
@@ -110,10 +110,10 @@ func TestDecodeExtractToken(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name     string
-		in       *http.Request
-		out      service.ExtractTokenRequest
-		outError string
+		name   string
+		in     *http.Request
+		out    service.ExtractTokenRequest
+		outErr string
 	}{
 		{
 			name: "NoError",
@@ -122,12 +122,12 @@ func TestDecodeExtractToken(t *testing.T) {
 				Token:  tokenTest,
 				Secret: secretTest,
 			},
-			outError: "",
+			outErr: "",
 		},
 		{
 			name: "BadRequest",
 			in:   badReq,
-			out:  service.ExtractTokenRequest{}, outError: "EOF",
+			out:  service.ExtractTokenRequest{}, outErr: "EOF",
 		},
 	} {
 		tt := tt
@@ -148,8 +148,8 @@ func TestDecodeExtractToken(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
@@ -179,10 +179,10 @@ func TestDecodeSetToken(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name     string
-		in       *http.Request
-		out      service.SetTokenRequest
-		outError string
+		name   string
+		in     *http.Request
+		out    service.SetTokenRequest
+		outErr string
 	}{
 		{
 			name: "NoError",
@@ -190,13 +190,13 @@ func TestDecodeSetToken(t *testing.T) {
 			out: service.SetTokenRequest{
 				Token: tokenTest,
 			},
-			outError: "",
+			outErr: "",
 		},
 		{
-			name:     "BadRequest",
-			in:       badReq,
-			out:      service.SetTokenRequest{},
-			outError: "EOF",
+			name:   "BadRequest",
+			in:     badReq,
+			out:    service.SetTokenRequest{},
+			outErr: "EOF",
 		},
 	} {
 		tt := tt
@@ -217,8 +217,8 @@ func TestDecodeSetToken(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
@@ -248,10 +248,10 @@ func TestDecodeDeleteToken(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name     string
-		in       *http.Request
-		out      service.DeleteTokenRequest
-		outError string
+		name   string
+		in     *http.Request
+		out    service.DeleteTokenRequest
+		outErr string
 	}{
 		{
 			name: "NoError",
@@ -259,13 +259,13 @@ func TestDecodeDeleteToken(t *testing.T) {
 			out: service.DeleteTokenRequest{
 				Token: tokenTest,
 			},
-			outError: "",
+			outErr: "",
 		},
 		{
-			name:     "BadRequest",
-			in:       badReq,
-			out:      service.DeleteTokenRequest{},
-			outError: "EOF",
+			name:   "BadRequest",
+			in:     badReq,
+			out:    service.DeleteTokenRequest{},
+			outErr: "EOF",
 		},
 	} {
 		tt := tt
@@ -286,8 +286,8 @@ func TestDecodeDeleteToken(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
@@ -317,22 +317,22 @@ func TestDecodeCheckToken(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name     string
-		in       *http.Request
-		out      service.CheckTokenRequest
-		outError string
+		name   string
+		in     *http.Request
+		out    service.CheckTokenRequest
+		outErr string
 	}{
 		{
-			name:     "NoError",
-			in:       goodReq,
-			out:      service.CheckTokenRequest{tokenTest},
-			outError: "",
+			name:   "NoError",
+			in:     goodReq,
+			out:    service.CheckTokenRequest{tokenTest},
+			outErr: "",
 		},
 		{
-			name:     "BadRequest",
-			in:       badReq,
-			out:      service.CheckTokenRequest{},
-			outError: "EOF",
+			name:   "BadRequest",
+			in:     badReq,
+			out:    service.CheckTokenRequest{},
+			outErr: "EOF",
 		},
 	} {
 		tt := tt
@@ -353,8 +353,8 @@ func TestDecodeCheckToken(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
@@ -367,14 +367,24 @@ func TestEncodeResponse(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name     string
-		in       string
-		outError string
+		name   string
+		in     interface{}
+		outErr string
 	}{
 		{
-			name:     "NoError",
-			in:       "test",
-			outError: "",
+			name:   "NoError",
+			in:     "test",
+			outErr: "",
+		},
+		{
+			name:   "ErrorEncode",
+			in:     "test",
+			outErr: "",
+		},
+		{
+			name:   "ErrorBadEncode",
+			in:     func() {},
+			outErr: "json: unsupported type: func()",
 		},
 	} {
 		tt := tt
@@ -387,8 +397,8 @@ func TestEncodeResponse(t *testing.T) {
 			if err != nil {
 				resultErr = err.Error()
 			}
-			if !strings.Contains(resultErr, tt.outError) {
-				t.Errorf("want %v; got %v", tt.outError, resultErr)
+			if !strings.Contains(resultErr, tt.outErr) {
+				t.Errorf("want %v; got %v", tt.outErr, resultErr)
 			}
 		})
 	}

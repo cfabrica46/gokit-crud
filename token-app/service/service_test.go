@@ -129,10 +129,15 @@ func TestExtractToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
+
 			assert.Equal(t, tt.outID, resultID, "they should be equal")
 			assert.Equal(t, tt.outUsername, resultUsername, "they should be equal")
 			assert.Equal(t, tt.outEmail, resultEmail, "they should be equal")
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
 		})
 	}
 }
@@ -190,7 +195,11 @@ func TestSetToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
@@ -238,7 +247,11 @@ func TestDeleteToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
@@ -314,8 +327,12 @@ func TestCheckToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 			assert.Equal(t, tt.outCheck, resultCheck, "they should be equal")
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
 		})
 	}
 }
@@ -363,11 +380,11 @@ func TestKeyFunc(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
 			}
-
-			// log.Println(r).
 
 			result, ok := res.([]byte)
 			if resultErr == "" {

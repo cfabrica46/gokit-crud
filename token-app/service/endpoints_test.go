@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/alicebob/miniredis"
@@ -123,7 +124,11 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
@@ -175,7 +180,11 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
@@ -279,7 +288,11 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
