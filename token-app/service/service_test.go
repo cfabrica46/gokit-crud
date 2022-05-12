@@ -1,8 +1,6 @@
 package service_test
 
 import (
-	"bytes"
-	"strings"
 	"testing"
 
 	"github.com/alicebob/miniredis"
@@ -51,7 +49,7 @@ func TestGenerateToken(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -60,9 +58,7 @@ func TestGenerateToken(t *testing.T) {
 
 			result = svc.GenerateToken(tt.inID, tt.inUsername, tt.inEmail, tt.inSecret)
 
-			if !strings.Contains(result, tt.outToken) {
-				t.Errorf("want %v; got %v", tt.outToken, result)
-			}
+			assert.Contains(t, result, tt.outToken)
 		})
 	}
 }
@@ -79,7 +75,7 @@ func TestExtractToken(t *testing.T) {
 
 	tokenSigned, err := token.SignedString([]byte(secretTest))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -117,7 +113,7 @@ func TestExtractToken(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -129,10 +125,10 @@ func TestExtractToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outID, resultID, "they should be equal")
@@ -178,7 +174,7 @@ func TestSetToken(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -195,10 +191,10 @@ func TestSetToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -235,7 +231,7 @@ func TestDeleteToken(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -247,10 +243,10 @@ func TestDeleteToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -302,7 +298,7 @@ func TestCheckToken(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -313,7 +309,7 @@ func TestCheckToken(t *testing.T) {
 			if tt.in != "" {
 				err = svc.SetToken(tt.in)
 				if err != nil {
-					t.Error(err)
+					assert.Error(t, err)
 				}
 			}
 
@@ -327,11 +323,12 @@ func TestCheckToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
+
 			assert.Equal(t, tt.outCheck, resultCheck, "they should be equal")
 		})
 	}
@@ -354,7 +351,7 @@ func TestKeyFunc(t *testing.T) {
 			inID:       idTest,
 			inUsername: usernameTest,
 			inEmail:    emailTest,
-			outSecret:  []byte{},
+			outSecret:  []byte(nil),
 			outErr:     service.ErrUnexpectedSigningMethod.Error(),
 		},
 	} {
@@ -380,22 +377,20 @@ func TestKeyFunc(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			result, ok := res.([]byte)
 			if resultErr == "" {
 				if !ok {
-					t.Error("response is not of the type indicated")
+					assert.Fail(t, "response is not of the type indicated")
 				}
 			}
 
-			if !bytes.Equal(tt.outSecret, result) {
-				t.Errorf("want %v; got %v", tt.outSecret, result)
-			}
+			assert.Equal(t, tt.outSecret, result)
 		})
 	}
 }

@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/alicebob/miniredis"
@@ -29,7 +28,6 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 				Email:    emailTest,
 				Secret:   secretTest,
 			},
-			out: "",
 		},
 	} {
 		tt := tt
@@ -38,7 +36,7 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -47,19 +45,15 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeGenerateTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.GenerateTokenResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if result.Token == "" {
-				t.Error("token its empty")
-			}
-
-			assert.NotEqual(t, tt.out, result.Token, "they shouldn't be equal")
+			assert.NotEmpty(t, result.Token)
 		})
 	}
 }
@@ -76,7 +70,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 	tokenSigned, err := token.SignedString([]byte(secretTest))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -107,7 +101,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -116,18 +110,18 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeExtractTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.ExtractTokenResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}
@@ -158,7 +152,7 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -172,18 +166,18 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeSetTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.SetTokenResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}
@@ -214,7 +208,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -228,15 +222,19 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeDeleteTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.DeleteTokenResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			assert.Contains(t, result.Err, tt.outErr)
+			if tt.name == "NoError" {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
+			}
 		})
 	}
 }
@@ -266,7 +264,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 			mr, err := miniredis.Run()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
@@ -280,18 +278,18 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeCheckTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.CheckTokenResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == "NoError" {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}

@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/cfabrica46/gokit-crud/token-app/service"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDecodeGenerateToken(t *testing.T) {
@@ -24,17 +24,17 @@ func TestDecodeGenerateToken(t *testing.T) {
 		Secret:   secretTest,
 	})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -75,16 +75,17 @@ func TestDecodeGenerateToken(t *testing.T) {
 			result, ok := r.(service.GenerateTokenRequest)
 			if !ok {
 				if (tt.out != service.GenerateTokenRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -96,17 +97,17 @@ func TestDecodeExtractToken(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.ExtractTokenRequest{tokenTest, secretTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -144,16 +145,17 @@ func TestDecodeExtractToken(t *testing.T) {
 			result, ok := r.(service.ExtractTokenRequest)
 			if !ok {
 				if (tt.out != service.ExtractTokenRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -165,17 +167,17 @@ func TestDecodeSetToken(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.SetTokenRequest{tokenTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -213,16 +215,17 @@ func TestDecodeSetToken(t *testing.T) {
 			result, ok := r.(service.SetTokenRequest)
 			if !ok {
 				if (tt.out != service.SetTokenRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -234,17 +237,17 @@ func TestDecodeDeleteToken(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.DeleteTokenRequest{tokenTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -282,16 +285,17 @@ func TestDecodeDeleteToken(t *testing.T) {
 			result, ok := r.(service.DeleteTokenRequest)
 			if !ok {
 				if (tt.out != service.DeleteTokenRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -303,17 +307,17 @@ func TestDecodeCheckToken(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.CheckTokenRequest{tokenTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -349,16 +353,17 @@ func TestDecodeCheckToken(t *testing.T) {
 			result, ok := r.(service.CheckTokenRequest)
 			if !ok {
 				if (tt.out != service.CheckTokenRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -397,8 +402,11 @@ func TestEncodeResponse(t *testing.T) {
 			if err != nil {
 				resultErr = err.Error()
 			}
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+
+			if tt.name == "NoError" {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
