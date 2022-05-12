@@ -2,11 +2,11 @@ package service_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/cfabrica46/gokit-crud/database-app/service"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
@@ -75,7 +75,11 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err)
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
@@ -151,7 +155,11 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err)
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
@@ -233,7 +241,11 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err)
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
@@ -295,7 +307,11 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err)
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
@@ -364,7 +380,11 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err)
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }
@@ -423,7 +443,11 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			assert.Equal(t, tt.outErr, result.Err)
+			if tt.outErr != "" {
+				if !strings.Contains(result.Err, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, result.Err)
+				}
+			}
 		})
 	}
 }

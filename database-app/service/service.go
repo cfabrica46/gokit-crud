@@ -29,12 +29,9 @@ func GetService(db *sql.DB) *Service {
 func (s Service) GetAllUsers() (users []User, err error) {
 	rows, err := s.db.Query("SELECT id, username, email FROM users")
 	if err != nil {
-		return nil, fmt.Errorf("error to get all users: %w", err)
+		return nil, fmt.Errorf("uwu error to get all users: %w", err)
 	}
 	defer rows.Close()
-
-	/*  verify scan erros type values
-	rows.Err not rows */
 
 	for rows.Next() {
 		var userBeta User

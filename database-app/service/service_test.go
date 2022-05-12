@@ -1,11 +1,11 @@
 package service_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/cfabrica46/gokit-crud/database-app/service"
-	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -24,27 +24,38 @@ func TestGetAllUsers(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name                               string
-		outUsername, outPassword, outEmail string
-		outErr                             string
-		outID                              int
+		name                         string
+		outID, outUsername, outEmail interface{}
+		outErr                       string
 	}{
 		{
 			name:        "NoError",
 			outID:       idTest,
 			outUsername: usernameTest,
-			// outPassword: passwordTest,.
-			outEmail: emailTest,
-			outErr:   "",
+			outEmail:    emailTest,
+			outErr:      "",
 		},
 		{
 			name:        "ErrorDBClose",
 			outID:       idTest,
 			outUsername: usernameTest,
-			// outPassword: passwordTest,.
-			outEmail: emailTest,
-			outErr:   "sql: database is closed",
+			outEmail:    emailTest,
+			outErr:      "sql: database is closed",
 		},
+		{
+			name:        "ErrorScanRows",
+			outID:       "id",
+			outUsername: 1,
+			outEmail:    1,
+			outErr:      "Scan error on column index 0",
+		},
+		/* {
+			name:        "ErrorNoRows",
+			outID:       idTest,
+			outUsername: usernameTest,
+			outEmail:    emailTest,
+			outErr:      "asdfadfsafds",
+		}, */
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -68,13 +79,10 @@ func TestGetAllUsers(t *testing.T) {
 				[]string{
 					"id",
 					"username",
-					// "password",.
 					"email",
 				}).AddRow(
 				tt.outID,
-				// "oli",.
 				tt.outUsername,
-				// tt.outPassword,.
 				tt.outEmail,
 			)
 
@@ -85,7 +93,15 @@ func TestGetAllUsers(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			} else {
+				if resultErr != "" {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
@@ -172,7 +188,11 @@ func TestGetUserByID(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
@@ -262,7 +282,11 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
@@ -333,7 +357,11 @@ func TestGetIDByUsername(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
@@ -408,7 +436,11 @@ func TestInsertUser(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
@@ -466,7 +498,11 @@ func TestDeleteUser(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr, "they should be equal")
+			if tt.outErr != "" {
+				if !strings.Contains(resultErr, tt.outErr) {
+					t.Errorf("want %v; got %v", tt.outErr, resultErr)
+				}
+			}
 		})
 	}
 }
