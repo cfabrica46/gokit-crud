@@ -14,9 +14,6 @@ const (
 	passwordTest string = "password"
 	emailTest    string = "email@email.com"
 
-	noRows  string = "no rows"
-	closeDB string = "close db"
-
 	errDatabaseClosed string = "sql: database is closed"
 
 	nameNoError       string = "NoError"
@@ -69,7 +66,7 @@ func TestGetAllUsers(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -148,7 +145,7 @@ func TestGetUserByID(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -235,7 +232,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -316,7 +313,7 @@ func TestGetIDByUsername(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -386,7 +383,7 @@ func TestInsertUser(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -447,7 +444,7 @@ func TestDeleteUser(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 

@@ -29,10 +29,9 @@ func TestSignUpEndpoint(t *testing.T) {
 		in       service.SignUpRequest
 		outToken string
 		outErr   string
-		isError  bool
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in: service.SignUpRequest{
 				Username: usernameTest,
 				Password: passwordTest,
@@ -40,14 +39,12 @@ func TestSignUpEndpoint(t *testing.T) {
 			},
 			outToken: tokenTest,
 			outErr:   "",
-			isError:  false,
 		},
 		{
 			name:     "ErrorWebService",
 			in:       service.SignUpRequest{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
-			isError:  true,
 		},
 	} {
 		tt := tt
@@ -66,7 +63,7 @@ func TestSignUpEndpoint(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -83,16 +80,16 @@ func TestSignUpEndpoint(t *testing.T) {
 
 			r, err := service.MakeSignUpEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.SignUpResponse)
 			if !ok {
-				t.Error(errNotTypeIndicated)
+				assert.Error(t, errNotTypeIndicated)
 			}
 
-			if !tt.isError {
-				assert.Zero(t, result.Err)
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
 			}
@@ -118,24 +115,21 @@ func TestSignInEndpoint(t *testing.T) {
 		in       service.SignInRequest
 		outToken string
 		outErr   string
-		isError  bool
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in: service.SignInRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 			},
 			outToken: tokenTest,
 			outErr:   "",
-			isError:  false,
 		},
 		{
 			name:     "ErrorWebService",
 			in:       service.SignInRequest{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
-			isError:  true,
 		},
 	} {
 		tt := tt
@@ -159,7 +153,7 @@ func TestSignInEndpoint(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -176,16 +170,16 @@ func TestSignInEndpoint(t *testing.T) {
 
 			r, err := service.MakeSignInEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.SignInResponse)
 			if !ok {
-				t.Error(errNotTypeIndicated)
+				assert.Error(t, errNotTypeIndicated)
 			}
 
-			if !tt.isError {
-				assert.Zero(t, result.Err)
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
 			}
@@ -207,24 +201,21 @@ func TestLogOutEndpoint(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name    string
-		in      service.LogOutRequest
-		outErr  string
-		isError bool
+		name   string
+		in     service.LogOutRequest
+		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in: service.LogOutRequest{
 				Token: tokenTest,
 			},
-			outErr:  "",
-			isError: false,
+			outErr: "",
 		},
 		{
-			name:    "ErrorWebService",
-			in:      service.LogOutRequest{},
-			outErr:  errWebServer.Error(),
-			isError: true,
+			name:   "ErrorWebService",
+			in:     service.LogOutRequest{},
+			outErr: errWebServer.Error(),
 		},
 	} {
 		tt := tt
@@ -241,7 +232,7 @@ func TestLogOutEndpoint(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -258,16 +249,16 @@ func TestLogOutEndpoint(t *testing.T) {
 
 			r, err := service.MakeLogOutEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.LogOutResponse)
 			if !ok {
-				t.Error(errNotTypeIndicated)
+				assert.Error(t, errNotTypeIndicated)
 			}
 
-			if !tt.isError {
-				assert.Zero(t, result.Err)
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
 			}
@@ -290,10 +281,9 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 		name     string
 		outErr   string
 		outUsers []dbapp.User
-		isError  bool
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			outUsers: []dbapp.User{
 				{
 					ID:       idTest,
@@ -302,14 +292,12 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 					Email:    emailTest,
 				},
 			},
-			outErr:  "",
-			isError: false,
+			outErr: "",
 		},
 		{
 			name:     "ErrorWebService",
 			outUsers: nil,
 			outErr:   errWebServer.Error(),
-			isError:  true,
 		},
 	} {
 		tt := tt
@@ -326,7 +314,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -343,16 +331,16 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 
 			r, err := service.MakeGetAllUsersEndpoint(svc)(context.TODO(), nil)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.GetAllUsersResponse)
 			if !ok {
-				t.Error(errNotTypeIndicated)
+				assert.Error(t, errNotTypeIndicated)
 			}
 
-			if !tt.isError {
-				assert.Zero(t, result.Err)
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
 			}
@@ -378,10 +366,9 @@ func TestProfileEndpoint(t *testing.T) {
 		in      service.ProfileRequest
 		outUser dbapp.User
 		outErr  string
-		isError bool
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in: service.ProfileRequest{
 				Token: tokenTest,
 			},
@@ -391,15 +378,13 @@ func TestProfileEndpoint(t *testing.T) {
 				Password: passwordTest,
 				Email:    emailTest,
 			},
-			outErr:  "",
-			isError: false,
+			outErr: "",
 		},
 		{
 			name:    "ErrorWebService",
 			in:      service.ProfileRequest{},
 			outUser: dbapp.User{},
 			outErr:  errWebServer.Error(),
-			isError: true,
 		},
 	} {
 		tt := tt
@@ -424,7 +409,7 @@ func TestProfileEndpoint(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -441,16 +426,16 @@ func TestProfileEndpoint(t *testing.T) {
 
 			r, err := service.MakeProfileEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.ProfileResponse)
 			if !ok {
-				t.Error(errNotTypeIndicated)
+				assert.Error(t, errNotTypeIndicated)
 			}
 
-			if !tt.isError {
-				assert.Zero(t, result.Err)
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
 			}
@@ -472,24 +457,21 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name    string
-		in      service.DeleteAccountRequest
-		outErr  string
-		isError bool
+		name   string
+		in     service.DeleteAccountRequest
+		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in: service.DeleteAccountRequest{
 				Token: tokenTest,
 			},
-			outErr:  "",
-			isError: false,
+			outErr: "",
 		},
 		{
-			name:    "ErrorWebService",
-			in:      service.DeleteAccountRequest{},
-			outErr:  errWebServer.Error(),
-			isError: true,
+			name:   "ErrorWebService",
+			in:     service.DeleteAccountRequest{},
+			outErr: errWebServer.Error(),
 		},
 	} {
 		tt := tt
@@ -512,7 +494,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -529,16 +511,16 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 			r, err := service.MakeDeleteAccountEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				t.Error(err)
+				assert.Error(err)
 			}
 
 			result, ok := r.(service.DeleteAccountResponse)
 			if !ok {
-				t.Error(errNotTypeIndicated)
+				assert.Error(errNotTypeIndicated)
 			}
 
-			if !tt.isError {
-				assert.Zero(t, result.Err)
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
 			}

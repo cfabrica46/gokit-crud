@@ -41,7 +41,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -66,12 +66,12 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 
 			r, err := service.MakeGetAllUsersEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.GetAllUsersResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
 			if tt.name == nameNoError {
@@ -117,7 +117,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -145,12 +145,12 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 
 			r, err := service.MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.GetUserByIDResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
 			if tt.name == nameNoError {
@@ -199,7 +199,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -230,12 +230,12 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 				tt.inRequest,
 			)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.GetUserByUsernameAndPasswordResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
 			if tt.name == nameNoError {
@@ -279,7 +279,7 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 			t.Parallel()
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -295,12 +295,12 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 
 			r, err := service.MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.GetIDByUsernameResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
 			if tt.name == nameNoError {
@@ -348,7 +348,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -367,12 +367,12 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 
 			r, err := service.MakeInsertUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.InsertUserResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
 			if tt.name == nameNoError {
@@ -414,7 +414,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 			defer db.Close()
 
@@ -429,12 +429,12 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 
 			r, err := service.MakeDeleteUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.DeleteUserResponse)
 			if !ok {
-				t.Error("response is not of the type indicated")
+				assert.Fail(t, "response is not of the type indicated")
 			}
 
 			if tt.name == nameNoError {

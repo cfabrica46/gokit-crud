@@ -27,6 +27,8 @@ const (
 	tokenHostTest string = "token"
 	portTest      string = "8080"
 	tokenTest     string = "token"
+
+	nameNoError string = "NoError"
 )
 
 var (

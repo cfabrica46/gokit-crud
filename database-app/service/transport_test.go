@@ -41,7 +41,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 			}
 			result, ok := r.(service.GetAllUsersRequest)
 			if !ok {
-				t.Error("result is not of the type indicated")
+				assert.Fail(t, "result is not of the type indicated")
 			}
 
 			if tt.name == nameNoError {
@@ -50,9 +50,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -62,17 +60,17 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.GetUserByIDRequest{ID: idTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -113,7 +111,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 			result, ok := r.(service.GetUserByIDRequest)
 			if !ok {
 				if (tt.out != service.GetUserByIDRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
@@ -123,9 +121,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -140,17 +136,17 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 		Password: passwordTest,
 	})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -189,7 +185,7 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 			result, ok := r.(service.GetUserByUsernameAndPasswordRequest)
 			if !ok {
 				if (tt.out != service.GetUserByUsernameAndPasswordRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
@@ -199,9 +195,7 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -211,17 +205,17 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.GetIDByUsernameRequest{Username: usernameTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodGet, "localhost:8080", bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -259,7 +253,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 			result, ok := r.(service.GetIDByUsernameRequest)
 			if !ok {
 				if (tt.out != service.GetIDByUsernameRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
@@ -269,9 +263,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -283,17 +275,17 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.InsertUserRequest{usernameTest, "0idTest234", emailTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -333,7 +325,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 			result, ok := r.(service.InsertUserRequest)
 			if !ok {
 				if (tt.out != service.InsertUserRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
@@ -343,9 +335,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
@@ -357,17 +347,17 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 
 	dataJSON, err := json.Marshal(service.DeleteUserRequest{idTest})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -405,7 +395,7 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 			result, ok := r.(service.DeleteUserRequest)
 			if !ok {
 				if (tt.out != service.DeleteUserRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
@@ -415,9 +405,7 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			if result != tt.out {
-				t.Errorf("want %v; got %v", tt.out, result)
-			}
+			assert.Equal(t, tt.out, result)
 		})
 	}
 }
