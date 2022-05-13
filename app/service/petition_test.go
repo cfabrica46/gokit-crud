@@ -1,5 +1,6 @@
 package service_test
 
+/*
 import (
 	"bytes"
 	"encoding/json"
@@ -23,7 +24,6 @@ func TestMakePetition(t *testing.T) {
 		outErr          string
 		inBody          interface{}
 		out             []byte
-		isError         bool
 	}{
 		{
 			name:     "NoError",
@@ -32,7 +32,6 @@ func TestMakePetition(t *testing.T) {
 			inBody:   []byte("body"),
 			out:      []byte("body"),
 			outErr:   "",
-			isError:  false,
 		},
 		{
 			name:     "ErrorBadBodyRequest",
@@ -41,7 +40,6 @@ func TestMakePetition(t *testing.T) {
 			inBody:   func() {},
 			out:      []byte(nil),
 			outErr:   "json: unsupported type: func()",
-			isError:  true,
 		},
 		{
 			name:     "ErrorBadURL",
@@ -50,7 +48,6 @@ func TestMakePetition(t *testing.T) {
 			inBody:   []byte("body"),
 			out:      []byte(nil),
 			outErr:   `parse "%%": invalid URL escape "%%"`,
-			isError:  true,
 		},
 		{
 			name:     "ErrorWebService",
@@ -59,7 +56,6 @@ func TestMakePetition(t *testing.T) {
 			inBody:   []byte("body"),
 			out:      []byte(nil),
 			outErr:   errWebServer.Error(),
-			isError:  true,
 		},
 	} {
 		tt := tt
@@ -89,10 +85,10 @@ func TestMakePetition(t *testing.T) {
 				tt.inBody,
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.out, result)
@@ -120,12 +116,12 @@ func TestPetitionGetAllUsers(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -134,7 +130,6 @@ func TestPetitionGetAllUsers(t *testing.T) {
 		outErr   string
 		inResp   []byte
 		outUsers []dbapp.User
-		isError  bool
 	}{
 		{
 			name:     "NoError",
@@ -142,7 +137,6 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			inResp:   goodJSONTest,
 			outUsers: goodResponseTest.Users,
 			outErr:   "",
-			isError:  false,
 		},
 		{
 			name:     "ErrorBadURL",
@@ -150,7 +144,6 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			inResp:   []byte("{}"),
 			outUsers: nil,
 			outErr:   `parse "%%": invalid URL escape "%%"`,
-			isError:  true,
 		},
 		{
 			name:     "ErrorNoJSON",
@@ -158,7 +151,6 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			inResp:   []byte(""),
 			outUsers: nil,
 			outErr:   "unexpected end of JSON input",
-			isError:  true,
 		},
 		{
 			name:     "ErrorBadJSON",
@@ -166,7 +158,6 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			inResp:   badJSONTest,
 			outUsers: nil,
 			outErr:   "error",
-			isError:  true,
 		},
 	} {
 		tt := tt
@@ -185,10 +176,10 @@ func TestPetitionGetAllUsers(t *testing.T) {
 
 			resultUsers, resultErr = service.PetitionGetAllUsers(mock, tt.inURL)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outUsers, resultUsers)
@@ -209,12 +200,12 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -223,7 +214,6 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 		outErr            string
 		inResp            []byte
 		outID             int
-		isError           bool
 	}{
 		{
 			name:       "NoError",
@@ -232,7 +222,6 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			inResp:     goodJSONTest,
 			outID:      idTest,
 			outErr:     "",
-			isError:    false,
 		},
 		{
 			name:       "ErrorBadURL",
@@ -241,7 +230,6 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			inResp:     []byte("{}"),
 			outID:      0,
 			outErr:     `parse "%%": invalid URL escape "%%"`,
-			isError:    true,
 		},
 		{
 			name:       "ErrorNoJSON",
@@ -250,7 +238,6 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			inResp:     []byte(""),
 			outID:      0,
 			outErr:     "unexpected end of JSON input",
-			isError:    true,
 		},
 		{
 			name:       "ErrorBadJSON",
@@ -259,7 +246,6 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			inResp:     badJSONTest,
 			outID:      0,
 			outErr:     "error",
-			isError:    true,
 		},
 	} {
 		tt := tt
@@ -284,10 +270,10 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outID, resultID)
@@ -313,12 +299,12 @@ func TestPetitionGetUserByID(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -328,7 +314,6 @@ func TestPetitionGetUserByID(t *testing.T) {
 		outUser dbapp.User
 		inResp  []byte
 		inID    int
-		isError bool
 	}{
 		{
 			name:    "NoError",
@@ -337,7 +322,6 @@ func TestPetitionGetUserByID(t *testing.T) {
 			inResp:  goodJSONTest,
 			outUser: goodResponseTest.User,
 			outErr:  "",
-			isError: false,
 		},
 		{
 			name:    "ErrorBadURL",
@@ -346,7 +330,6 @@ func TestPetitionGetUserByID(t *testing.T) {
 			inResp:  []byte("{}"),
 			outUser: dbapp.User{},
 			outErr:  `parse "%%": invalid URL escape "%%"`,
-			isError: true,
 		},
 		{
 			name:    "ErrorNoJSON",
@@ -355,7 +338,6 @@ func TestPetitionGetUserByID(t *testing.T) {
 			inResp:  []byte(""),
 			outUser: dbapp.User{},
 			outErr:  "unexpected end of JSON input",
-			isError: true,
 		},
 		{
 			name:    "ErrorBadJSON",
@@ -364,7 +346,6 @@ func TestPetitionGetUserByID(t *testing.T) {
 			inResp:  badJSONTest,
 			outUser: dbapp.User{},
 			outErr:  "error",
-			isError: true,
 		},
 	} {
 		tt := tt
@@ -389,10 +370,10 @@ func TestPetitionGetUserByID(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outUser, resultUser)
@@ -418,12 +399,12 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -434,7 +415,6 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 		outErr     string
 		outUser    dbapp.User
 		inResp     []byte
-		isError    bool
 	}{
 		{
 			name:       "NoError",
@@ -444,7 +424,6 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			inResp:     goodJSONTest,
 			outUser:    goodResponseTest.User,
 			outErr:     "",
-			isError:    false,
 		},
 		{
 			name:       "ErrorBadURL",
@@ -454,7 +433,6 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			inResp:     []byte("{}"),
 			outUser:    dbapp.User{},
 			outErr:     `parse "%%": invalid URL escape "%%"`,
-			isError:    true,
 		},
 		{
 			name:       "ErrorNoJSON",
@@ -464,7 +442,6 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			inResp:     []byte(""),
 			outUser:    dbapp.User{},
 			outErr:     "unexpected end of JSON input",
-			isError:    true,
 		},
 		{
 			name:       "ErrorBadJSON",
@@ -474,7 +451,6 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			inResp:     badJSONTest,
 			outUser:    dbapp.User{},
 			outErr:     "error",
-			isError:    true,
 		},
 	} {
 		tt := tt
@@ -500,10 +476,10 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outUser, resultUser)
@@ -522,12 +498,12 @@ func TestPetitionInsertUser(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -538,7 +514,6 @@ func TestPetitionInsertUser(t *testing.T) {
 		inEmail    string
 		outErr     string
 		inResp     []byte
-		isError    bool
 	}{
 		{
 			name:       "NoError",
@@ -548,7 +523,6 @@ func TestPetitionInsertUser(t *testing.T) {
 			inEmail:    emailTest,
 			inResp:     goodJSONTest,
 			outErr:     "",
-			isError:    false,
 		},
 		{
 			name:       "ErrorBadURL",
@@ -558,7 +532,6 @@ func TestPetitionInsertUser(t *testing.T) {
 			inEmail:    emailTest,
 			inResp:     []byte("{}"),
 			outErr:     `parse "%%": invalid URL escape "%%"`,
-			isError:    true,
 		},
 		{
 			name:       "ErrorNoJSON",
@@ -568,7 +541,6 @@ func TestPetitionInsertUser(t *testing.T) {
 			inEmail:    emailTest,
 			inResp:     []byte(""),
 			outErr:     "unexpected end of JSON input",
-			isError:    true,
 		},
 		{
 			name:       "ErrorBadJSON",
@@ -578,7 +550,6 @@ func TestPetitionInsertUser(t *testing.T) {
 			inEmail:    emailTest,
 			inResp:     badJSONTest,
 			outErr:     "error",
-			isError:    true,
 		},
 	} {
 		tt := tt
@@ -604,10 +575,10 @@ func TestPetitionInsertUser(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -624,53 +595,48 @@ func TestPetitionDeleteUser(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
-		name    string
-		inURL   string
-		outErr  string
-		inResp  []byte
-		inID    int
-		isError bool
+		name   string
+		inURL  string
+		outErr string
+		inResp []byte
+		inID   int
 	}{
 		{
-			name:    "NoError",
-			inURL:   urlTest,
-			inID:    idTest,
-			inResp:  goodJSONTest,
-			outErr:  "",
-			isError: false,
+			name:   "NoError",
+			inURL:  urlTest,
+			inID:   idTest,
+			inResp: goodJSONTest,
+			outErr: "",
 		},
 		{
-			name:    "ErrorBadURL",
-			inURL:   "%%",
-			inID:    idTest,
-			inResp:  []byte("{}"),
-			outErr:  `parse "%%": invalid URL escape "%%"`,
-			isError: true,
+			name:   "ErrorBadURL",
+			inURL:  "%%",
+			inID:   idTest,
+			inResp: []byte("{}"),
+			outErr: `parse "%%": invalid URL escape "%%"`,
 		},
 		{
-			name:    "ErrorNoJSON",
-			inURL:   urlTest,
-			inID:    idTest,
-			inResp:  []byte(""),
-			outErr:  "unexpected end of JSON input",
-			isError: true,
+			name:   "ErrorNoJSON",
+			inURL:  urlTest,
+			inID:   idTest,
+			inResp: []byte(""),
+			outErr: "unexpected end of JSON input",
 		},
 		{
-			name:    "ErrorBadJSON",
-			inURL:   urlTest,
-			inID:    idTest,
-			inResp:  badJSONTest,
-			outErr:  "error",
-			isError: true,
+			name:   "ErrorBadJSON",
+			inURL:  urlTest,
+			inID:   idTest,
+			inResp: badJSONTest,
+			outErr: "error",
 		},
 	} {
 		tt := tt
@@ -694,10 +660,10 @@ func TestPetitionDeleteUser(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -712,7 +678,7 @@ func TestPetitionGenerateToken(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -725,7 +691,6 @@ func TestPetitionGenerateToken(t *testing.T) {
 		outErr     string
 		inResp     []byte
 		inID       int
-		isError    bool
 	}{
 		{
 			name:       "NoError",
@@ -737,7 +702,6 @@ func TestPetitionGenerateToken(t *testing.T) {
 			inResp:     goodJSONTest,
 			outToken:   tokenTest,
 			outErr:     "",
-			isError:    false,
 		},
 		{
 			name:       "ErrorBadURL",
@@ -749,7 +713,6 @@ func TestPetitionGenerateToken(t *testing.T) {
 			inResp:     []byte("{}"),
 			outToken:   "",
 			outErr:     `parse "%%": invalid URL escape "%%"`,
-			isError:    true,
 		},
 		{
 			name:       "ErrorNoJSON",
@@ -761,7 +724,6 @@ func TestPetitionGenerateToken(t *testing.T) {
 			inResp:     []byte(""),
 			outToken:   "",
 			outErr:     "unexpected end of JSON input",
-			isError:    true,
 		},
 	} {
 		tt := tt
@@ -789,10 +751,10 @@ func TestPetitionGenerateToken(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outToken, resultToken)
@@ -815,12 +777,12 @@ func TestPetitionExtractToken(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -832,7 +794,6 @@ func TestPetitionExtractToken(t *testing.T) {
 		outEmail    string
 		outErr      string
 		inResp      []byte
-		isError     bool
 		outID       int
 	}{
 		{
@@ -845,7 +806,6 @@ func TestPetitionExtractToken(t *testing.T) {
 			outUsername: usernameTest,
 			outEmail:    emailTest,
 			outErr:      "",
-			isError:     false,
 		},
 		{
 			name:        "ErrorBadURL",
@@ -857,7 +817,6 @@ func TestPetitionExtractToken(t *testing.T) {
 			outUsername: "",
 			outEmail:    "",
 			outErr:      `parse "%%": invalid URL escape "%%"`,
-			isError:     true,
 		},
 		{
 			name:        "ErrorNoJSON",
@@ -869,7 +828,6 @@ func TestPetitionExtractToken(t *testing.T) {
 			outUsername: "",
 			outEmail:    "",
 			outErr:      "unexpected end of JSON input",
-			isError:     true,
 		},
 		{
 			name:        "ErrorBadJSON",
@@ -881,7 +839,6 @@ func TestPetitionExtractToken(t *testing.T) {
 			outUsername: "",
 			outEmail:    "",
 			outErr:      "error",
-			isError:     true,
 		},
 	} {
 		tt := tt
@@ -908,10 +865,10 @@ func TestPetitionExtractToken(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outID, resultID)
@@ -932,12 +889,12 @@ func TestPetitionSetToken(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -946,7 +903,6 @@ func TestPetitionSetToken(t *testing.T) {
 		inToken string
 		outErr  string
 		inResp  []byte
-		isError bool
 	}{
 		{
 			name:    "NoError",
@@ -954,7 +910,6 @@ func TestPetitionSetToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  goodJSONTest,
 			outErr:  "",
-			isError: false,
 		},
 		{
 			name:    "ErrorBadURL",
@@ -962,7 +917,6 @@ func TestPetitionSetToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  []byte("{}"),
 			outErr:  `parse "%%": invalid URL escape "%%"`,
-			isError: true,
 		},
 		{
 			name:    "ErrorNoJSON",
@@ -970,7 +924,6 @@ func TestPetitionSetToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  []byte(""),
 			outErr:  "unexpected end of JSON input",
-			isError: true,
 		},
 		{
 			name:    "ErrorBadJSON",
@@ -978,7 +931,6 @@ func TestPetitionSetToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  badJSONTest,
 			outErr:  "error",
-			isError: true,
 		},
 	} {
 		tt := tt
@@ -1002,10 +954,10 @@ func TestPetitionSetToken(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -1022,12 +974,12 @@ func TestPetitionDeleteToken(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -1036,7 +988,6 @@ func TestPetitionDeleteToken(t *testing.T) {
 		inToken string
 		outErr  string
 		inResp  []byte
-		isError bool
 	}{
 		{
 			name:    "NoError",
@@ -1044,7 +995,6 @@ func TestPetitionDeleteToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  goodJSONTest,
 			outErr:  "",
-			isError: false,
 		},
 		{
 			name:    "ErrorBadURL",
@@ -1052,7 +1002,6 @@ func TestPetitionDeleteToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  []byte("{}"),
 			outErr:  `parse "%%": invalid URL escape "%%"`,
-			isError: true,
 		},
 		{
 			name:    "ErrorNoJSON",
@@ -1060,7 +1009,6 @@ func TestPetitionDeleteToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  []byte(""),
 			outErr:  "unexpected end of JSON input",
-			isError: true,
 		},
 		{
 			name:    "ErrorBadJSON",
@@ -1068,7 +1016,6 @@ func TestPetitionDeleteToken(t *testing.T) {
 			inToken: tokenTest,
 			inResp:  badJSONTest,
 			outErr:  "error",
-			isError: true,
 		},
 	} {
 		tt := tt
@@ -1092,10 +1039,10 @@ func TestPetitionDeleteToken(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -1114,12 +1061,12 @@ func TestPetitionCheckToken(t *testing.T) {
 
 	goodJSONTest, err := json.Marshal(goodResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badJSONTest, err := json.Marshal(badResponseTest)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -1129,7 +1076,6 @@ func TestPetitionCheckToken(t *testing.T) {
 		outErr   string
 		inResp   []byte
 		outCheck bool
-		isError  bool
 	}{
 		{
 			name:     "NoError",
@@ -1138,7 +1084,6 @@ func TestPetitionCheckToken(t *testing.T) {
 			inResp:   goodJSONTest,
 			outCheck: true,
 			outErr:   "",
-			isError:  false,
 		},
 		{
 			name:     "ErrorBadURL",
@@ -1147,7 +1092,6 @@ func TestPetitionCheckToken(t *testing.T) {
 			inResp:   []byte("{}"),
 			outCheck: false,
 			outErr:   `parse "%%": invalid URL escape "%%"`,
-			isError:  true,
 		},
 		{
 			name:     "ErrorNoJSON",
@@ -1156,7 +1100,6 @@ func TestPetitionCheckToken(t *testing.T) {
 			inResp:   []byte(""),
 			outCheck: false,
 			outErr:   "unexpected end of JSON input",
-			isError:  true,
 		},
 		{
 			name:     "ErrorBadJSON",
@@ -1165,7 +1108,6 @@ func TestPetitionCheckToken(t *testing.T) {
 			inResp:   badJSONTest,
 			outCheck: false,
 			outErr:   "error",
-			isError:  true,
 		},
 	} {
 		tt := tt
@@ -1190,13 +1132,13 @@ func TestPetitionCheckToken(t *testing.T) {
 				},
 			)
 
-			if !tt.isError {
-				assert.Nil(t, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				assert.ErrorContains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outCheck, resultCheck)
 		})
 	}
-}
+} */

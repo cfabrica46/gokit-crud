@@ -27,17 +27,17 @@ func TestDecodeSignUpRequest(t *testing.T) {
 		emailTest,
 	})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -78,11 +78,16 @@ func TestDecodeSignUpRequest(t *testing.T) {
 			result, ok := r.(service.SignUpRequest)
 			if !ok {
 				if (tt.out != service.SignUpRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+
 			assert.Equal(t, tt.out, result)
 		})
 	}
@@ -101,17 +106,17 @@ func TestDecodeSignInRequest(t *testing.T) {
 		passwordTest,
 	})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer([]byte{}))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -150,11 +155,16 @@ func TestDecodeSignInRequest(t *testing.T) {
 			result, ok := r.(service.SignInRequest)
 			if !ok {
 				if (tt.out != service.SignInRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+
 			assert.Equal(t, tt.out, result)
 		})
 	}
@@ -171,13 +181,15 @@ func TestDecodeLogOutRequest(t *testing.T) {
 		tokenTest,
 	})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
+
+	goodReq.Header.Add("Authorization", tokenTest)
 
 	for _, tt := range []struct {
 		name   string
@@ -186,9 +198,11 @@ func TestDecodeLogOutRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
-			in:     goodReq,
-			out:    service.LogOutRequest{},
+			name: "NoError",
+			in:   goodReq,
+			out: service.LogOutRequest{
+				Token: tokenTest,
+			},
 			outErr: "",
 		},
 	} {
@@ -207,11 +221,16 @@ func TestDecodeLogOutRequest(t *testing.T) {
 			result, ok := r.(service.LogOutRequest)
 			if !ok {
 				if (tt.out != service.LogOutRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+
 			assert.Equal(t, tt.out, result)
 		})
 	}
@@ -224,7 +243,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	for _, tt := range []struct {
@@ -255,11 +274,16 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 			result, ok := r.(service.GetAllUsersRequest)
 			if !ok {
 				if (tt.out != service.GetAllUsersRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+
 			assert.Equal(t, tt.out, result)
 		})
 	}
@@ -276,13 +300,15 @@ func TestDecodeProfileRequest(t *testing.T) {
 		tokenTest,
 	})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
+
+	goodReq.Header.Add("Authorization", tokenTest)
 
 	for _, tt := range []struct {
 		name   string
@@ -291,9 +317,11 @@ func TestDecodeProfileRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
-			in:     goodReq,
-			out:    service.ProfileRequest{},
+			name: "NoError",
+			in:   goodReq,
+			out: service.ProfileRequest{
+				Token: tokenTest,
+			},
 			outErr: "",
 		},
 	} {
@@ -312,11 +340,16 @@ func TestDecodeProfileRequest(t *testing.T) {
 			result, ok := r.(service.ProfileRequest)
 			if !ok {
 				if (tt.out != service.ProfileRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+
 			assert.Equal(t, tt.out, result)
 		})
 	}
@@ -333,13 +366,15 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 		tokenTest,
 	})
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	goodReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
+
+	goodReq.Header.Add("Authorization", tokenTest)
 
 	for _, tt := range []struct {
 		name   string
@@ -348,9 +383,11 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
-			in:     goodReq,
-			out:    service.DeleteAccountRequest{},
+			name: "NoError",
+			in:   goodReq,
+			out: service.DeleteAccountRequest{
+				Token: tokenTest,
+			},
 			outErr: "",
 		},
 	} {
@@ -369,11 +406,16 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 			result, ok := r.(service.DeleteAccountRequest)
 			if !ok {
 				if (tt.out != service.DeleteAccountRequest{}) {
-					t.Error("result is not of the type indicated")
+					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+
 			assert.Equal(t, tt.out, result)
 		})
 	}
@@ -409,7 +451,11 @@ func TestEncodeResponse(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			assert.Equal(t, tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
 		})
 	}
 }

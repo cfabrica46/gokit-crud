@@ -126,7 +126,7 @@ func TestSignUp(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -243,7 +243,7 @@ func TestSignIn(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -356,7 +356,7 @@ func TestLogOut(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -368,7 +368,7 @@ func TestLogOut(t *testing.T) {
 
 				jsonCheck, err := json.Marshal(testCheck)
 				if err != nil {
-					t.Error(err)
+					assert.Error(t, err)
 				}
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
@@ -470,7 +470,7 @@ func TestGetAllUsers(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -604,7 +604,7 @@ func TestProfile(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -616,7 +616,7 @@ func TestProfile(t *testing.T) {
 
 				jsonCheck, err := json.Marshal(testCheck)
 				if err != nil {
-					t.Error(err)
+					assert.Error(t, err)
 				}
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
@@ -751,7 +751,7 @@ func TestDeleteAccount(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				t.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -763,7 +763,7 @@ func TestDeleteAccount(t *testing.T) {
 
 				jsonCheck, err := json.Marshal(testCheck)
 				if err != nil {
-					t.Error(err)
+					assert.Error(t, err)
 				}
 
 				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}

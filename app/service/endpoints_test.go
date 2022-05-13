@@ -494,7 +494,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 			jsonData, err := json.Marshal(testResp)
 			if err != nil {
-				assert.Error(err)
+				assert.Error(t, err)
 			}
 
 			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
@@ -511,12 +511,12 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 			r, err := service.MakeDeleteAccountEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(err)
+				assert.Error(t, err)
 			}
 
 			result, ok := r.(service.DeleteAccountResponse)
 			if !ok {
-				assert.Error(errNotTypeIndicated)
+				assert.Error(t, errNotTypeIndicated)
 			}
 
 			if tt.name == nameNoError {
