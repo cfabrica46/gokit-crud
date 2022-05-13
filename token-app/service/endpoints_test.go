@@ -21,7 +21,7 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 		in   service.GenerateTokenRequest
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in: service.GenerateTokenRequest{
 				ID:       idTest,
 				Username: usernameTest,
@@ -79,7 +79,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in: service.ExtractTokenRequest{
 				tokenSigned,
 				secretTest,
@@ -118,7 +118,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
@@ -136,12 +136,12 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 		in     service.SetTokenRequest
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     service.SetTokenRequest{"token"},
 			outErr: "",
 		},
 		{
-			name:   "ErrorRedisClose",
+			name:   nameErrorRedisClose,
 			in:     service.SetTokenRequest{""},
 			outErr: errRedisClosed,
 		},
@@ -159,8 +159,7 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict.
-			if tt.outErr == errRedisClosed {
+			if tt.name == nameErrorRedisClose {
 				svc.DB.Close()
 			}
 
@@ -174,7 +173,7 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
@@ -192,12 +191,12 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     service.DeleteTokenRequest{"token"},
 			outErr: "",
 		},
 		{
-			name:   "ErrorRedisClose",
+			name:   nameErrorRedisClose,
 			in:     service.DeleteTokenRequest{""},
 			outErr: errRedisClosed,
 		},
@@ -215,8 +214,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict.
-			if tt.outErr == errRedisClosed {
+			if tt.name == nameErrorRedisClose {
 				svc.DB.Close()
 			}
 
@@ -230,7 +228,7 @@ func TestMakeDeleteTokenEndpoint(t *testing.T) {
 				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)
@@ -248,12 +246,12 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     service.CheckTokenRequest{"token"},
 			outErr: "",
 		},
 		{
-			name:   "ErrorRedisClose",
+			name:   nameErrorRedisClose,
 			in:     service.CheckTokenRequest{""},
 			outErr: errRedisClosed,
 		},
@@ -271,8 +269,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict.
-			if tt.outErr == errRedisClosed {
+			if tt.name == nameErrorRedisClose {
 				svc.DB.Close()
 			}
 
@@ -286,7 +283,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 				assert.Fail(t, "response is not of the type indicated")
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
 				assert.Contains(t, result.Err, tt.outErr)

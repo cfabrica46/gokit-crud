@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/cfabrica46/gokit-crud/database-app/service"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDecodeGetAllUsersRequest(t *testing.T) {
@@ -22,7 +22,7 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     &http.Request{},
 			out:    service.GetAllUsersRequest{},
 			outErr: "",
@@ -44,9 +44,12 @@ func TestDecodeGetAllUsersRequest(t *testing.T) {
 				t.Error("result is not of the type indicated")
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
+
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -79,7 +82,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 		out    service.GetUserByIDRequest
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.GetUserByIDRequest{
 				ID: idTest,
@@ -114,9 +117,12 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
+
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -154,7 +160,7 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.GetUserByUsernameAndPasswordRequest{
 				Username: usernameTest,
@@ -187,9 +193,12 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
+
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -222,7 +231,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 		out    service.GetIDByUsernameRequest
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.GetIDByUsernameRequest{
 				Username: usernameTest,
@@ -254,9 +263,12 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
+
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -291,7 +303,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.InsertUserRequest{
 				Username: usernameTest,
@@ -325,9 +337,12 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
+
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -362,7 +377,7 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 		out    service.DeleteUserRequest
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.DeleteUserRequest{
 				ID: idTest,
@@ -394,9 +409,12 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 				}
 			}
 
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, result)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
+
 			if result != tt.out {
 				t.Errorf("want %v; got %v", tt.out, result)
 			}
@@ -413,7 +431,7 @@ func TestEncodeResponse(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     "test",
 			outErr: "",
 		},
@@ -432,8 +450,11 @@ func TestEncodeResponse(t *testing.T) {
 			if err != nil {
 				resultErr = err.Error()
 			}
-			if !strings.Contains(resultErr, tt.outErr) {
-				t.Errorf("want %v; got %v", tt.outErr, resultErr)
+
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}

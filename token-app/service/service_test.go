@@ -19,6 +19,9 @@ const (
 	tokenTest    string = "token"
 
 	errRedisClosed string = "redis: client is closed"
+
+	nameNoError         string = "NoError"
+	nameErrorRedisClose string = "ErrorRedisClose"
 )
 
 func TestGenerateToken(t *testing.T) {
@@ -32,7 +35,7 @@ func TestGenerateToken(t *testing.T) {
 		inID                int
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inEmail:    emailTest,
@@ -86,7 +89,7 @@ func TestExtractToken(t *testing.T) {
 		outID                         int
 	}{
 		{
-			name:        "NoError",
+			name:        nameNoError,
 			inToken:     tokenSigned,
 			inSecret:    []byte(secretTest),
 			outID:       idTest,
@@ -125,7 +128,7 @@ func TestExtractToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -156,12 +159,12 @@ func TestSetToken(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     tokenSigned,
 			outErr: "",
 		},
 		{
-			name:   "ErrorRedisClose",
+			name:   nameErrorRedisClose,
 			in:     "",
 			outErr: "redis: client is closed",
 		},
@@ -181,8 +184,7 @@ func TestSetToken(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// Generate Conflict.
-			if tt.outErr == "redis: client is closed" {
+			if tt.name == nameErrorRedisClose {
 				svc.DB.Close()
 			}
 
@@ -191,7 +193,7 @@ func TestSetToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -218,7 +220,7 @@ func TestDeleteToken(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     tokenSigned,
 			outErr: "",
 		},
@@ -243,7 +245,7 @@ func TestDeleteToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -271,19 +273,19 @@ func TestCheckToken(t *testing.T) {
 		outCheck bool
 	}{
 		{
-			name:     "NoError",
+			name:     nameNoError,
 			in:       tokenSigned,
 			outCheck: true,
 			outErr:   "",
 		},
 		{
-			name:     "NoError",
+			name:     nameNoError,
 			in:       "",
 			outCheck: false,
 			outErr:   "",
 		},
 		{
-			name:     "ErrorRedisClose",
+			name:     nameErrorRedisClose,
 			in:       "",
 			outCheck: false,
 			outErr:   "redis: client is closed",
@@ -305,7 +307,6 @@ func TestCheckToken(t *testing.T) {
 
 			svc := service.GetService(client)
 
-			// insert.
 			if tt.in != "" {
 				err = svc.SetToken(tt.in)
 				if err != nil {
@@ -313,8 +314,7 @@ func TestCheckToken(t *testing.T) {
 				}
 			}
 
-			// Generate Conflict.
-			if tt.outErr == "redis: client is closed" {
+			if tt.name == nameErrorRedisClose {
 				svc.DB.Close()
 			}
 
@@ -323,7 +323,7 @@ func TestCheckToken(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -377,7 +377,7 @@ func TestKeyFunc(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)

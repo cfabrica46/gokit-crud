@@ -2,11 +2,11 @@ package service_test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/cfabrica46/gokit-crud/database-app/service"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
@@ -20,7 +20,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 		outID                              int
 	}{
 		{
-			name:        "NoError",
+			name:        nameNoError,
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
@@ -28,7 +28,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			outErr:      "",
 		},
 		{
-			name:        "ErrorDBClose",
+			name:        nameErrorDBClosed,
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
@@ -45,8 +45,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			}
 			defer db.Close()
 
-			// generate confict closing db.
-			if tt.outErr == errDatabaseClosed {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -75,10 +74,10 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}
@@ -95,7 +94,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 		inID                            int
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -104,7 +103,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			outErr:     "",
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -122,8 +121,7 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			}
 			defer db.Close()
 
-			// generate confict closing db.
-			if tt.outErr == errDatabaseClosed {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -155,10 +153,10 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}
@@ -175,7 +173,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 		inID                            int
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -187,7 +185,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -205,8 +203,7 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			}
 			defer db.Close()
 
-			// generate confict closing db.
-			if tt.outErr == errDatabaseClosed {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -241,10 +238,10 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}
@@ -261,7 +258,7 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 		inID       int
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inRequest: service.GetIDByUsernameRequest{
@@ -270,7 +267,7 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inRequest:  service.GetIDByUsernameRequest{},
@@ -286,8 +283,7 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 			}
 			defer db.Close()
 
-			// generate confict closing db.
-			if tt.outErr == errDatabaseClosed {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -307,10 +303,10 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}
@@ -326,7 +322,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 		outErr                          string
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -338,7 +334,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -356,8 +352,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			}
 			defer db.Close()
 
-			// generate confict closing db.
-			if tt.outErr == errDatabaseClosed {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -380,10 +375,10 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}
@@ -399,7 +394,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 		inID      int
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			inID: idTest,
 			inRequest: service.DeleteUserRequest{
 				ID: idTest,
@@ -407,7 +402,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
-			name:      "ErrorDBClose",
+			name:      nameErrorDBClosed,
 			inID:      idTest,
 			inRequest: service.DeleteUserRequest{},
 			outErr:    errDatabaseClosed,
@@ -423,8 +418,7 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 			}
 			defer db.Close()
 
-			// generate confict closing db.
-			if tt.outErr == errDatabaseClosed {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -443,10 +437,10 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 				t.Error("response is not of the type indicated")
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(result.Err, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, result.Err)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Contains(t, result.Err, tt.outErr)
 			}
 		})
 	}

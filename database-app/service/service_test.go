@@ -1,11 +1,11 @@
 package service_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/cfabrica46/gokit-crud/database-app/service"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -18,6 +18,10 @@ const (
 	closeDB string = "close db"
 
 	errDatabaseClosed string = "sql: database is closed"
+
+	nameNoError       string = "NoError"
+	nameErrorDBClosed string = "ErrorDBClosed"
+	nameErrorNoRows   string = "ErrorNoRows"
 )
 
 func TestGetAllUsers(t *testing.T) {
@@ -29,14 +33,14 @@ func TestGetAllUsers(t *testing.T) {
 		outErr                       string
 	}{
 		{
-			name:        "NoError",
+			name:        nameNoError,
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
 			outErr:      "",
 		},
 		{
-			name:        "ErrorDBClose",
+			name:        nameErrorDBClosed,
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
@@ -50,7 +54,7 @@ func TestGetAllUsers(t *testing.T) {
 			outErr:      "Scan error on column index 0",
 		},
 		/* {
-			name:        "ErrorNoRows",
+			name:        nameErrorNoRows,
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
@@ -69,7 +73,7 @@ func TestGetAllUsers(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.outErr == "sql: database is closed" {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -93,14 +97,10 @@ func TestGetAllUsers(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
 			} else {
-				if resultErr != "" {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -113,35 +113,31 @@ func TestGetUserByID(t *testing.T) {
 		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
-		condition                       string
 		inID                            int
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  "",
 		},
 		{
-			name:       "ErrorNoRows",
+			name:       nameErrorNoRows,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  noRows,
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "sql: database is closed",
-			condition:  closeDB,
 		},
 	} {
 		tt := tt
@@ -156,7 +152,7 @@ func TestGetUserByID(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == closeDB {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -175,7 +171,7 @@ func TestGetUserByID(t *testing.T) {
 				tt.inEmail,
 			)
 
-			if tt.condition == noRows {
+			if tt.name == nameErrorNoRows {
 				rows = sqlmock.NewRows([]string{"id", "username", "password", "email"})
 			}
 
@@ -188,10 +184,10 @@ func TestGetUserByID(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -204,39 +200,32 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
-		condition                       string
 		inID                            int
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  "",
 		},
 		{
-			name:       "ErrorNoRows",
+			name:       nameErrorNoRows,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  noRows,
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inID:       idTest,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "sql: database is closed",
-			condition:  closeDB,
 		},
-		// {"", ""},
-		// {"", noRows},
-		// {"sql: database is closed", closeDB},.
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -250,7 +239,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == closeDB {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -269,7 +258,7 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 				tt.inEmail,
 			)
 
-			if tt.condition == noRows {
+			if tt.name == nameErrorNoRows {
 				rows = sqlmock.NewRows([]string{"id", "username", "password", "email"})
 			}
 
@@ -282,10 +271,10 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -298,33 +287,26 @@ func TestGetIDByUsername(t *testing.T) {
 		name       string
 		inUsername string
 		outErr     string
-		condition  string
 		inID       int
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "",
-			condition:  "",
 		},
 		{
-			name:       "ErrorNoRows",
+			name:       nameErrorNoRows,
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "",
-			condition:  noRows,
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inID:       idTest,
 			inUsername: usernameTest,
 			outErr:     "sql: database is closed",
-			condition:  closeDB,
 		},
-		/* {"", ""},
-		{"", noRows},
-		{"sql: database is closed", closeDB}, */
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -338,7 +320,7 @@ func TestGetIDByUsername(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == closeDB {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -346,7 +328,7 @@ func TestGetIDByUsername(t *testing.T) {
 
 			rows := sqlmock.NewRows([]string{"id"}).AddRow(tt.inID)
 
-			if tt.condition == noRows {
+			if tt.name == nameErrorNoRows {
 				rows = sqlmock.NewRows([]string{"id"})
 			}
 
@@ -357,10 +339,10 @@ func TestGetIDByUsername(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -373,35 +355,28 @@ func TestInsertUser(t *testing.T) {
 		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
-		condition                       string
 	}{
 		{
-			name:       "NoError",
+			name:       nameNoError,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  "",
 		},
 		{
-			name:       "ErrorNoRows",
+			name:       nameErrorNoRows,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "",
-			condition:  noRows,
 		},
 		{
-			name:       "ErrorDBClose",
+			name:       nameErrorDBClosed,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			outErr:     "sql: database is closed",
-			condition:  closeDB,
 		},
-		// {"", ""},
-		// {"", "duplicate key"},
-		// {"sql: database is closed", closeDB},.
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -415,7 +390,7 @@ func TestInsertUser(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == closeDB {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -436,10 +411,10 @@ func TestInsertUser(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -449,22 +424,19 @@ func TestDeleteUser(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name      string
-		outErr    string
-		condition string
-		inID      int
+		name   string
+		outErr string
+		inID   int
 	}{
 		{
-			name:      "NoError",
-			inID:      idTest,
-			outErr:    "",
-			condition: "",
+			name:   nameNoError,
+			inID:   idTest,
+			outErr: "",
 		},
 		{
-			name:      "ErrorDBClose",
-			inID:      idTest,
-			outErr:    "sql: database is closed",
-			condition: closeDB,
+			name:   nameErrorDBClosed,
+			inID:   idTest,
+			outErr: "sql: database is closed",
 		},
 	} {
 		tt := tt
@@ -479,7 +451,7 @@ func TestDeleteUser(t *testing.T) {
 			}
 			defer db.Close()
 
-			if tt.condition == closeDB {
+			if tt.name == nameErrorDBClosed {
 				db.Close()
 			}
 
@@ -498,10 +470,10 @@ func TestDeleteUser(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.outErr != "" {
-				if !strings.Contains(resultErr, tt.outErr) {
-					t.Errorf("want %v; got %v", tt.outErr, resultErr)
-				}
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}

@@ -44,7 +44,7 @@ func TestDecodeGenerateToken(t *testing.T) {
 		out    service.GenerateTokenRequest
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.GenerateTokenRequest{
 				ID:       idTest,
@@ -79,7 +79,7 @@ func TestDecodeGenerateToken(t *testing.T) {
 				}
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -117,7 +117,7 @@ func TestDecodeExtractToken(t *testing.T) {
 		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.ExtractTokenRequest{
 				Token:  tokenTest,
@@ -149,7 +149,7 @@ func TestDecodeExtractToken(t *testing.T) {
 				}
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -187,7 +187,7 @@ func TestDecodeSetToken(t *testing.T) {
 		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.SetTokenRequest{
 				Token: tokenTest,
@@ -219,7 +219,7 @@ func TestDecodeSetToken(t *testing.T) {
 				}
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -257,7 +257,7 @@ func TestDecodeDeleteToken(t *testing.T) {
 		outErr string
 	}{
 		{
-			name: "NoError",
+			name: nameNoError,
 			in:   goodReq,
 			out: service.DeleteTokenRequest{
 				Token: tokenTest,
@@ -289,7 +289,7 @@ func TestDecodeDeleteToken(t *testing.T) {
 				}
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -327,7 +327,7 @@ func TestDecodeCheckToken(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     goodReq,
 			out:    service.CheckTokenRequest{tokenTest},
 			outErr: "",
@@ -357,7 +357,7 @@ func TestDecodeCheckToken(t *testing.T) {
 				}
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
@@ -377,7 +377,7 @@ func TestEncodeResponse(t *testing.T) {
 		outErr string
 	}{
 		{
-			name:   "NoError",
+			name:   nameNoError,
 			in:     "test",
 			outErr: "",
 		},
@@ -403,7 +403,7 @@ func TestEncodeResponse(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			if tt.name == "NoError" {
+			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
 				assert.Contains(t, resultErr, tt.outErr)
