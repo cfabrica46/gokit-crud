@@ -191,6 +191,11 @@ func TestDecodeLogOutRequest(t *testing.T) {
 
 	goodReq.Header.Add("Authorization", tokenTest)
 
+	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
 	for _, tt := range []struct {
 		name   string
 		in     *http.Request
@@ -204,6 +209,12 @@ func TestDecodeLogOutRequest(t *testing.T) {
 				Token: tokenTest,
 			},
 			outErr: "",
+		},
+		{
+			name:   "ErrorNotHeader",
+			in:     badReq,
+			out:    service.LogOutRequest{},
+			outErr: "failed to get header",
 		},
 	} {
 		tt := tt
@@ -310,6 +321,11 @@ func TestDecodeProfileRequest(t *testing.T) {
 
 	goodReq.Header.Add("Authorization", tokenTest)
 
+	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
 	for _, tt := range []struct {
 		name   string
 		in     *http.Request
@@ -323,6 +339,12 @@ func TestDecodeProfileRequest(t *testing.T) {
 				Token: tokenTest,
 			},
 			outErr: "",
+		},
+		{
+			name:   "ErrorNotHeader",
+			in:     badReq,
+			out:    service.ProfileRequest{},
+			outErr: "failed to get header",
 		},
 	} {
 		tt := tt
@@ -376,6 +398,11 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 
 	goodReq.Header.Add("Authorization", tokenTest)
 
+	badReq, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(dataJSON))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
 	for _, tt := range []struct {
 		name   string
 		in     *http.Request
@@ -389,6 +416,12 @@ func TestDecodeDeleteAccountRequest(t *testing.T) {
 				Token: tokenTest,
 			},
 			outErr: "",
+		},
+		{
+			name:   "ErrorNotHeader",
+			in:     badReq,
+			out:    service.DeleteAccountRequest{},
+			outErr: "failed to get header",
 		},
 	} {
 		tt := tt

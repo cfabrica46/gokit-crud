@@ -1,18 +1,17 @@
 package service_test
 
-/*
 import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"testing"
 
 	"github.com/cfabrica46/gokit-crud/app/service"
-	"github.com/stretchr/testify/assert"
-
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMakePetition(t *testing.T) {
@@ -88,7 +87,9 @@ func TestMakePetition(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				log.Println(resultErr)
+				log.Println(tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.out, result)
@@ -179,7 +180,7 @@ func TestPetitionGetAllUsers(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.outUsers, resultUsers)
@@ -273,7 +274,7 @@ func TestPetitionGetIDByUsername(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.outID, resultID)
@@ -373,7 +374,7 @@ func TestPetitionGetUserByID(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.outUser, resultUser)
@@ -479,7 +480,7 @@ func TestPetitionGetUserByUsernameAndPassword(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.outUser, resultUser)
@@ -578,7 +579,7 @@ func TestPetitionInsertUser(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 		})
 	}
@@ -663,7 +664,7 @@ func TestPetitionDeleteUser(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 		})
 	}
@@ -754,7 +755,7 @@ func TestPetitionGenerateToken(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.outToken, resultToken)
@@ -868,7 +869,7 @@ func TestPetitionExtractToken(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.outID, resultID)
@@ -957,7 +958,7 @@ func TestPetitionSetToken(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 		})
 	}
@@ -1042,7 +1043,7 @@ func TestPetitionDeleteToken(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 		})
 	}
@@ -1135,10 +1136,10 @@ func TestPetitionCheckToken(t *testing.T) {
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
 			} else {
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.Contains(t, resultErr.Error(), tt.outErr)
 			}
 
 			assert.Equal(t, tt.outCheck, resultCheck)
 		})
 	}
-} */
+}
