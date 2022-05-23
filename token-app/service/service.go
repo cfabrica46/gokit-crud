@@ -1,9 +1,8 @@
 package service
 
-/* import (
+import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/golang-jwt/jwt"
@@ -16,11 +15,10 @@ const (
 
 var ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
 
-type serviceInterface interface {
+type ServiceInterface interface {
 	GenerateToken(int, string, string, []byte) string
 	ExtractToken(string, []byte) (int, string, string, error)
-	SetToken(string) error
-	DeleteToken(string) error
+	ManageToken(State, string) error
 	CheckToken(string) (bool, error)
 }
 
@@ -64,20 +62,11 @@ func (Service) ExtractToken(token string, secret []byte) (id int, username, emai
 	return id, username, email, nil
 }
 
-// SetToken ...
-func (s *Service) SetToken(token string) (err error) {
-	err = s.DB.Set(token, true, time.Minute*time.Duration(lifeOfToken)).Err()
+// ManageToken ...
+func (s *Service) ManageToken(st State, token string) (err error) {
+	err = st.ManageToken(s.DB, token)
 	if err != nil {
-		return fmt.Errorf("error to set token: %w", err)
-	}
-
-	return nil
-}
-
-// DeleteToken ...
-func (s *Service) DeleteToken(token string) (err error) {
-	if err := s.DB.Del(token).Err(); err != nil {
-		return fmt.Errorf("failed to delete token: %w", err)
+		return fmt.Errorf("error when managing token: %w", err)
 	}
 
 	return nil
@@ -109,4 +98,4 @@ func KeyFunc(secret []byte) func(token *jwt.Token) (any, error) {
 
 		return secret, nil
 	}
-} */
+}
