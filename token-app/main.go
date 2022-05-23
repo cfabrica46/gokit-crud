@@ -43,20 +43,20 @@ func runServer(port string, db *redis.Client) {
 	)
 
 	getSetTokenHandler := httptransport.NewServer(
-		service.MakeSetTokenEndpoint(svc),
-		service.DecodeRequest(service.TokenRequest{}),
+		service.MakeManageTokenEndpoint(svc, service.NewSetTokenState()),
+		service.DecodeRequest(service.Token{}),
 		service.EncodeResponse,
 	)
 
 	getDeleteTokenHandler := httptransport.NewServer(
-		service.MakeDeleteTokenEndpoint(svc),
-		service.DecodeRequest(service.TokenRequest{}),
+		service.MakeManageTokenEndpoint(svc, service.NewDeleteTokenState()),
+		service.DecodeRequest(service.Token{}),
 		service.EncodeResponse,
 	)
 
 	getCheckTokenHandler := httptransport.NewServer(
 		service.MakeCheckTokenEndpoint(svc),
-		service.DecodeRequest(service.TokenRequest{}),
+		service.DecodeRequest(service.Token{}),
 		service.EncodeResponse,
 	)
 

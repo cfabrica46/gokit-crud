@@ -14,8 +14,8 @@ type ExtractTokenRequest struct {
 	Secret string `json:"secret"`
 }
 
-// TokenRequest ...
-type TokenRequest struct {
+// Token ...
+type Token struct {
 	Token string `json:"token"`
 }
 
@@ -32,8 +32,8 @@ type ErrorResponse struct {
 	Err string `json:"err,omitempty"`
 }
 
-// CheckResponse ...
-type CheckResponse struct {
+// CheckTokenResponse ...
+type CheckTokenResponse struct {
 	Err   string `json:"err,omitempty"`
 	Check bool   `json:"check"`
 }

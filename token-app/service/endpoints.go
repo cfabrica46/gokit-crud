@@ -1,18 +1,26 @@
 package service
 
-/* import (
+import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/go-kit/kit/endpoint"
 )
 
+var ErrRequest = errors.New("error to request")
+
 // MakeGenerateTokenEndpoint ...
 func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
-		req, _ := request.(GenerateTokenRequest)
+		req, ok := request.(GenerateTokenRequest)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrUnexpectedSigningMethod)
+		}
+
 		token := svc.GenerateToken(req.ID, req.Username, req.Email, []byte(req.Secret))
 
-		return GenerateTokenResponse{Token: token}, nil
+		return Token{Token: token}, nil
 	}
 }
 
@@ -21,7 +29,10 @@ func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(ExtractTokenRequest)
+		req, ok := request.(ExtractTokenRequest)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
+		}
 
 		id, username, email, err := svc.ExtractToken(req.Token, []byte(req.Secret))
 		if err != nil {
@@ -32,35 +43,22 @@ func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	}
 }
 
-// MakeSetTokenEndpoint ...
-func MakeSetTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
+// MakeManageTokenEndpoint ...
+func MakeManageTokenEndpoint(svc serviceInterface, st State) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(SetTokenRequest)
+		req, ok := request.(Token)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type Token", ErrRequest)
+		}
 
-		err := svc.SetToken(req.Token)
+		err := svc.ManageToken(st, req.Token)
 		if err != nil {
 			errMessage = err.Error()
 		}
 
-		return SetTokenResponse{Err: errMessage}, nil
-	}
-}
-
-// MakeDeleteTokenEndpoint ...
-func MakeDeleteTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request any) (any, error) {
-		var errMessage string
-
-		req, _ := request.(DeleteTokenRequest)
-
-		err := svc.DeleteToken(req.Token)
-		if err != nil {
-			errMessage = err.Error()
-		}
-
-		return DeleteTokenResponse{Err: errMessage}, nil
+		return ErrorResponse{Err: errMessage}, nil
 	}
 }
 
@@ -69,7 +67,10 @@ func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(CheckTokenRequest)
+		req, ok := request.(Token)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type Token", ErrRequest)
+		}
 
 		check, err := svc.CheckToken(req.Token)
 		if err != nil {
@@ -78,4 +79,4 @@ func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 		return CheckTokenResponse{Check: check, Err: errMessage}, nil
 	}
-} */
+}

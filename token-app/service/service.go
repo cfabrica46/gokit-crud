@@ -13,9 +13,12 @@ const (
 	lifeOfToken int = 10
 )
 
-var ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
+var (
+	ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
+	ErrClaims                  = errors.New("error to claims")
+)
 
-type ServiceInterface interface {
+type serviceInterface interface {
 	GenerateToken(int, string, string, []byte) string
 	ExtractToken(string, []byte) (int, string, string, error)
 	ManageToken(State, string) error
@@ -54,10 +57,23 @@ func (Service) ExtractToken(token string, secret []byte) (id int, username, emai
 	}
 
 	claims, _ := t.Claims.(jwt.MapClaims)
-	idAux, _ := claims["id"].(float64)
+
+	idAux, ok := claims["id"].(float64)
+	if !ok {
+		return 0, "", "", fmt.Errorf("%w: claims['id'] isn't of type float64", ErrClaims)
+	}
+
 	id = int(idAux)
-	username, _ = claims["username"].(string)
-	email, _ = claims["email"].(string)
+
+	username, ok = claims["username"].(string)
+	if !ok {
+		return 0, "", "", fmt.Errorf("%w: claims['username'] isn't of type string", ErrClaims)
+	}
+
+	email, ok = claims["email"].(string)
+	if !ok {
+		return 0, "", "", fmt.Errorf("%w: claims['id'] isn't of type email", ErrClaims)
+	}
 
 	return id, username, email, nil
 }

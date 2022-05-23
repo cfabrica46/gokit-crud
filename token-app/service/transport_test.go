@@ -1,6 +1,6 @@
 package service_test
 
-import (
+/* import (
 	"bytes"
 	"context"
 	"encoding/json"
@@ -410,4 +410,4 @@ func TestEncodeResponse(t *testing.T) {
 			}
 		})
 	}
-}
+} */
