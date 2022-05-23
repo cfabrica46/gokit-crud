@@ -7,6 +7,26 @@ import (
 	"net/http"
 )
 
+// DecodeCheckTokenRequest ...
+func DecodeCheckTokenRequest(_ context.Context, r *http.Request) (any, error) {
+	var request CheckTokenRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, fmt.Errorf("failed to decode request: %w", err)
+	}
+
+	return request, nil
+}
+
+// EncodeResponse ...
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response any) error {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		return fmt.Errorf("failed to encode response: %w", err)
+	}
+
+	return nil
+}
+
+/*
 // DecodeGenerateTokenRequest ...
 func DecodeGenerateTokenRequest(_ context.Context, r *http.Request) (any, error) {
 	var request GenerateTokenRequest
@@ -65,3 +85,4 @@ func EncodeResponse(_ context.Context, w http.ResponseWriter, response any) erro
 
 	return nil
 }
+*/

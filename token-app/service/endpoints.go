@@ -1,6 +1,6 @@
 package service
 
-import (
+/* import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
@@ -78,4 +78,4 @@ func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 		return CheckTokenResponse{Check: check, Err: errMessage}, nil
 	}
-}
+} */

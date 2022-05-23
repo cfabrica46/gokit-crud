@@ -8,6 +8,45 @@ type GenerateTokenRequest struct {
 	ID       int    `json:"id"`
 }
 
+// ExtractTokenRequest ...
+type ExtractTokenRequest struct {
+	Token  string `json:"token"`
+	Secret string `json:"secret"`
+}
+
+// TokenRequest ...
+type TokenRequest struct {
+	Token string `json:"token"`
+}
+
+// ExtractTokenResponse ...
+type ExtractTokenResponse struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Err      string `json:"err,omitempty"`
+	ID       int    `json:"id"`
+}
+
+// ErrorResponse ...
+type ErrorResponse struct {
+	Err string `json:"err,omitempty"`
+}
+
+// CheckResponse ...
+type CheckResponse struct {
+	Err   string `json:"err,omitempty"`
+	Check bool   `json:"check"`
+}
+
+/*
+// GenerateTokenRequest ...
+type GenerateTokenRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Secret   string `json:"secret"`
+	ID       int    `json:"id"`
+}
+
 // GenerateTokenResponse ...
 type GenerateTokenResponse struct {
 	Token string `json:"token"`
@@ -57,3 +96,4 @@ type CheckTokenResponse struct {
 	Err   string `json:"err,omitempty"`
 	Check bool   `json:"check"`
 }
+*/

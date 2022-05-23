@@ -1,6 +1,6 @@
 package service
 
-import (
+/* import (
 	"errors"
 	"fmt"
 	"time"
@@ -101,12 +101,12 @@ func (s Service) CheckToken(token string) (check bool, err error) {
 	return check, nil
 }
 
-func KeyFunc(secret []byte) func(token *jwt.Token) (interface{}, error) {
-	return func(token *jwt.Token) (interface{}, error) {
+func KeyFunc(secret []byte) func(token *jwt.Token) (any, error) {
+	return func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrUnexpectedSigningMethod
 		}
 
 		return secret, nil
 	}
-}
+} */
