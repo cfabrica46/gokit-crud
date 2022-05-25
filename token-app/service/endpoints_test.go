@@ -1,6 +1,6 @@
 package service_test
 
-/* import (
+import (
 	"context"
 	"testing"
 
@@ -48,7 +48,7 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 				assert.Error(t, err)
 			}
 
-			result, ok := r.(service.GenerateTokenResponse)
+			result, ok := r.(service.Token)
 			if !ok {
 				assert.Fail(t, "response is not of the type indicated")
 			}
@@ -127,23 +127,26 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 	}
 }
 
-func TestMakeSetTokenEndpoint(t *testing.T) {
+func TestMakeManageTokenEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name   string
-		outErr string
-		in     service.SetTokenRequest
+		name    string
+		outErr  string
+		inState service.State
+		in      service.Token
 	}{
 		{
-			name:   nameNoError,
-			in:     service.SetTokenRequest{"token"},
-			outErr: "",
+			name:    nameNoError,
+			in:      service.Token{"token"},
+			inState: service.NewSetTokenState(),
+			outErr:  "",
 		},
 		{
-			name:   nameErrorRedisClose,
-			in:     service.SetTokenRequest{""},
-			outErr: errRedisClosed,
+			name:    nameErrorRedisClose,
+			in:      service.Token{""},
+			inState: service.NewSetTokenState(),
+			outErr:  errRedisClosed,
 		},
 	} {
 		tt := tt
@@ -163,67 +166,12 @@ func TestMakeSetTokenEndpoint(t *testing.T) {
 				svc.DB.Close()
 			}
 
-			r, err := service.MakeSetTokenEndpoint(svc)(context.TODO(), tt.in)
+			r, err := service.MakeManageTokenEndpoint(svc, tt.inState)(context.TODO(), tt.in)
 			if err != nil {
 				assert.Error(t, err)
 			}
 
-			result, ok := r.(service.SetTokenResponse)
-			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
-			}
-
-			if tt.name == nameNoError {
-				assert.Empty(t, result.Err)
-			} else {
-				assert.Contains(t, result.Err, tt.outErr)
-			}
-		})
-	}
-}
-
-func TestMakeDeleteTokenEndpoint(t *testing.T) {
-	t.Parallel()
-
-	for _, tt := range []struct {
-		name   string
-		in     service.DeleteTokenRequest
-		outErr string
-	}{
-		{
-			name:   nameNoError,
-			in:     service.DeleteTokenRequest{"token"},
-			outErr: "",
-		},
-		{
-			name:   nameErrorRedisClose,
-			in:     service.DeleteTokenRequest{""},
-			outErr: errRedisClosed,
-		},
-	} {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			mr, err := miniredis.Run()
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
-
-			svc := service.GetService(client)
-
-			if tt.name == nameErrorRedisClose {
-				svc.DB.Close()
-			}
-
-			r, err := service.MakeDeleteTokenEndpoint(svc)(context.TODO(), tt.in)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			result, ok := r.(service.DeleteTokenResponse)
+			result, ok := r.(service.ErrorResponse)
 			if !ok {
 				assert.Fail(t, "response is not of the type indicated")
 			}
@@ -242,17 +190,17 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 	for _, tt := range []struct {
 		name   string
-		in     service.CheckTokenRequest
+		in     service.Token
 		outErr string
 	}{
 		{
 			name:   nameNoError,
-			in:     service.CheckTokenRequest{"token"},
+			in:     service.Token{"token"},
 			outErr: "",
 		},
 		{
 			name:   nameErrorRedisClose,
-			in:     service.CheckTokenRequest{""},
+			in:     service.Token{""},
 			outErr: errRedisClosed,
 		},
 	} {
@@ -290,4 +238,4 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 			}
 		})
 	}
-} */
+}

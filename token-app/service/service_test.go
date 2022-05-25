@@ -1,6 +1,6 @@
 package service_test
 
-/* import (
+import (
 	"testing"
 
 	"github.com/alicebob/miniredis"
@@ -16,7 +16,7 @@ const (
 	usernameTest string = "username"
 	emailTest    string = "email@email.com"
 	secretTest   string = "secret"
-	tokenTest    string = "token"
+	// tokenTest    string = "token"
 
 	errRedisClosed string = "redis: client is closed"
 
@@ -141,7 +141,7 @@ func TestExtractToken(t *testing.T) {
 	}
 }
 
-func TestSetToken(t *testing.T) {
+func TestManageToken(t *testing.T) {
 	t.Parallel()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -154,19 +154,34 @@ func TestSetToken(t *testing.T) {
 	tokenSigned, _ := token.SignedString([]byte(secretTest))
 
 	for _, tt := range []struct {
-		name   string
-		in     string
-		outErr string
+		name    string
+		in      string
+		inState service.State
+		outErr  string
 	}{
 		{
-			name:   nameNoError,
-			in:     tokenSigned,
-			outErr: "",
+			name:    nameNoError,
+			in:      tokenSigned,
+			inState: service.NewSetTokenState(),
+			outErr:  "",
 		},
 		{
-			name:   nameErrorRedisClose,
-			in:     "",
-			outErr: "redis: client is closed",
+			name:    nameNoError,
+			in:      tokenSigned,
+			inState: service.NewDeleteTokenState(),
+			outErr:  "",
+		},
+		{
+			name:    nameErrorRedisClose,
+			in:      "",
+			inState: service.NewSetTokenState(),
+			outErr:  "redis: client is closed",
+		},
+		{
+			name:    nameErrorRedisClose,
+			in:      "",
+			inState: service.NewDeleteTokenState(),
+			outErr:  "redis: client is closed",
 		},
 	} {
 		tt := tt
@@ -188,59 +203,7 @@ func TestSetToken(t *testing.T) {
 				svc.DB.Close()
 			}
 
-			err = svc.SetToken(tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-
-			if tt.name == nameNoError {
-				assert.Empty(t, resultErr)
-			} else {
-				assert.Contains(t, resultErr, tt.outErr)
-			}
-		})
-	}
-}
-
-func TestDeleteToken(t *testing.T) {
-	t.Parallel()
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":       idTest,
-		"username": usernameTest,
-		"email":    emailTest,
-		"uuid":     uuid.NewString(),
-	})
-
-	tokenSigned, _ := token.SignedString([]byte(secretTest))
-
-	for _, tt := range []struct {
-		name   string
-		in     string
-		outErr string
-	}{
-		{
-			name:   nameNoError,
-			in:     tokenSigned,
-			outErr: "",
-		},
-	} {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var resultErr string
-
-			mr, err := miniredis.Run()
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
-
-			svc := service.GetService(client)
-
-			err = svc.DeleteToken(tt.in)
+			err = svc.ManageToken(tt.inState, tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
@@ -308,7 +271,7 @@ func TestCheckToken(t *testing.T) {
 			svc := service.GetService(client)
 
 			if tt.in != "" {
-				err = svc.SetToken(tt.in)
+				err = svc.ManageToken(service.NewSetTokenState(), tt.in)
 				if err != nil {
 					assert.Error(t, err)
 				}
@@ -393,4 +356,4 @@ func TestKeyFunc(t *testing.T) {
 			assert.Equal(t, tt.outSecret, result)
 		})
 	}
-} */
+}

@@ -1,9 +1,10 @@
 package service_test
 
-/* import (
+import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +13,7 @@ package service_test
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDecodeGenerateToken(t *testing.T) {
+func TestDecodeRequest(t *testing.T) {
 	t.Parallel()
 
 	url := "localhost:8080/generate"
@@ -68,291 +69,16 @@ func TestDecodeGenerateToken(t *testing.T) {
 			var result service.GenerateTokenRequest
 			var resultErr string
 
-			r, err := service.DecodeGenerateTokenRequest(context.TODO(), tt.in)
+			r, err := service.DecodeRequest(service.GenerateTokenRequest{})(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}
+
+			log.Println(r)
+
 			result, ok := r.(service.GenerateTokenRequest)
 			if !ok {
 				if (tt.out != service.GenerateTokenRequest{}) {
-					assert.Fail(t, "result is not of the type indicated")
-				}
-			}
-
-			if tt.name == nameNoError {
-				assert.Empty(t, resultErr)
-			} else {
-				assert.Contains(t, resultErr, tt.outErr)
-			}
-
-			assert.Equal(t, tt.out, result)
-		})
-	}
-}
-
-func TestDecodeExtractToken(t *testing.T) {
-	t.Parallel()
-
-	url := "localhost:8080/extract"
-
-	dataJSON, err := json.Marshal(service.ExtractTokenRequest{tokenTest, secretTest})
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		out    service.ExtractTokenRequest
-		outErr string
-	}{
-		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.ExtractTokenRequest{
-				Token:  tokenTest,
-				Secret: secretTest,
-			},
-			outErr: "",
-		},
-		{
-			name: "BadRequest",
-			in:   badReq,
-			out:  service.ExtractTokenRequest{}, outErr: "EOF",
-		},
-	} {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var result service.ExtractTokenRequest
-			var resultErr string
-
-			r, err := service.DecodeExtractTokenRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			result, ok := r.(service.ExtractTokenRequest)
-			if !ok {
-				if (tt.out != service.ExtractTokenRequest{}) {
-					assert.Fail(t, "result is not of the type indicated")
-				}
-			}
-
-			if tt.name == nameNoError {
-				assert.Empty(t, resultErr)
-			} else {
-				assert.Contains(t, resultErr, tt.outErr)
-			}
-
-			assert.Equal(t, tt.out, result)
-		})
-	}
-}
-
-func TestDecodeSetToken(t *testing.T) {
-	t.Parallel()
-
-	url := "localhost:8080/token"
-
-	dataJSON, err := json.Marshal(service.SetTokenRequest{tokenTest})
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		out    service.SetTokenRequest
-		outErr string
-	}{
-		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.SetTokenRequest{
-				Token: tokenTest,
-			},
-			outErr: "",
-		},
-		{
-			name:   "BadRequest",
-			in:     badReq,
-			out:    service.SetTokenRequest{},
-			outErr: "EOF",
-		},
-	} {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var result service.SetTokenRequest
-			var resultErr string
-
-			r, err := service.DecodeSetTokenRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			result, ok := r.(service.SetTokenRequest)
-			if !ok {
-				if (tt.out != service.SetTokenRequest{}) {
-					assert.Fail(t, "result is not of the type indicated")
-				}
-			}
-
-			if tt.name == nameNoError {
-				assert.Empty(t, resultErr)
-			} else {
-				assert.Contains(t, resultErr, tt.outErr)
-			}
-
-			assert.Equal(t, tt.out, result)
-		})
-	}
-}
-
-func TestDecodeDeleteToken(t *testing.T) {
-	t.Parallel()
-
-	url := "localhost:8080/token"
-
-	dataJSON, err := json.Marshal(service.DeleteTokenRequest{tokenTest})
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	goodReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(dataJSON))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	badReq, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		out    service.DeleteTokenRequest
-		outErr string
-	}{
-		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.DeleteTokenRequest{
-				Token: tokenTest,
-			},
-			outErr: "",
-		},
-		{
-			name:   "BadRequest",
-			in:     badReq,
-			out:    service.DeleteTokenRequest{},
-			outErr: "EOF",
-		},
-	} {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var result service.DeleteTokenRequest
-			var resultErr string
-
-			r, err := service.DecodeDeleteTokenRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			result, ok := r.(service.DeleteTokenRequest)
-			if !ok {
-				if (tt.out != service.DeleteTokenRequest{}) {
-					assert.Fail(t, "result is not of the type indicated")
-				}
-			}
-
-			if tt.name == nameNoError {
-				assert.Empty(t, resultErr)
-			} else {
-				assert.Contains(t, resultErr, tt.outErr)
-			}
-
-			assert.Equal(t, tt.out, result)
-		})
-	}
-}
-
-func TestDecodeCheckToken(t *testing.T) {
-	t.Parallel()
-
-	url := "localhost:8080/Check"
-
-	dataJSON, err := json.Marshal(service.CheckTokenRequest{tokenTest})
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		out    service.CheckTokenRequest
-		outErr string
-	}{
-		{
-			name:   nameNoError,
-			in:     goodReq,
-			out:    service.CheckTokenRequest{tokenTest},
-			outErr: "",
-		},
-		{
-			name:   "BadRequest",
-			in:     badReq,
-			out:    service.CheckTokenRequest{},
-			outErr: "EOF",
-		},
-	} {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var result service.CheckTokenRequest
-			var resultErr string
-
-			r, err := service.DecodeCheckTokenRequest(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
-			}
-			result, ok := r.(service.CheckTokenRequest)
-			if !ok {
-				if (tt.out != service.CheckTokenRequest{}) {
 					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
@@ -410,4 +136,4 @@ func TestEncodeResponse(t *testing.T) {
 			}
 		})
 	}
-} */
+}
