@@ -12,13 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type incorrectRequest struct {
+	incorrect bool
+}
+
 func TestMakeGenerateTokenEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name string
-		out  string
-		in   service.GenerateTokenRequest
+		in     any
+		name   string
+		outErr string
 	}{
 		{
 			name: nameNoError,
@@ -28,11 +32,21 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 				Email:    emailTest,
 				Secret:   secretTest,
 			},
+			outErr: "",
+		},
+		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			mr, err := miniredis.Run()
 			if err != nil {
@@ -45,15 +59,23 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeGenerateTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.Token)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
 			}
 
-			assert.NotEmpty(t, result.Token)
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+				assert.NotEmpty(t, result.Token)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+				assert.Empty(t, result.Token)
+			}
 		})
 	}
 }
@@ -75,7 +97,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 	for _, tt := range []struct {
 		name   string
-		in     service.ExtractTokenRequest
+		in     any
 		outErr string
 	}{
 		{
@@ -85,6 +107,13 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 				secretTest,
 			},
 			outErr: "",
+		},
+		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
 		},
 		{
 			name: "ErrorNotValidToken",
@@ -99,6 +128,8 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			var resultErr string
+
 			mr, err := miniredis.Run()
 			if err != nil {
 				assert.Error(t, err)
@@ -110,18 +141,22 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeExtractTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.ExtractTokenResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			} else {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -131,16 +166,23 @@ func TestMakeManageTokenEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
+		inState service.State
+		in      any
 		name    string
 		outErr  string
-		inState service.State
-		in      service.Token
 	}{
 		{
 			name:    nameNoError,
 			in:      service.Token{"token"},
 			inState: service.NewSetTokenState(),
 			outErr:  "",
+		},
+		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
 		},
 		{
 			name:    nameErrorRedisClose,
@@ -152,6 +194,8 @@ func TestMakeManageTokenEndpoint(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			mr, err := miniredis.Run()
 			if err != nil {
@@ -168,18 +212,22 @@ func TestMakeManageTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeManageTokenEndpoint(svc, tt.inState)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.ErrorResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			} else {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -190,13 +238,20 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 	for _, tt := range []struct {
 		name   string
-		in     service.Token
+		in     any
 		outErr string
 	}{
 		{
 			name:   nameNoError,
 			in:     service.Token{"token"},
 			outErr: "",
+		},
+		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
 		},
 		{
 			name:   nameErrorRedisClose,
@@ -207,6 +262,8 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			mr, err := miniredis.Run()
 			if err != nil {
@@ -223,18 +280,22 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 
 			r, err := service.MakeCheckTokenEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
 			result, ok := r.(service.CheckTokenResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			} else {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}

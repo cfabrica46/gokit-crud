@@ -72,7 +72,7 @@ func (Service) ExtractToken(token string, secret []byte) (id int, username, emai
 
 	email, ok = claims["email"].(string)
 	if !ok {
-		return 0, "", "", fmt.Errorf("%w: claims['id'] isn't of type email", ErrClaims)
+		return 0, "", "", fmt.Errorf("%w: claims['email'] isn't of type string", ErrClaims)
 	}
 
 	return id, username, email, nil

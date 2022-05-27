@@ -21,6 +21,7 @@ const (
 	errRedisClosed string = "redis: client is closed"
 
 	nameNoError         string = "NoError"
+	nameErrorRequest    string = "ErrorRequest"
 	nameErrorRedisClose string = "ErrorRedisClose"
 )
 
@@ -76,7 +77,43 @@ func TestExtractToken(t *testing.T) {
 		"uuid":     uuid.NewString(),
 	})
 
+	tokenBadID := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       "badID",
+		"username": usernameTest,
+		"email":    emailTest,
+		"uuid":     uuid.NewString(),
+	})
+
+	tokenBadUsername := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       idTest,
+		"username": 1,
+		"email":    emailTest,
+		"uuid":     uuid.NewString(),
+	})
+
+	tokenBadEmail := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       idTest,
+		"username": usernameTest,
+		"email":    1,
+		"uuid":     uuid.NewString(),
+	})
+
 	tokenSigned, err := token.SignedString([]byte(secretTest))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	tokenSignedBadID, err := tokenBadID.SignedString([]byte(secretTest))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	tokenSignedBadUsername, err := tokenBadUsername.SignedString([]byte(secretTest))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	tokenSignedBadEmail, err := tokenBadEmail.SignedString([]byte(secretTest))
 	if err != nil {
 		assert.Error(t, err)
 	}
@@ -105,6 +142,33 @@ func TestExtractToken(t *testing.T) {
 			outUsername: "",
 			outEmail:    "",
 			outErr:      "token contains an invalid number of segments",
+		},
+		{
+			name:        "ErrorClaimsID",
+			inToken:     tokenSignedBadID,
+			inSecret:    []byte(secretTest),
+			outID:       0,
+			outUsername: "",
+			outEmail:    "",
+			outErr:      "claims['id'] isn't of type float64",
+		},
+		{
+			name:        "ErrorClaimsUsername",
+			inToken:     tokenSignedBadUsername,
+			inSecret:    []byte(secretTest),
+			outID:       0,
+			outUsername: "",
+			outEmail:    "",
+			outErr:      "claims['username'] isn't of type string",
+		},
+		{
+			name:        "ErrorClaimsEmail",
+			inToken:     tokenSignedBadEmail,
+			inSecret:    []byte(secretTest),
+			outID:       0,
+			outUsername: "",
+			outEmail:    "",
+			outErr:      "claims['email'] isn't of type string",
 		},
 	} {
 		tt := tt
