@@ -3,8 +3,6 @@ package service_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,22 +11,52 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	generateTokenRequestJSON = `{
+		 "username": "username",
+		 "email": "email@email.com",
+		 "secret": "secret",
+		 "id": 1
+	}`
+
+	extractTokenRequestJSON = `{
+		"token": "token",
+		 "secret": "secret"
+	}`
+
+	tokenRequestJSON = `{
+		"token": "token"
+	}`
+)
+
 func TestDecodeRequest(t *testing.T) {
 	t.Parallel()
 
-	url := "localhost:8080/generate"
+	url := "localhost:8080/"
 
-	dataJSON, err := json.Marshal(service.GenerateTokenRequest{
-		ID:       idTest,
-		Username: usernameTest,
-		Email:    emailTest,
-		Secret:   secretTest,
-	})
+	generateTokenReq, err := http.NewRequest(
+		http.MethodPost,
+		url,
+		bytes.NewBuffer([]byte(generateTokenRequestJSON)),
+	)
 	if err != nil {
 		assert.Error(t, err)
 	}
 
-	goodReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataJSON))
+	extractTokenReq, err := http.NewRequest(
+		http.MethodPost,
+		url,
+		bytes.NewBuffer([]byte(extractTokenRequestJSON)),
+	)
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	tokenReq, err := http.NewRequest(
+		http.MethodPost,
+		url,
+		bytes.NewBuffer([]byte(tokenRequestJSON)),
+	)
 	if err != nil {
 		assert.Error(t, err)
 	}
@@ -39,26 +67,45 @@ func TestDecodeRequest(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		outErr string
-		out    service.GenerateTokenRequest
+		inType      any
+		in          *http.Request
+		name        string
+		outUsername string
+		outEmail    string
+		outToken    string
+		outSecret   string
+		outErr      string
+		outID       int
 	}{
 		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.GenerateTokenRequest{
-				ID:       idTest,
-				Username: usernameTest,
-				Email:    emailTest,
-				Secret:   secretTest,
-			},
-			outErr: "",
+			name:        nameNoError + "GenerateToken",
+			inType:      service.GenerateTokenRequest{},
+			in:          generateTokenReq,
+			outID:       idTest,
+			outUsername: usernameTest,
+			outEmail:    emailTest,
+			outSecret:   secretTest,
+			outErr:      "",
+		},
+		{
+			name:      nameNoError + "ExtractToken",
+			inType:    service.ExtractTokenRequest{},
+			in:        extractTokenReq,
+			outToken:  tokenTest,
+			outSecret: secretTest,
+			outErr:    "",
+		},
+		{
+			name:     nameNoError + "Token",
+			inType:   service.Token{},
+			in:       tokenReq,
+			outToken: tokenTest,
+			outErr:   "",
 		},
 		{
 			name:   "BadRequest",
+			inType: service.GenerateTokenRequest{},
 			in:     badReq,
-			out:    service.GenerateTokenRequest{},
 			outErr: "EOF",
 		},
 	} {
@@ -66,30 +113,49 @@ func TestDecodeRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var result service.GenerateTokenRequest
 			var resultErr string
 
-			r, err := service.DecodeRequest(service.GenerateTokenRequest{})(context.TODO(), tt.in)
-			if err != nil {
-				resultErr = err.Error()
+			var r any
+
+			switch resultType := tt.inType.(type) {
+			case service.GenerateTokenRequest:
+				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+			case service.ExtractTokenRequest:
+				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+			case service.Token:
+				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+			default:
+				assert.Fail(t, "Error to type inType")
 			}
 
-			log.Println(r)
-
-			result, ok := r.(service.GenerateTokenRequest)
-			if !ok {
-				if (tt.out != service.GenerateTokenRequest{}) {
-					assert.Fail(t, "result is not of the type indicated")
+			switch result := r.(type) {
+			case service.GenerateTokenRequest:
+				assert.Equal(t, tt.outID, result.ID)
+				assert.Equal(t, tt.outUsername, result.Username)
+				assert.Equal(t, tt.outEmail, result.Email)
+				assert.Equal(t, tt.outSecret, result.Secret)
+				assert.Empty(t, resultErr)
+			case service.ExtractTokenRequest:
+				assert.Equal(t, tt.outToken, result.Token)
+				assert.Equal(t, tt.outSecret, result.Secret)
+				assert.Empty(t, resultErr)
+			case service.Token:
+				assert.Equal(t, tt.outToken, result.Token)
+				assert.Empty(t, resultErr)
+			default:
+				if tt.name != nameNoError {
+					assert.Contains(t, resultErr, tt.outErr)
 				}
 			}
-
-			if tt.name == nameNoError {
-				assert.Empty(t, resultErr)
-			} else {
-				assert.Contains(t, resultErr, tt.outErr)
-			}
-
-			assert.Equal(t, tt.out, result)
 		})
 	}
 }

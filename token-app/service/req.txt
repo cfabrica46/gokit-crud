@@ -1,0 +1,6 @@
+{
+ "username": "username",
+ "email": "email@email.com",
+ "secret": "secret",
+ "id": 1
+}

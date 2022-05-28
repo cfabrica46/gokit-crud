@@ -1,6 +1,6 @@
 package service_test
 
-import (
+/* import (
 	"bytes"
 	"context"
 	"encoding/json"
@@ -526,4 +526,4 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 			}
 		})
 	}
-}
+} */

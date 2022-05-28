@@ -16,7 +16,7 @@ const (
 	usernameTest string = "username"
 	emailTest    string = "email@email.com"
 	secretTest   string = "secret"
-	// tokenTest    string = "token"
+	tokenTest    string = "token"
 
 	errRedisClosed string = "redis: client is closed"
 
