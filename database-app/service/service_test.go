@@ -26,7 +26,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	for _, tt := range []struct {
 		name                         string
-		outID, outUsername, outEmail interface{}
+		outID, outUsername, outEmail any
 		outErr                       string
 	}{
 		{

@@ -77,22 +77,18 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 		name   string
 		in     *http.Request
 		outErr string
-		out    service.GetUserByIDRequest
+		outID  int
 	}{
 		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.GetUserByIDRequest{
-				ID: idTest,
-			},
+			name:   nameNoError,
+			in:     goodReq,
+			outID:  idTest,
 			outErr: "",
 		},
 		{
-			name: "ErrRequestBody",
-			in:   badReq,
-			out: service.GetUserByIDRequest{
-				ID: 0,
-			},
+			name:   "ErrRequestBody",
+			in:     badReq,
+			outID:  0,
 			outErr: "EOF",
 		},
 	} {
@@ -101,6 +97,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 			t.Parallel()
 
 			var result service.GetUserByIDRequest
+			var resultID int
 			var resultErr string
 
 			r, err := service.DecodeGetUserByIDRequest(context.TODO(), tt.in)
@@ -110,10 +107,12 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 
 			result, ok := r.(service.GetUserByIDRequest)
 			if !ok {
-				if (tt.out != service.GetUserByIDRequest{}) {
+				if tt.name == nameNoError {
 					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
+
+			resultID = result.ID
 
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
@@ -121,7 +120,7 @@ func TestDecodeGetUserByIDRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, tt.out, result)
+			assert.Equal(t, tt.outID, resultID)
 		})
 	}
 }
@@ -150,32 +149,32 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		out    service.GetUserByUsernameAndPasswordRequest
-		outErr string
+		name        string
+		in          *http.Request
+		outUsername string
+		outPassword string
+		outErr      string
 	}{
 		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.GetUserByUsernameAndPasswordRequest{
-				Username: usernameTest,
-				Password: passwordTest,
-			},
-			outErr: "",
+			name:        nameNoError,
+			in:          goodReq,
+			outUsername: usernameTest,
+			outPassword: passwordTest,
+			outErr:      "",
 		},
 		{
-			name:   "ErrRequestBody",
-			in:     badReq,
-			out:    service.GetUserByUsernameAndPasswordRequest{},
-			outErr: "EOF",
+			name:        "ErrRequestBody",
+			in:          badReq,
+			outUsername: "",
+			outPassword: "",
+			outErr:      "EOF",
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var result service.GetUserByUsernameAndPasswordRequest
+			var resultUsername, resultPassword string
 			var resultErr string
 
 			r, err := service.DecodeGetUserByUsernameAndPasswordRequest(context.TODO(), tt.in)
@@ -184,10 +183,13 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 			}
 			result, ok := r.(service.GetUserByUsernameAndPasswordRequest)
 			if !ok {
-				if (tt.out != service.GetUserByUsernameAndPasswordRequest{}) {
+				if tt.name == nameNoError {
 					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
+
+			resultUsername = result.Username
+			resultPassword = result.Password
 
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
@@ -195,7 +197,8 @@ func TestDecodeGetUserByUsernameAndPasswordRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, tt.out, result)
+			assert.Equal(t, tt.outUsername, resultUsername)
+			assert.Equal(t, tt.outPassword, resultPassword)
 		})
 	}
 }
@@ -219,31 +222,29 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		outErr string
-		out    service.GetIDByUsernameRequest
+		name        string
+		in          *http.Request
+		outErr      string
+		outUsername string
 	}{
 		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.GetIDByUsernameRequest{
-				Username: usernameTest,
-			},
-			outErr: "",
+			name:        nameNoError,
+			in:          goodReq,
+			outUsername: usernameTest,
+			outErr:      "",
 		},
 		{
-			name:   "ErrRequestBody",
-			in:     badReq,
-			out:    service.GetIDByUsernameRequest{},
-			outErr: "",
+			name:        "ErrRequestBody",
+			in:          badReq,
+			outUsername: "",
+			outErr:      "EOF",
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var result service.GetIDByUsernameRequest
+			var resultUsername string
 			var resultErr string
 
 			r, err := service.DecodeGetIDByUsernameRequest(context.TODO(), tt.in)
@@ -252,10 +253,12 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 			}
 			result, ok := r.(service.GetIDByUsernameRequest)
 			if !ok {
-				if (tt.out != service.GetIDByUsernameRequest{}) {
+				if tt.name == nameNoError {
 					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
+
+			resultUsername = result.Username
 
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
@@ -263,7 +266,7 @@ func TestDecodeGetIDByUsernameRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, tt.out, result)
+			assert.Equal(t, tt.outUsername, resultUsername)
 		})
 	}
 }
@@ -273,7 +276,7 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 
 	url := "localhost:8080/user"
 
-	dataJSON, err := json.Marshal(service.InsertUserRequest{usernameTest, "0idTest234", emailTest})
+	dataJSON, err := json.Marshal(service.InsertUserRequest{usernameTest, passwordTest, emailTest})
 	if err != nil {
 		assert.Error(t, err)
 	}
@@ -289,33 +292,35 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name   string
-		in     *http.Request
-		out    service.InsertUserRequest
-		outErr string
+		name        string
+		in          *http.Request
+		outUsername string
+		outPassword string
+		outEmail    string
+		outErr      string
 	}{
 		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.InsertUserRequest{
-				Username: usernameTest,
-				Password: "0idTest234",
-				Email:    emailTest,
-			},
-			outErr: "",
+			name:        nameNoError,
+			in:          goodReq,
+			outUsername: usernameTest,
+			outPassword: passwordTest,
+			outEmail:    emailTest,
+			outErr:      "",
 		},
 		{
-			name:   "ErrRequestBody",
-			in:     badReq,
-			out:    service.InsertUserRequest{},
-			outErr: "EOF",
+			name:        "ErrRequestBody",
+			in:          badReq,
+			outUsername: "",
+			outPassword: "",
+			outEmail:    "",
+			outErr:      "EOF",
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var result service.InsertUserRequest
+			var resultUsername, resultPassword, resultEmail string
 			var resultErr string
 
 			r, err := service.DecodeInsertUserRequest(context.TODO(), tt.in)
@@ -324,10 +329,14 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 			}
 			result, ok := r.(service.InsertUserRequest)
 			if !ok {
-				if (tt.out != service.InsertUserRequest{}) {
+				if tt.name == nameNoError {
 					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
+
+			resultUsername = result.Username
+			resultPassword = result.Password
+			resultEmail = result.Email
 
 			if tt.name == nameNoError {
 				assert.Empty(t, resultErr)
@@ -335,7 +344,9 @@ func TestDecodeInsertUserRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, tt.out, result)
+			assert.Equal(t, tt.outUsername, resultUsername)
+			assert.Equal(t, tt.outPassword, resultPassword)
+			assert.Equal(t, tt.outEmail, resultEmail)
 		})
 	}
 }
@@ -364,20 +375,18 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 		name   string
 		in     *http.Request
 		outErr string
-		out    service.DeleteUserRequest
+		outID  int
 	}{
 		{
-			name: nameNoError,
-			in:   goodReq,
-			out: service.DeleteUserRequest{
-				ID: idTest,
-			},
+			name:   nameNoError,
+			in:     goodReq,
+			outID:  idTest,
 			outErr: "",
 		},
 		{
 			name:   "ErrRequestBody",
 			in:     badReq,
-			out:    service.DeleteUserRequest{},
+			outID:  0,
 			outErr: "EOF",
 		},
 	} {
@@ -385,7 +394,7 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var result service.DeleteUserRequest
+			var resultID int
 			var resultErr string
 
 			r, err := service.DecodeDeleteUserRequest(context.TODO(), tt.in)
@@ -394,7 +403,7 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 			}
 			result, ok := r.(service.DeleteUserRequest)
 			if !ok {
-				if (tt.out != service.DeleteUserRequest{}) {
+				if tt.name == nameNoError {
 					assert.Fail(t, "result is not of the type indicated")
 				}
 			}
@@ -405,7 +414,9 @@ func TestDecodeDeleteUserRequest(t *testing.T) {
 				assert.Contains(t, resultErr, tt.outErr)
 			}
 
-			assert.Equal(t, tt.out, result)
+			resultID = result.ID
+
+			assert.Equal(t, tt.outID, resultID)
 		})
 	}
 }
@@ -415,7 +426,7 @@ func TestEncodeResponse(t *testing.T) {
 
 	for _, tt := range []struct {
 		name   string
-		in     interface{}
+		in     any
 		outErr string
 	}{
 		{
