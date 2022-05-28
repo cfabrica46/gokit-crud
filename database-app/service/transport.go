@@ -5,74 +5,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-// DecodeGetAllUsersRequest ...
-func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (any, error) {
-	var request GetAllUsersRequest
+// DecodeRequest ...
+func DecodeRequest[req GetUserByIDRequest |
+	GetUserByUsernameAndPasswordRequest |
+	GetIDByUsernameRequest |
+	InsertUserRequest |
+	DeleteUserRequest](request req,
+) httptransport.DecodeRequestFunc {
+	return func(_ context.Context, r *http.Request) (any, error) {
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			return nil, fmt.Errorf("failed to decode request: %w", err)
+		}
 
-	return request, nil
+		return request, nil
+	}
 }
 
-// DecodeGetUserByIDRequest ...
-func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (any, error) {
-	var request GetUserByIDRequest
+// DecodeRequestWithoutBody ...
+func DecodeRequestWithoutBody[req GetAllUsersRequest](request req,
+) httptransport.DecodeRequestFunc {
+	return func(_ context.Context, _ *http.Request) (any, error) {
+		var request GetAllUsersRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, fmt.Errorf("failed to decode request: %w", err)
+		return request, nil
 	}
-
-	return request, nil
-}
-
-// DecodeGetUserByUsernameAndPasswordRequest ...
-func DecodeGetUserByUsernameAndPasswordRequest(
-	_ context.Context,
-	r *http.Request,
-) (
-	any,
-	error,
-) {
-	var request GetUserByUsernameAndPasswordRequest
-
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, fmt.Errorf("failed to decode request: %w", err)
-	}
-
-	return request, nil
-}
-
-// DecodeGetIDByUsernameRequest ...
-func DecodeGetIDByUsernameRequest(_ context.Context, r *http.Request) (any, error) {
-	var request GetIDByUsernameRequest
-
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, fmt.Errorf("failed to decode request: %w", err)
-	}
-
-	return request, nil
-}
-
-// DecodeInsertUserRequest ...
-func DecodeInsertUserRequest(_ context.Context, r *http.Request) (any, error) {
-	var request InsertUserRequest
-
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, fmt.Errorf("failed to decode request: %w", err)
-	}
-
-	return request, nil
-}
-
-// DecodeDeleteUserRequest ...
-func DecodeDeleteUserRequest(_ context.Context, r *http.Request) (any, error) {
-	var request DeleteUserRequest
-
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, fmt.Errorf("failed to decode request: %w", err)
-	}
-
-	return request, nil
 }
 
 // EncodeResponse ...
