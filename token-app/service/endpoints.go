@@ -15,7 +15,7 @@ func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		req, ok := request.(GenerateTokenRequest)
 		if !ok {
-			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrUnexpectedSigningMethod)
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
 
 		token := svc.GenerateToken(req.ID, req.Username, req.Email, []byte(req.Secret))
