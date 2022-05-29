@@ -20,7 +20,7 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetAllUsersResponse{Users: users, Err: errMessage}, nil
+		return UsersErrorResponse{Users: users, Err: errMessage}, nil
 	}
 }
 
@@ -29,7 +29,7 @@ func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, ok := request.(GetUserByIDRequest)
+		req, ok := request.(IDRequest)
 		if !ok {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
@@ -39,7 +39,7 @@ func MakeGetUserByIDEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetUserByIDResponse{User: user, Err: errMessage}, nil
+		return UserErrorResponse{User: user, Err: errMessage}, nil
 	}
 }
 
@@ -48,7 +48,7 @@ func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.End
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, ok := request.(GetUserByUsernameAndPasswordRequest)
+		req, ok := request.(UsernamePasswordRequest)
 		if !ok {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
@@ -58,7 +58,7 @@ func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.End
 			errMessage = err.Error()
 		}
 
-		return GetUserByUsernameAndPasswordResponse{User: user, Err: errMessage}, nil
+		return UserErrorResponse{User: user, Err: errMessage}, nil
 	}
 }
 
@@ -67,7 +67,7 @@ func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, ok := request.(GetIDByUsernameRequest)
+		req, ok := request.(UsernameRequest)
 		if !ok {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
@@ -77,7 +77,7 @@ func MakeGetIDByUsernameEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetIDByUsernameResponse{ID: id, Err: errMessage}, nil
+		return IDErrorResponse{ID: id, Err: errMessage}, nil
 	}
 }
 
@@ -86,7 +86,7 @@ func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, ok := request.(InsertUserRequest)
+		req, ok := request.(UsernamePasswordEmailRequest)
 		if !ok {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
@@ -96,7 +96,7 @@ func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return InsertUserResponse{errMessage}, nil
+		return ErrorResponse{errMessage}, nil
 	}
 }
 
@@ -105,7 +105,7 @@ func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, ok := request.(DeleteUserRequest)
+		req, ok := request.(IDRequest)
 		if !ok {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
@@ -115,6 +115,6 @@ func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return DeleteUserResponse{RowsAffected: rowsAffected, Err: errMessage}, nil
+		return RowsErrorResponse{RowsAffected: rowsAffected, Err: errMessage}, nil
 	}
 }

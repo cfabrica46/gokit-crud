@@ -1,67 +1,58 @@
 package service
 
-// GetAllUsersRequest ...
-type GetAllUsersRequest struct{}
+// EmptyRequest ...
+type EmptyRequest struct{}
 
-// GetAllUsersResponse ...
-type GetAllUsersResponse struct {
-	Err   string `json:"err,omitempty"`
-	Users []User `json:"users"`
-}
-
-// GetUserByIDRequest ...
-type GetUserByIDRequest struct {
+// IDRequest ...
+type IDRequest struct {
 	ID int `json:"id"`
 }
 
-// GetUserByIDResponse ...
-type GetUserByIDResponse struct {
-	Err  string `json:"err,omitempty"`
-	User User   `json:"user"`
-}
-
-// GetUserByUsernameAndPasswordRequest ...
-type GetUserByUsernameAndPasswordRequest struct {
+// UsernamePasswordRequest ...
+type UsernamePasswordRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-// GetUserByUsernameAndPasswordResponse ...
-type GetUserByUsernameAndPasswordResponse struct {
-	Err  string `json:"err,omitempty"`
-	User User   `json:"user"`
-}
-
-// GetIDByUsernameRequest ...
-type GetIDByUsernameRequest struct {
+// UsernameRequest ...
+type UsernameRequest struct {
 	Username string `json:"username"`
 }
 
-// GetIDByUsernameResponse ...
-type GetIDByUsernameResponse struct {
-	Err string `json:"err,omitempty"`
-	ID  int    `json:"id"`
-}
-
-// InsertUserRequest ...
-type InsertUserRequest struct {
+// UsernamePasswordEmailRequest ...
+type UsernamePasswordEmailRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
 }
 
-// InsertUserResponse ...
-type InsertUserResponse struct {
+// ---
+
+// UsersErrorResponse ...
+type UsersErrorResponse struct {
+	Err   string `json:"err,omitempty"`
+	Users []User `json:"users"`
+}
+
+// UserErrorResponse ...
+type UserErrorResponse struct {
+	Err  string `json:"err,omitempty"`
+	User User   `json:"user"`
+}
+
+// IDErrorResponse ...
+type IDErrorResponse struct {
+	Err string `json:"err,omitempty"`
+	ID  int    `json:"id"`
+}
+
+// ErrorResponse ...
+type ErrorResponse struct {
 	Err string `json:"err,omitempty"`
 }
 
-// DeleteUserRequest ...
-type DeleteUserRequest struct {
-	ID int `json:"id"`
-}
-
-// DeleteUserResponse ...
-type DeleteUserResponse struct {
+// RowsErrorResponse ...
+type RowsErrorResponse struct {
 	Err          string `json:"err,omitempty"`
 	RowsAffected int    `json:"rowsAffected"`
 }

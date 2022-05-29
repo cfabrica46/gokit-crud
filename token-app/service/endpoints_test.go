@@ -26,7 +26,7 @@ func TestMakeGenerateTokenEndpoint(t *testing.T) {
 	}{
 		{
 			name: nameNoError,
-			in: service.GenerateTokenRequest{
+			in: service.IDUsernameEmailSecretRequest{
 				ID:       idTest,
 				Username: usernameTest,
 				Email:    emailTest,
@@ -102,7 +102,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 	}{
 		{
 			name: nameNoError,
-			in: service.ExtractTokenRequest{
+			in: service.TokenSecretRequest{
 				tokenSigned,
 				secretTest,
 			},
@@ -117,7 +117,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 		},
 		{
 			name: "ErrorNotValidToken",
-			in: service.ExtractTokenRequest{
+			in: service.TokenSecretRequest{
 				"",
 				secretTest,
 			},
@@ -144,7 +144,7 @@ func TestMakeExtractTokenEndpoint(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.ExtractTokenResponse)
+			result, ok := r.(service.IDUsernameEmailErrResponse)
 			if !ok {
 				if tt.name != nameErrorRequest {
 					assert.Fail(t, "response is not of the type indicated")
@@ -283,7 +283,7 @@ func TestMakeCheckTokenEndpoint(t *testing.T) {
 				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.CheckTokenResponse)
+			result, ok := r.(service.CheckErrResponse)
 			if !ok {
 				if tt.name != nameErrorRequest {
 					assert.Fail(t, "response is not of the type indicated")

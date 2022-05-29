@@ -32,13 +32,13 @@ func runServer(port string, db *redis.Client) {
 
 	getGenerateTokenHandler := httptransport.NewServer(
 		service.MakeGenerateTokenEndpoint(svc),
-		service.DecodeRequest(service.GenerateTokenRequest{}),
+		service.DecodeRequest(service.IDUsernameEmailSecretRequest{}),
 		service.EncodeResponse,
 	)
 
 	getExtractTokenHandler := httptransport.NewServer(
 		service.MakeExtractTokenEndpoint(svc),
-		service.DecodeRequest(service.ExtractTokenRequest{}),
+		service.DecodeRequest(service.TokenSecretRequest{}),
 		service.EncodeResponse,
 	)
 

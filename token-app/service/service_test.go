@@ -12,6 +12,8 @@ import (
 )
 
 const (
+	urlTest string = "localhost:8080"
+
 	idTest       int    = 1
 	usernameTest string = "username"
 	emailTest    string = "email@email.com"

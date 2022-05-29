@@ -32,11 +32,9 @@ const (
 func TestDecodeRequest(t *testing.T) {
 	t.Parallel()
 
-	url := "localhost:8080/"
-
 	generateTokenReq, err := http.NewRequest(
 		http.MethodPost,
-		url,
+		urlTest,
 		bytes.NewBuffer([]byte(generateTokenRequestJSON)),
 	)
 	if err != nil {
@@ -45,7 +43,7 @@ func TestDecodeRequest(t *testing.T) {
 
 	extractTokenReq, err := http.NewRequest(
 		http.MethodPost,
-		url,
+		urlTest,
 		bytes.NewBuffer([]byte(extractTokenRequestJSON)),
 	)
 	if err != nil {
@@ -54,14 +52,14 @@ func TestDecodeRequest(t *testing.T) {
 
 	tokenReq, err := http.NewRequest(
 		http.MethodPost,
-		url,
+		urlTest,
 		bytes.NewBuffer([]byte(tokenRequestJSON)),
 	)
 	if err != nil {
 		assert.Error(t, err)
 	}
 
-	badReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
+	badReq, err := http.NewRequest(http.MethodPost, urlTest, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		assert.Error(t, err)
 	}
@@ -79,7 +77,7 @@ func TestDecodeRequest(t *testing.T) {
 	}{
 		{
 			name:        nameNoError + "GenerateToken",
-			inType:      service.GenerateTokenRequest{},
+			inType:      service.IDUsernameEmailSecretRequest{},
 			in:          generateTokenReq,
 			outID:       idTest,
 			outUsername: usernameTest,
@@ -89,7 +87,7 @@ func TestDecodeRequest(t *testing.T) {
 		},
 		{
 			name:      nameNoError + "ExtractToken",
-			inType:    service.ExtractTokenRequest{},
+			inType:    service.TokenSecretRequest{},
 			in:        extractTokenReq,
 			outToken:  tokenTest,
 			outSecret: secretTest,
@@ -104,7 +102,7 @@ func TestDecodeRequest(t *testing.T) {
 		},
 		{
 			name:   "BadRequest",
-			inType: service.GenerateTokenRequest{},
+			inType: service.IDUsernameEmailSecretRequest{},
 			in:     badReq,
 			outErr: "EOF",
 		},
@@ -118,12 +116,12 @@ func TestDecodeRequest(t *testing.T) {
 			var r any
 
 			switch resultType := tt.inType.(type) {
-			case service.GenerateTokenRequest:
+			case service.IDUsernameEmailSecretRequest:
 				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
 				if err != nil {
 					resultErr = err.Error()
 				}
-			case service.ExtractTokenRequest:
+			case service.TokenSecretRequest:
 				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
 				if err != nil {
 					resultErr = err.Error()
@@ -138,13 +136,13 @@ func TestDecodeRequest(t *testing.T) {
 			}
 
 			switch result := r.(type) {
-			case service.GenerateTokenRequest:
+			case service.IDUsernameEmailSecretRequest:
 				assert.Equal(t, tt.outID, result.ID)
 				assert.Equal(t, tt.outUsername, result.Username)
 				assert.Equal(t, tt.outEmail, result.Email)
 				assert.Equal(t, tt.outSecret, result.Secret)
 				assert.Empty(t, resultErr)
-			case service.ExtractTokenRequest:
+			case service.TokenSecretRequest:
 				assert.Equal(t, tt.outToken, result.Token)
 				assert.Equal(t, tt.outSecret, result.Secret)
 				assert.Empty(t, resultErr)

@@ -57,37 +57,37 @@ func runServer(port string, db *sql.DB) {
 
 	getAllUsersHandler := httptransport.NewServer(
 		service.MakeGetAllUsersEndpoint(svc),
-		service.DecodeGetAllUsersRequest,
+		service.DecodeRequestWithoutBody(),
 		service.EncodeResponse,
 	)
 
 	getUserByIDHandler := httptransport.NewServer(
 		service.MakeGetUserByIDEndpoint(svc),
-		service.DecodeGetUserByIDRequest,
+		service.DecodeRequest(service.IDRequest{}),
 		service.EncodeResponse,
 	)
 
 	getUserByUsernameAndPasswordHandler := httptransport.NewServer(
 		service.MakeGetUserByUsernameAndPasswordEndpoint(svc),
-		service.DecodeGetUserByUsernameAndPasswordRequest,
+		service.DecodeRequest(service.UsernamePasswordRequest{}),
 		service.EncodeResponse,
 	)
 
 	getIDByUsernameHandler := httptransport.NewServer(
 		service.MakeGetIDByUsernameEndpoint(svc),
-		service.DecodeGetIDByUsernameRequest,
+		service.DecodeRequest(service.UsernameRequest{}),
 		service.EncodeResponse,
 	)
 
 	insertUserHandler := httptransport.NewServer(
 		service.MakeInsertUserEndpoint(svc),
-		service.DecodeInsertUserRequest,
+		service.DecodeRequest(service.UsernamePasswordEmailRequest{}),
 		service.EncodeResponse,
 	)
 
 	deleteUserHandler := httptransport.NewServer(
 		service.MakeDeleteUserEndpoint(svc),
-		service.DecodeDeleteUserRequest,
+		service.DecodeRequest(service.IDRequest{}),
 		service.EncodeResponse,
 	)
 

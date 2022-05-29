@@ -9,27 +9,25 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-// DecodeRequest ...
-func DecodeRequest[req GetUserByIDRequest |
-	GetUserByUsernameAndPasswordRequest |
-	GetIDByUsernameRequest |
-	InsertUserRequest |
-	DeleteUserRequest](request req,
-) httptransport.DecodeRequestFunc {
-	return func(_ context.Context, r *http.Request) (any, error) {
-		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-			return nil, fmt.Errorf("failed to decode request: %w", err)
-		}
+// DecodeRequestWithoutBody ...
+func DecodeRequestWithoutBody() httptransport.DecodeRequestFunc {
+	return func(_ context.Context, _ *http.Request) (any, error) {
+		var request EmptyRequest
 
 		return request, nil
 	}
 }
 
-// DecodeRequestWithoutBody ...
-func DecodeRequestWithoutBody[req GetAllUsersRequest](request req,
+// DecodeRequest ...
+func DecodeRequest[req IDRequest |
+	UsernamePasswordRequest |
+	UsernameRequest |
+	UsernamePasswordEmailRequest](request req,
 ) httptransport.DecodeRequestFunc {
-	return func(_ context.Context, _ *http.Request) (any, error) {
-		var request GetAllUsersRequest
+	return func(_ context.Context, r *http.Request) (any, error) {
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			return nil, fmt.Errorf("failed to decode request: %w", err)
+		}
 
 		return request, nil
 	}

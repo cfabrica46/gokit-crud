@@ -10,8 +10,8 @@ import (
 )
 
 // DecodeRequest ...
-func DecodeRequest[req GenerateTokenRequest |
-	ExtractTokenRequest |
+func DecodeRequest[req IDUsernameEmailSecretRequest |
+	TokenSecretRequest |
 	Token](request req,
 ) httptransport.DecodeRequestFunc {
 	return func(_ context.Context, r *http.Request) (any, error) {

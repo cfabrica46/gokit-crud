@@ -9,6 +9,8 @@ import (
 )
 
 const (
+	urlTest string = "localhost:8080"
+
 	idTest       int    = 1
 	usernameTest string = "username"
 	passwordTest string = "password"
@@ -17,6 +19,7 @@ const (
 	errDatabaseClosed string = "sql: database is closed"
 
 	nameNoError       string = "NoError"
+	nameErrorRequest  string = "ErrorRequest"
 	nameErrorDBClosed string = "ErrorDBClosed"
 	nameErrorNoRows   string = "ErrorNoRows"
 )

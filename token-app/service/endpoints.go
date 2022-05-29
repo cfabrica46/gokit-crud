@@ -13,7 +13,7 @@ var ErrRequest = errors.New("error to request")
 // MakeGenerateTokenEndpoint ...
 func MakeGenerateTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
-		req, ok := request.(GenerateTokenRequest)
+		req, ok := request.(IDUsernameEmailSecretRequest)
 		if !ok {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
@@ -29,7 +29,7 @@ func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, ok := request.(ExtractTokenRequest)
+		req, ok := request.(TokenSecretRequest)
 		if !ok {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
@@ -39,7 +39,7 @@ func MakeExtractTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return ExtractTokenResponse{ID: id, Username: username, Email: email, Err: errMessage}, nil
+		return IDUsernameEmailErrResponse{ID: id, Username: username, Email: email, Err: errMessage}, nil
 	}
 }
 
@@ -77,6 +77,6 @@ func MakeCheckTokenEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return CheckTokenResponse{Check: check, Err: errMessage}, nil
+		return CheckErrResponse{Check: check, Err: errMessage}, nil
 	}
 }

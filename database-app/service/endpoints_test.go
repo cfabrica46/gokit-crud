@@ -9,14 +9,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type incorrectRequest struct {
+	incorrect bool
+}
+
 func TestMakeGetAllUsersEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
+		inRequest                          any
 		name                               string
 		outUsername, outPassword, outEmail string
 		outErr                             string
-		inRequest                          service.GetAllUsersRequest
 		outID                              int
 	}{
 		{
@@ -24,7 +28,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
-			inRequest:   service.GetAllUsersRequest{},
+			inRequest:   service.EmptyRequest{},
 			outErr:      "",
 		},
 		{
@@ -32,7 +36,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 			outID:       idTest,
 			outUsername: usernameTest,
 			outEmail:    emailTest,
-			inRequest:   service.GetAllUsersRequest{},
+			inRequest:   service.EmptyRequest{},
 			outErr:      errDatabaseClosed,
 		},
 	} {
@@ -69,7 +73,7 @@ func TestMakeGetAllUsersEndpoint(t *testing.T) {
 				assert.Error(t, err)
 			}
 
-			result, ok := r.(service.GetAllUsersResponse)
+			result, ok := r.(service.UsersErrorResponse)
 			if !ok {
 				assert.Fail(t, "response is not of the type indicated")
 			}
@@ -87,10 +91,10 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
+		inRequest                       any
 		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
-		inRequest                       service.GetUserByIDRequest
 		inID                            int
 	}{
 		{
@@ -99,8 +103,15 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  service.GetUserByIDRequest{ID: idTest},
+			inRequest:  service.IDRequest{ID: idTest},
 			outErr:     "",
+		},
+		{
+			name: nameErrorRequest,
+			inRequest: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
 		},
 		{
 			name:       nameErrorDBClosed,
@@ -108,13 +119,16 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  service.GetUserByIDRequest{},
+			inRequest:  service.IDRequest{},
 			outErr:     errDatabaseClosed,
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
+
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				assert.Error(t, err)
@@ -145,18 +159,24 @@ func TestMakeGetUserByIDEndpoint(t *testing.T) {
 
 			r, err := service.MakeGetUserByIDEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.GetUserByIDResponse)
+			result, ok := r.(service.UserErrorResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -166,10 +186,10 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
+		inRequest                       any
 		name                            string
 		inUsername, inPassword, inEmail string
 		outErr                          string
-		inRequest                       service.GetUserByUsernameAndPasswordRequest
 		inID                            int
 	}{
 		{
@@ -178,11 +198,18 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest: service.GetUserByUsernameAndPasswordRequest{
+			inRequest: service.UsernamePasswordRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 			},
 			outErr: "",
+		},
+		{
+			name: nameErrorRequest,
+			inRequest: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
 		},
 		{
 			name:       nameErrorDBClosed,
@@ -190,13 +217,16 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  service.GetUserByUsernameAndPasswordRequest{},
+			inRequest:  service.UsernamePasswordRequest{},
 			outErr:     errDatabaseClosed,
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
+
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				assert.Error(t, err)
@@ -230,18 +260,24 @@ func TestMakeGetUserByUsernameAndPasswordEndpoint(t *testing.T) {
 				tt.inRequest,
 			)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.GetUserByUsernameAndPasswordResponse)
+			result, ok := r.(service.UserErrorResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -251,32 +287,42 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
+		inRequest  any
 		name       string
 		inUsername string
 		outErr     string
-		inRequest  service.GetIDByUsernameRequest
 		inID       int
 	}{
 		{
 			name:       nameNoError,
 			inID:       idTest,
 			inUsername: usernameTest,
-			inRequest: service.GetIDByUsernameRequest{
+			inRequest: service.UsernameRequest{
 				Username: usernameTest,
 			},
 			outErr: "",
 		},
 		{
+			name: nameErrorRequest,
+			inRequest: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:       nameErrorDBClosed,
 			inID:       idTest,
 			inUsername: usernameTest,
-			inRequest:  service.GetIDByUsernameRequest{},
+			inRequest:  service.UsernameRequest{},
 			outErr:     errDatabaseClosed,
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
+
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				assert.Error(t, err)
@@ -295,18 +341,24 @@ func TestGetIDByUsernameEndpoint(t *testing.T) {
 
 			r, err := service.MakeGetIDByUsernameEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.GetIDByUsernameResponse)
+			result, ok := r.(service.IDErrorResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -316,9 +368,9 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
+		inRequest                       any
 		name                            string
 		inUsername, inPassword, inEmail string
-		inRequest                       service.InsertUserRequest
 		outErr                          string
 	}{
 		{
@@ -326,7 +378,7 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest: service.InsertUserRequest{
+			inRequest: service.UsernamePasswordEmailRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 				Email:    emailTest,
@@ -334,17 +386,26 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name: nameErrorRequest,
+			inRequest: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:       nameErrorDBClosed,
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
-			inRequest:  service.InsertUserRequest{},
+			inRequest:  service.UsernamePasswordEmailRequest{},
 			outErr:     errDatabaseClosed,
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
@@ -367,18 +428,24 @@ func TestMakeInsertUserEndpoint(t *testing.T) {
 
 			r, err := service.MakeInsertUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.InsertUserResponse)
+			result, ok := r.(service.ErrorResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -388,29 +455,38 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
+		inRequest any
 		name      string
 		outErr    string
-		inRequest service.DeleteUserRequest
 		inID      int
 	}{
 		{
 			name: nameNoError,
 			inID: idTest,
-			inRequest: service.DeleteUserRequest{
+			inRequest: service.IDRequest{
 				ID: idTest,
 			},
 			outErr: "",
 		},
 		{
+			name: nameErrorRequest,
+			inRequest: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:      nameErrorDBClosed,
 			inID:      idTest,
-			inRequest: service.DeleteUserRequest{},
+			inRequest: service.IDRequest{},
 			outErr:    errDatabaseClosed,
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			db, mock, err := sqlmock.New()
 			if err != nil {
@@ -429,18 +505,24 @@ func TestMakeDeleteUserEndpoint(t *testing.T) {
 
 			r, err := service.MakeDeleteUserEndpoint(svc)(context.TODO(), tt.inRequest)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.DeleteUserResponse)
+			result, ok := r.(service.RowsErrorResponse)
 			if !ok {
-				assert.Fail(t, "response is not of the type indicated")
+				if tt.name != nameErrorRequest {
+					assert.Fail(t, "response is not of the type indicated")
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
