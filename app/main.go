@@ -1,6 +1,6 @@
 package main
 
-import (
+/* import (
 	"log"
 	"net/http"
 	"os"
@@ -84,4 +84,4 @@ func runServer(port string, infServ *service.InfoServices) {
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
 	log.Println(http.ListenAndServe(":"+port, router))
-}
+} */

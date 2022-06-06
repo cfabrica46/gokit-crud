@@ -1,6 +1,6 @@
 package service
 
-import (
+/* import (
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,8 +11,8 @@ import (
 var errFailedGetHeader = errors.New("failed to get header")
 
 // DecodeSignUpRequest ...
-func DecodeSignUpRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request SignUpRequest
+func DecodeSignUpRequest(_ context.Context, r *http.Request) (req any, err error) {
+	var request UsernamePasswordEmailRequest
 
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
@@ -22,8 +22,8 @@ func DecodeSignUpRequest(_ context.Context, r *http.Request) (req interface{}, e
 }
 
 // DecodeSignInRequest ...
-func DecodeSignInRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request SignInRequest
+func DecodeSignInRequest(_ context.Context, r *http.Request) (req any, err error) {
+	var request UsernamePasswordRequest
 
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
@@ -33,8 +33,8 @@ func DecodeSignInRequest(_ context.Context, r *http.Request) (req interface{}, e
 }
 
 // DecodeLogOutRequest ...
-func DecodeLogOutRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request LogOutRequest
+func DecodeLogOutRequest(_ context.Context, r *http.Request) (req any, err error) {
+	var request TokenRequest
 
 	if r.Header.Get("Authorization") == "" {
 		return nil, errFailedGetHeader
@@ -46,15 +46,15 @@ func DecodeLogOutRequest(_ context.Context, r *http.Request) (req interface{}, e
 }
 
 // DecodeGetAllUsersRequest ...
-func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (req interface{}, err error) {
-	var request GetAllUsersRequest
+func DecodeGetAllUsersRequest(_ context.Context, _ *http.Request) (req any, err error) {
+	var request EmptyRequest
 
 	return request, nil
 }
 
 // DecodeProfileRequest ...
-func DecodeProfileRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request ProfileRequest
+func DecodeProfileRequest(_ context.Context, r *http.Request) (req any, err error) {
+	var request TokenRequest
 
 	if r.Header.Get("Authorization") == "" {
 		return nil, errFailedGetHeader
@@ -66,8 +66,8 @@ func DecodeProfileRequest(_ context.Context, r *http.Request) (req interface{}, 
 }
 
 // DecodeDeleteAccountRequest ...
-func DecodeDeleteAccountRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	var request DeleteAccountRequest
+func DecodeDeleteAccountRequest(_ context.Context, r *http.Request) (req any, err error) {
+	var request TokenRequest
 
 	if r.Header.Get("Authorization") == "" {
 		return nil, errFailedGetHeader
@@ -79,10 +79,10 @@ func DecodeDeleteAccountRequest(_ context.Context, r *http.Request) (req interfa
 }
 
 // EncodeResponse ...
-func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) (err error) {
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response any) (err error) {
 	if err = json.NewEncoder(w).Encode(response); err != nil {
 		return fmt.Errorf("failed to encode response: %w", err)
 	}
 
 	return nil
-}
+} */

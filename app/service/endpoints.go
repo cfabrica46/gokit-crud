@@ -1,6 +1,6 @@
 package service
 
-import (
+/* import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
@@ -8,55 +8,55 @@ import (
 
 // MakeSignUpEndpoint ...
 func MakeSignUpEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(SignUpRequest)
+		req, _ := request.(UsernamePasswordEmailRequest)
 
 		token, err := svc.SignUp(req.Username, req.Password, req.Email)
 		if err != nil {
 			errMessage = err.Error()
 		}
 
-		return SignUpResponse{Token: token, Err: errMessage}, nil
+		return TokenErrorResponse{Token: token, Err: errMessage}, nil
 	}
 }
 
 // MakeSignInEndpoint ...
 func MakeSignInEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(SignInRequest)
+		req, _ := request.(UsernamePasswordRequest)
 
 		token, err := svc.SignIn(req.Username, req.Password)
 		if err != nil {
 			errMessage = err.Error()
 		}
 
-		return SignInResponse{Token: token, Err: errMessage}, nil
+		return TokenErrorResponse{Token: token, Err: errMessage}, nil
 	}
 }
 
 // MakeLogOutEndpoint ...
 func MakeLogOutEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(LogOutRequest)
+		req, _ := request.(TokenRequest)
 
 		err := svc.LogOut(req.Token)
 		if err != nil {
 			errMessage = err.Error()
 		}
 
-		return LogOutResponse{Err: errMessage}, nil
+		return ErrorResponse{Err: errMessage}, nil
 	}
 }
 
 // MakeGetAllUsersEndpoint ...
 func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, _ interface{}) (interface{}, error) {
+	return func(_ context.Context, _ any) (any, error) {
 		var errMessage string
 
 		users, err := svc.GetAllUsers()
@@ -64,38 +64,38 @@ func MakeGetAllUsersEndpoint(svc serviceInterface) endpoint.Endpoint {
 			errMessage = err.Error()
 		}
 
-		return GetAllUsersResponse{Users: users, Err: errMessage}, nil
+		return UsersErrorResponse{Users: users, Err: errMessage}, nil
 	}
 }
 
 // MakeProfileEndpoint ...
 func MakeProfileEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(ProfileRequest)
+		req, _ := request.(TokenRequest)
 
 		user, err := svc.Profile(req.Token)
 		if err != nil {
 			errMessage = err.Error()
 		}
 
-		return ProfileResponse{User: user, Err: errMessage}, nil
+		return UserErrorResponse{User: user, Err: errMessage}, nil
 	}
 }
 
 // MakeDeleteAccountEndpoint ...
 func MakeDeleteAccountEndpoint(svc serviceInterface) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(DeleteAccountRequest)
+		req, _ := request.(TokenRequest)
 
 		err := svc.DeleteAccount(req.Token)
 		if err != nil {
 			errMessage = err.Error()
 		}
 
-		return DeleteAccountResponse{Err: errMessage}, nil
+		return ErrorResponse{Err: errMessage}, nil
 	}
-}
+} */
