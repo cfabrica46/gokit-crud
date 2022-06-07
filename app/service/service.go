@@ -37,7 +37,7 @@ func NewService(client httpClient, is *InfoServices) *Service {
 func (s *Service) GetIDByUsername(username string) (id int, err error) {
 	dbDomain := fmt.Sprintf("%s:%s", s.dbHost, s.dbPort)
 
-	resp, err := DoRequest(NewMRGetIDByUsername(s.client, dbDomain, username))
+	/* resp, err := DoRequest(NewMRGetIDByUsername(s.client, dbDomain, username))
 	if err != nil {
 		return 0, err
 	}
@@ -46,9 +46,22 @@ func (s *Service) GetIDByUsername(username string) (id int, err error) {
 
 	if r.Err != "" {
 		return 0, fmt.Errorf("%w:%s", ErrResponse, r.Err)
+	} */
+
+	resp, err := DoFunc(
+		s.client,
+		dbapp.UsernameRequest{
+			Username: username,
+		},
+		dbDomain+"/id/username",
+		http.MethodPost,
+		dbapp.IDErrorResponse{},
+	)
+	if err != nil {
+		return 0, fmt.Errorf("%w:%s", ErrResponse, err)
 	}
 
-	return r.ID, nil
+	return resp.ID, nil
 }
 
 /* import (

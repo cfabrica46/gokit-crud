@@ -11,7 +11,7 @@ import (
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 )
 
-type MyRequest interface {
+/* type MyRequest interface {
 	Do()
 	Result() (any, error)
 }
@@ -85,4 +85,48 @@ func DoRequest(mr MyRequest) (result any, err error) {
 	}
 
 	return result, nil
+} */
+
+// ---
+
+func DoFunc[responseEntity dbapp.IDErrorResponse](client httpClient, body any, url, methodHTTP string, response responseEntity) (resp2 *responseEntity, err error) {
+	bodyJSON, err := json.Marshal(body)
+	if err != nil {
+		err = fmt.Errorf("error to make petition: %w", err)
+
+		return nil, err
+	}
+
+	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Minute)
+	defer ctxCancel()
+
+	req, err := http.NewRequestWithContext(ctx, methodHTTP, url, bytes.NewBuffer(bodyJSON))
+	if err != nil {
+		err = fmt.Errorf("error to make petition: %w", err)
+
+		return nil, err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		err = fmt.Errorf("error to make petition: %w", err)
+
+		return nil, err
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("failed to decode request: %w", err)
+	}
+
+	return &response, nil
 }
+
+/* func DecodeRequest[req dbapp.IDErrorResponse](request req) httptransport.DecodeRequestFunc {
+	return func(_ context.Context, r *http.Request) (any, error) {
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			return nil, fmt.Errorf("failed to decode request: %w", err)
+		}
+
+		return request, nil
+	}
+} */
