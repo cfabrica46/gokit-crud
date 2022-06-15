@@ -2,10 +2,7 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
-
-	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 )
 
 var ErrResponse = errors.New("error to response")
@@ -18,35 +15,24 @@ type InfoServices struct {
 	Secret    string
 }
 
-type httpClient interface {
+type HttpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
 // Service ...
 type Service struct {
-	client                                       httpClient
+	client                                       HttpClient
 	dbHost, dbPort, tokenHost, tokenPort, secret string
 }
 
 // NewService ...
-func NewService(client httpClient, is *InfoServices) *Service {
+func NewService(client HttpClient, is *InfoServices) *Service {
 	return &Service{client, is.DBHost, is.DBPort, is.TokenHost, is.TokenPort, is.Secret}
 }
 
 // GetIDByUsername ...
 func (s *Service) GetIDByUsername(username string) (id int, err error) {
-	dbDomain := fmt.Sprintf("%s:%s", s.dbHost, s.dbPort)
-
-	/* resp, err := DoRequest(NewMRGetIDByUsername(s.client, dbDomain, username))
-	if err != nil {
-		return 0, err
-	}
-
-	r, _ := resp.(dbapp.IDErrorResponse)
-
-	if r.Err != "" {
-		return 0, fmt.Errorf("%w:%s", ErrResponse, r.Err)
-	} */
+	/* dbDomain := fmt.Sprintf("%s:%s", s.dbHost, s.dbPort)
 
 	resp, err := DoFunc(
 		s.client,
@@ -61,7 +47,8 @@ func (s *Service) GetIDByUsername(username string) (id int, err error) {
 		return 0, fmt.Errorf("%w:%s", ErrResponse, err)
 	}
 
-	return resp.ID, nil
+	return resp.ID, nil */
+	return 0, nil
 }
 
 /* import (
