@@ -9,9 +9,21 @@ import (
 	"time"
 
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
+	tokenapp "github.com/cfabrica46/gokit-crud/token-app/service"
 )
 
-func RequestFunc[responseEntity dbapp.IDErrorResponse](client HttpClient, body any, url, methodHTTP string, response *responseEntity) (err error) {
+type MyResponse interface {
+	dbapp.UserErrorResponse |
+		dbapp.IDErrorResponse |
+		dbapp.ErrorResponse |
+		dbapp.RowsErrorResponse |
+		tokenapp.Token |
+		tokenapp.IDUsernameEmailErrResponse |
+		tokenapp.ErrorResponse |
+		tokenapp.CheckErrResponse
+}
+
+func RequestFunc[responseEntity MyResponse](client HttpClient, body any, url, methodHTTP string, response *responseEntity) (err error) {
 	bodyJSON, err := json.Marshal(body)
 	if err != nil {
 		err = fmt.Errorf("error to make petition: %w", err)
