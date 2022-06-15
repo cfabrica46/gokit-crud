@@ -1,15 +1,7 @@
 package service_test
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"io"
-	"net/http"
-	"testing"
-
-	"github.com/cfabrica46/gokit-crud/app/service"
-	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -32,95 +24,6 @@ var (
 	errWebServer        = errors.New("error from web server")
 	errNotTypeIndicated = errors.New("response is not of the type indicated")
 )
-
-func GetIDByUsername(t *testing.T) {
-	t.Parallel()
-
-	infoServiceTest := service.InfoServices{
-		DBHost:    dbHostTest,
-		DBPort:    portTest,
-		TokenHost: tokenHostTest,
-		TokenPort: portTest,
-		Secret:    secretTest,
-	}
-
-	for _, tt := range []struct {
-		name       string
-		inUsername string
-		url        string
-		method     string
-		isError    bool
-		out        int
-	}{
-		{
-			name:       "NoError",
-			inUsername: usernameTest,
-			/* inPassword: passwordTest,
-			inEmail:    emailTest, */
-			isError: false,
-			url:     "http://token:8080/generate",
-			method:  http.MethodPost,
-			out:     idTest,
-		},
-	} {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var idResponse int
-			var resultErr error
-			var errorResponse string
-
-			if tt.isError {
-				errorResponse = errWebServer.Error()
-			} else {
-				idResponse = idTest
-			}
-
-			testResp := struct {
-				Err string `json:"err"`
-				ID  int    `json:"id"`
-			}{
-				ID:  tt.out,
-				Err: errorResponse,
-			}
-
-			jsonData, err := json.Marshal(testResp)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
-
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
-						response = &http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader(jsonData)),
-						}
-					}
-				}
-
-				return response, nil
-			})
-
-			svc := service.NewService(
-				mock,
-				&infoServiceTest,
-			)
-
-			resultID, resultErr := svc.GetIDByUsername(tt.inUsername)
-
-			if !tt.isError {
-				assert.Nil(t, resultErr)
-			} else {
-				assert.ErrorContains(t, resultErr, errorResponse)
-			}
-			assert.Equal(t, idResponse, resultID)
-		})
-	}
-}
 
 /* import (
 	"bytes"

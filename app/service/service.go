@@ -85,7 +85,7 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 	}
 
 	if idResponse.Err != "" {
-		return "", fmt.Errorf("%w:%s", ErrWebServer, errorDBResponse.Err)
+		return "", fmt.Errorf("%w:%s", ErrWebServer, idResponse.Err)
 	}
 
 	if err = RequestFunc(
@@ -116,91 +116,114 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 	}
 
 	if errorTokenResponse.Err != "" {
-		return "", fmt.Errorf("%w:%s", ErrWebServer, errorDBResponse.Err)
+		return "", fmt.Errorf("%w:%s", ErrWebServer, errorTokenResponse.Err)
 	}
 
 	return tokenResponse.Token, nil
 }
 
-/* // SignIn ...
+// SignIn ...
 func (s *Service) SignIn(username, password string) (token string, err error) {
-	dbURL := fmt.Sprintf("%s:%s", s.dbHost, s.dbPort)
-	tokenURL := fmt.Sprintf("%s:%s", s.tokenHost, s.tokenPort)
+	var userErrorResponse dbapp.UserErrorResponse
+	var tokenResponse tokenapp.Token
+	var errorResponse tokenapp.ErrorResponse
 
-	user, err := PetitionGetUserByUsernameAndPassword(
+	if err = RequestFunc(
 		s.client,
-		dbURL+"/user/username_password",
-		dbapp.GetUserByUsernameAndPasswordRequest{
+		dbapp.UsernamePasswordRequest{
 			Username: username,
 			Password: password,
 		},
-	)
-	if err != nil {
+		s.dbHost+"/user/username_password",
+		http.MethodGet,
+		&userErrorResponse,
+	); err != nil {
 		return "", err
 	}
 
-	token, err = PetitionGenerateToken(
+	if userErrorResponse.Err != "" {
+		return "", fmt.Errorf("%w:%s", ErrWebServer, userErrorResponse.Err)
+	}
+
+	if err = RequestFunc(
 		s.client,
-		tokenURL+"/generate",
-		tokenapp.GenerateTokenRequest{
-			ID:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
+		tokenapp.IDUsernameEmailSecretRequest{
+			ID:       userErrorResponse.User.ID,
+			Username: userErrorResponse.User.Username,
+			Email:    userErrorResponse.User.Email,
 			Secret:   s.secret,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/generate",
+		http.MethodPost,
+		&tokenResponse,
+	); err != nil {
 		return "", err
 	}
 
-	err = PetitionSetToken(
+	if err = RequestFunc(
 		s.client,
-		tokenURL+"/token",
-		tokenapp.SetTokenRequest{
-			Token: token,
+		tokenapp.Token{
+			Token: tokenResponse.Token,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/token",
+		http.MethodPost,
+		&errorResponse,
+	); err != nil {
 		return "", err
 	}
 
-	return token, nil
-} */
+	if errorResponse.Err != "" {
+		return "", fmt.Errorf("%w:%s", ErrWebServer, errorResponse.Err)
+	}
 
-/* // LogOut ...
+	return tokenResponse.Token, nil
+}
+
+// LogOut ...
 func (s *Service) LogOut(token string) (err error) {
-	tokenURL := fmt.Sprintf("%s:%s", s.tokenHost, s.tokenPort)
+	var checkErrorResponse tokenapp.CheckErrResponse
+	var errorResponse tokenapp.ErrorResponse
 
-	check, err := PetitionCheckToken(
+	if err = RequestFunc(
 		s.client,
-		tokenURL+"/check",
-		tokenapp.CheckTokenRequest{
+		tokenapp.Token{
 			Token: token,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/check",
+		http.MethodPost,
+		&checkErrorResponse,
+	); err != nil {
 		return err
 	}
 
-	if !check {
+	if checkErrorResponse.Err != "" {
+		return fmt.Errorf("%w:%s", ErrWebServer, checkErrorResponse.Err)
+	}
+
+	if !checkErrorResponse.Check {
 		err = ErrTokenNotValid
 
 		return err
 	}
 
-	err = PetitionDeleteToken(
+	if err = RequestFunc(
 		s.client,
-		tokenURL+"/token",
-		tokenapp.DeleteTokenRequest{
+		tokenapp.Token{
 			Token: token,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/token",
+		http.MethodDelete,
+		&errorResponse,
+	); err != nil {
 		return err
 	}
 
+	if errorResponse.Err != "" {
+		return fmt.Errorf("%w:%s", ErrWebServer, errorResponse.Err)
+	}
+
 	return nil
-} */
+}
 
 /* // GetAllUsers  ...
 func (s *Service) GetAllUsers() (users []dbapp.User, err error) {
@@ -214,91 +237,126 @@ func (s *Service) GetAllUsers() (users []dbapp.User, err error) {
 	return users, nil
 } */
 
-/* // Profile  ...
+// Profile  ...
 func (s *Service) Profile(token string) (user dbapp.User, err error) {
-	dbURL := fmt.Sprintf("%s:%s", s.dbHost, s.dbPort)
-	tokenURL := fmt.Sprintf("%s:%s", s.tokenHost, s.tokenPort)
+	var checkErrorResponse tokenapp.CheckErrResponse
+	var idUsernameEmailErrResponse tokenapp.IDUsernameEmailErrResponse
+	var userErrorResponse dbapp.UserErrorResponse
 
-	check, err := PetitionCheckToken(
+	if err = RequestFunc(
 		s.client,
-		tokenURL+"/check",
-		tokenapp.CheckTokenRequest{
+		tokenapp.Token{
 			Token: token,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/check",
+		http.MethodPost,
+		&checkErrorResponse,
+	); err != nil {
 		return dbapp.User{}, err
 	}
 
-	if !check {
+	if checkErrorResponse.Err != "" {
+		return dbapp.User{}, fmt.Errorf("%w:%s", ErrWebServer, checkErrorResponse.Err)
+	}
+
+	if !checkErrorResponse.Check {
 		err = ErrTokenNotValid
 
 		return dbapp.User{}, err
 	}
 
-	userID, _, _, err := PetitionExtractToken(
+	if err = RequestFunc(
 		s.client,
-		tokenURL+"/extract",
-		tokenapp.ExtractTokenRequest{
+		tokenapp.TokenSecretRequest{
 			Token:  token,
 			Secret: s.secret,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/extract",
+		http.MethodPost,
+		&idUsernameEmailErrResponse,
+	); err != nil {
 		return dbapp.User{}, err
 	}
 
-	user, err = PetitionGetUserByID(
+	if idUsernameEmailErrResponse.Err != "" {
+		return dbapp.User{}, fmt.Errorf("%w:%s", ErrWebServer, idUsernameEmailErrResponse.Err)
+	}
+
+	if err = RequestFunc(
 		s.client,
-		dbURL+"/user/id",
-		dbapp.GetUserByIDRequest{
-			ID: userID,
+		dbapp.IDRequest{
+			ID: idUsernameEmailErrResponse.ID,
 		},
-	)
-	if err != nil {
+		s.dbHost+"/user/id",
+		http.MethodGet,
+		&userErrorResponse,
+	); err != nil {
 		return dbapp.User{}, err
 	}
 
-	return user, nil
-} */
+	if userErrorResponse.Err != "" {
+		return dbapp.User{}, fmt.Errorf("%w:%s", ErrWebServer, userErrorResponse.Err)
+	}
 
-/* // DeleteAccount  ...
+	return userErrorResponse.User, nil
+}
+
+// DeleteAccount  ...
 func (s *Service) DeleteAccount(token string) (err error) {
-	dbURL := fmt.Sprintf("%s:%s", s.dbHost, s.dbPort)
-	tokenURL := fmt.Sprintf("%s:%s", s.tokenHost, s.tokenPort)
+	var checkErrorResponse tokenapp.CheckErrResponse
+	var idUsernameEmailErrResponse tokenapp.IDUsernameEmailErrResponse
+	var errorResponse dbapp.ErrorResponse
 
-	check, err := PetitionCheckToken(
+	if err = RequestFunc(
 		s.client,
-		tokenURL+"/check",
-		tokenapp.CheckTokenRequest{
+		tokenapp.Token{
 			Token: token,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/check",
+		http.MethodPost,
+		&checkErrorResponse,
+	); err != nil {
 		return err
 	}
 
-	if !check {
+	if checkErrorResponse.Err != "" {
+		return fmt.Errorf("%w:%s", ErrWebServer, checkErrorResponse.Err)
+	}
+
+	if !checkErrorResponse.Check {
 		err = ErrTokenNotValid
 
 		return err
 	}
 
-	userID, _, _, err := PetitionExtractToken(s.client,
-		tokenURL+"/extract",
-		tokenapp.ExtractTokenRequest{
+	if err = RequestFunc(
+		s.client,
+		tokenapp.TokenSecretRequest{
 			Token:  token,
 			Secret: s.secret,
 		},
-	)
-	if err != nil {
+		s.tokenHost+"/extract",
+		http.MethodPost,
+		&idUsernameEmailErrResponse,
+	); err != nil {
 		return err
 	}
 
-	err = PetitionDeleteUser(s.client, dbURL+"/user", dbapp.DeleteUserRequest{ID: userID})
-	if err != nil {
+	if idUsernameEmailErrResponse.Err != "" {
+		return fmt.Errorf("%w:%s", ErrWebServer, idUsernameEmailErrResponse.Err)
+	}
+
+	if err = RequestFunc(
+		s.client,
+		dbapp.IDRequest{
+			ID: idUsernameEmailErrResponse.ID,
+		},
+		s.dbHost+"/user",
+		http.MethodDelete,
+		&errorResponse,
+	); err != nil {
 		return err
 	}
 
-	return err
-} */
+	return nil
+}

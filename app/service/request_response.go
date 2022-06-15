@@ -39,8 +39,8 @@ type UsersErrorResponse struct {
 
 // UserErrorResponse () (dbapp.User, error).
 type UserErrorResponse struct {
-	User dbapp.User `json:"user"`
 	Err  string     `json:"err,omitempty"`
+	User dbapp.User `json:"user"`
 }
 
 // ErrorResponse (string, string, string) (string, error).
