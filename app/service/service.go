@@ -44,7 +44,7 @@ type Service struct {
 
 // NewService ...
 func NewService(client HttpClient, is *InfoServices) *Service {
-	return &Service{client, is.DBHost + ":" + is.DBPort, is.TokenHost + ":" + is.TokenPort, is.Secret}
+	return &Service{client, "http://" + is.DBHost + ":" + is.DBPort, "http://" + is.TokenHost + ":" + is.TokenPort, is.Secret}
 }
 
 // SignUp ...
@@ -225,17 +225,25 @@ func (s *Service) LogOut(token string) (err error) {
 	return nil
 }
 
-/* // GetAllUsers  ...
+// GetAllUsers  ...
 func (s *Service) GetAllUsers() (users []dbapp.User, err error) {
-	dbURL := fmt.Sprintf("%s:%s", s.dbHost, s.dbPort)
+	var usersErrorResponse dbapp.UsersErrorResponse
 
-	users, err = PetitionWithoutBody(s.client, dbURL+"/users")
-	if err != nil {
+	if err = RequestFuncWithoutBody(
+		s.client,
+		s.dbHost+"/users",
+		http.MethodGet,
+		&usersErrorResponse,
+	); err != nil {
 		return nil, err
 	}
 
-	return users, nil
-} */
+	if usersErrorResponse.Err != "" {
+		return nil, fmt.Errorf("%w:%s", ErrWebServer, usersErrorResponse.Err)
+	}
+
+	return usersErrorResponse.Users, nil
+}
 
 // Profile  ...
 func (s *Service) Profile(token string) (user dbapp.User, err error) {

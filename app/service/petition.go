@@ -54,3 +54,28 @@ func RequestFunc[responseEntity MyResponse](client HttpClient, body any, url, me
 
 	return nil
 }
+
+func RequestFuncWithoutBody(client HttpClient, url, methodHTTP string, response *dbapp.UsersErrorResponse) (err error) {
+	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Minute)
+	defer ctxCancel()
+
+	req, err := http.NewRequestWithContext(ctx, methodHTTP, url, bytes.NewBuffer(nil))
+	if err != nil {
+		err = fmt.Errorf("error to make petition: %w", err)
+
+		return err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		err = fmt.Errorf("error to make petition: %w", err)
+
+		return err
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
+		return fmt.Errorf("failed to decode request: %w", err)
+	}
+
+	return nil
+}

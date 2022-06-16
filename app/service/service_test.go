@@ -1,37 +1,10 @@
 package service_test
 
 import (
-	"errors"
-)
-
-const (
-	idTest       int    = 1
-	usernameTest string = "username"
-	passwordTest string = "password"
-	emailTest    string = "email@email.com"
-	secretTest   string = "secret"
-
-	urlTest       string = "localhost:8080"
-	dbHostTest    string = "db"
-	tokenHostTest string = "token"
-	portTest      string = "8080"
-	tokenTest     string = "token"
-
-	nameNoError string = "NoError"
-)
-
-var (
-	errWebServer        = errors.New("error from web server")
-	errNotTypeIndicated = errors.New("response is not of the type indicated")
-)
-
-/* import (
 	"bytes"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"testing"
 
@@ -61,8 +34,6 @@ var (
 	errNotTypeIndicated = errors.New("response is not of the type indicated")
 )
 
-
-
 func TestSignUp(t *testing.T) {
 	t.Parallel()
 
@@ -80,6 +51,7 @@ func TestSignUp(t *testing.T) {
 		url                             string
 		method                          string
 		isError                         bool
+		isErrorInsideRequest            bool
 	}{
 		{
 			name:       "NoError",
@@ -87,7 +59,7 @@ func TestSignUp(t *testing.T) {
 			inPassword: passwordTest,
 			inEmail:    emailTest,
 			isError:    false,
-			url:        "http://token:8080/generate",
+			url:        "http://db:8080/user",
 			method:     http.MethodPost,
 		},
 		{
@@ -100,6 +72,16 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodPost,
 		},
 		{
+			name:                 "ErrorInsideInsertUser",
+			inUsername:           usernameTest,
+			inPassword:           passwordTest,
+			inEmail:              emailTest,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://db:8080/user",
+			method:               http.MethodPost,
+		},
+		{
 			name:       "ErrorGetID",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -109,7 +91,17 @@ func TestSignUp(t *testing.T) {
 			method:     http.MethodGet,
 		},
 		{
-			name:       "ErrorGenerateToken",
+			name:                 "ErrorInsideGetID",
+			inUsername:           usernameTest,
+			inPassword:           passwordTest,
+			inEmail:              emailTest,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://db:8080/id/username",
+			method:               http.MethodGet,
+		},
+		{
+			name:       "ErrorGenerate",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
 			inEmail:    emailTest,
@@ -126,6 +118,16 @@ func TestSignUp(t *testing.T) {
 			url:        "http://token:8080/token",
 			method:     http.MethodPost,
 		},
+		{
+			name:                 "ErrorInsideSetToken",
+			inUsername:           usernameTest,
+			inPassword:           passwordTest,
+			inEmail:              emailTest,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/token",
+			method:               http.MethodPost,
+		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -141,34 +143,28 @@ func TestSignUp(t *testing.T) {
 				tokenResponse = tokenTest
 			}
 
-			testResp := struct {
-				Token string `json:"token"`
-				Err   string `json:"err"`
-				ID    int    `json:"id"`
-			}{
-				ID:    idTest,
-				Token: tokenResponse,
-				Err:   errorResponse,
-			}
-
-			jsonData, err := json.Marshal(testResp)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
-
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
-						response = &http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader(jsonData)),
+			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
+				if tt.isError {
+					if req.URL.String() == tt.url && req.Method == tt.method {
+						if tt.isErrorInsideRequest {
+							return &http.Response{
+								Body: io.NopCloser(bytes.NewReader([]byte(`{
+										"err":"error"
+									}`),
+								)),
+							}, nil
+						} else {
+							return nil, errWebServer
 						}
 					}
 				}
 
-				return response, nil
+				return &http.Response{
+					Body: io.NopCloser(bytes.NewReader([]byte(`{
+						"token":"token",
+						"id":1
+					}`))),
+				}, nil
 			})
 
 			svc := service.NewService(
@@ -205,6 +201,7 @@ func TestSignIn(t *testing.T) {
 		url                    string
 		method                 string
 		isError                bool
+		isErrorInsideRequest   bool
 	}{
 		{
 			name:       "NoError",
@@ -223,6 +220,15 @@ func TestSignIn(t *testing.T) {
 			method:     http.MethodGet,
 		},
 		{
+			name:                 "ErrorInsideGetToken",
+			inUsername:           usernameTest,
+			inPassword:           passwordTest,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://db:8080/user/username_password",
+			method:               http.MethodGet,
+		},
+		{
 			name:       "ErrorGenerateToken",
 			inUsername: usernameTest,
 			inPassword: passwordTest,
@@ -237,6 +243,15 @@ func TestSignIn(t *testing.T) {
 			isError:    true,
 			url:        "http://token:8080/token",
 			method:     http.MethodPost,
+		},
+		{
+			name:                 "ErrorInsideSetToken",
+			inUsername:           usernameTest,
+			inPassword:           passwordTest,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/token",
+			method:               http.MethodPost,
 		},
 	} {
 		tt := tt
@@ -253,39 +268,33 @@ func TestSignIn(t *testing.T) {
 				tokenResponse = tokenTest
 			}
 
-			testResp := struct {
-				User  dbapp.User `json:"user"`
-				Token string     `json:"token"`
-				Err   string     `json:"err"`
-			}{
-				User: dbapp.User{
-					ID:       idTest,
-					Username: usernameTest,
-					Password: passwordTest,
-					Email:    emailTest,
-				},
-				Token: tokenResponse,
-				Err:   errorResponse,
-			}
-
-			jsonData, err := json.Marshal(testResp)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-				response := &http.Response{Body: io.NopCloser(bytes.NewReader([]byte("{}")))}
-
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
-						response = &http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader(jsonData)),
+			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
+				if tt.isError {
+					if req.URL.String() == tt.url && req.Method == tt.method {
+						if tt.isErrorInsideRequest {
+							return &http.Response{
+								Body: io.NopCloser(bytes.NewReader([]byte(`{
+										"err":"error"
+									}`),
+								)),
+							}, nil
+						} else {
+							return nil, errWebServer
 						}
 					}
 				}
 
-				return response, nil
+				return &http.Response{
+					Body: io.NopCloser(bytes.NewReader([]byte(`{
+						"token":"token",
+						"user":{
+							"id":       1,
+							"username": "username",
+							"password": "password",
+							"email":    "email@email.com"
+						}
+					}`))),
+				}, nil
 			})
 
 			svc := service.NewService(
@@ -309,12 +318,13 @@ func TestLogOut(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name     string
-		inToken  string
-		url      string
-		method   string
-		outCheck bool
-		isError  bool
+		name                 string
+		inToken              string
+		url                  string
+		method               string
+		outCheck             bool
+		isError              bool
+		isErrorInsideRequest bool
 	}{
 		{
 			name:     "NoError",
@@ -333,10 +343,19 @@ func TestLogOut(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
-			name:     "ErrorCheckToken",
+			name:                 "ErrorInsideCheckToken",
+			inToken:              tokenTest,
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/check",
+			method:               http.MethodPost,
+		},
+		{
+			name:     "FalseCheckToken",
 			inToken:  tokenTest,
 			outCheck: false,
-			isError:  true,
+			isError:  false,
 			url:      "http://token:8080/check",
 			method:   http.MethodPost,
 		},
@@ -347,6 +366,15 @@ func TestLogOut(t *testing.T) {
 			isError:  true,
 			url:      "http://token:8080/token",
 			method:   http.MethodDelete,
+		},
+		{
+			name:                 "ErrorDeleteToken",
+			inToken:              tokenTest,
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/token",
+			method:               http.MethodDelete,
 		},
 	} {
 		tt := tt
@@ -368,48 +396,29 @@ func TestLogOut(t *testing.T) {
 				errorResponse = errWebServer.Error()
 			}
 
-			testResp := struct {
-				Err   string `json:"err"`
-				Check bool   `json:"check"`
-			}{
-				Check: tt.outCheck,
-				Err:   errorResponse,
-			}
-
-			if !tt.outCheck {
-				testResp.Err = ""
-				errorResponse = service.ErrTokenNotValid.Error()
-			}
-
-			jsonData, err := json.Marshal(testResp)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-				testCheck := struct {
-					Check bool `json:"check"`
-				}{
-					Check: tt.outCheck,
-				}
-
-				jsonCheck, err := json.Marshal(testCheck)
-				if err != nil {
-					assert.Error(t, err)
-				}
-
-				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
-
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
-						response = &http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader(jsonData)),
+			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
+				if tt.isError {
+					if req.URL.String() == tt.url && req.Method == tt.method {
+						if tt.isErrorInsideRequest {
+							return &http.Response{
+								Body: io.NopCloser(bytes.NewReader([]byte(`{
+										"err":"error"
+									}`),
+								)),
+							}, nil
+						} else {
+							return nil, errWebServer
 						}
 					}
 				}
 
-				return response, nil
+				s := fmt.Sprintf(`{
+					"check": %t
+				}`, tt.outCheck)
+
+				return &http.Response{
+					Body: io.NopCloser(bytes.NewReader([]byte(s))),
+				}, nil
 			})
 
 			svc := service.NewService(
@@ -420,7 +429,11 @@ func TestLogOut(t *testing.T) {
 			resultErr = svc.LogOut(tt.inToken)
 
 			if !tt.isError {
-				assert.Nil(t, resultErr)
+				if tt.outCheck {
+					assert.Nil(t, resultErr)
+				} else {
+					assert.ErrorContains(t, resultErr, errorResponse)
+				}
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
 			}
@@ -431,14 +444,13 @@ func TestLogOut(t *testing.T) {
 func TestGetAllUsers(t *testing.T) {
 	t.Parallel()
 
-	log.SetFlags(log.Lshortfile)
-
 	for _, tt := range []struct {
-		name     string
-		url      string
-		method   string
-		outUsers []dbapp.User
-		isError  bool
+		name                 string
+		url                  string
+		method               string
+		outUsers             []dbapp.User
+		isError              bool
+		isErrorInsideRequest bool
 	}{
 		{
 			name: "NoError",
@@ -461,6 +473,14 @@ func TestGetAllUsers(t *testing.T) {
 			url:      "http://db:8080/users",
 			method:   http.MethodGet,
 		},
+		{
+			name:                 "ErrorInsideGetAllUsers",
+			outUsers:             nil,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://db:8080/users",
+			method:               http.MethodGet,
+		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -482,28 +502,33 @@ func TestGetAllUsers(t *testing.T) {
 				errorResponse = errWebServer.Error()
 			}
 
-			testResp := struct {
-				Err   string       `json:"err"`
-				Users []dbapp.User `json:"users"`
-			}{
-				Users: []dbapp.User{{
-					ID:       idTest,
-					Username: usernameTest,
-					Password: passwordTest,
-					Email:    emailTest,
-				}},
-				Err: errorResponse,
-			}
+			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
+				if tt.isError {
+					if req.URL.String() == tt.url && req.Method == tt.method {
+						if tt.isErrorInsideRequest {
+							return &http.Response{
+								Body: io.NopCloser(bytes.NewReader([]byte(`{
+										"err":"error"
+									}`),
+								)),
+							}, nil
+						} else {
+							return nil, errWebServer
+						}
+					}
+				}
 
-			jsonData, err := json.Marshal(testResp)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
-					StatusCode: http.StatusOK,
-					Body:       ioutil.NopCloser(bytes.NewReader(jsonData)),
+					Body: io.NopCloser(bytes.NewReader([]byte(`{
+						"users":[
+							{
+								"username":"username",
+								"password":"password",
+								"email":"email@email.com",
+								"id":1
+							}
+						]
+					}`))),
 				}, nil
 			})
 
@@ -519,7 +544,6 @@ func TestGetAllUsers(t *testing.T) {
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
 			}
-
 			assert.Equal(t, tt.outUsers, resultUsers)
 		})
 	}
@@ -529,13 +553,14 @@ func TestProfile(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name     string
-		inToken  string
-		url      string
-		method   string
-		outUser  dbapp.User
-		outCheck bool
-		isError  bool
+		name                 string
+		inToken              string
+		url                  string
+		method               string
+		outUser              dbapp.User
+		outCheck             bool
+		isError              bool
+		isErrorInsideRequest bool
 	}{
 		{
 			name:    "NoError",
@@ -561,11 +586,21 @@ func TestProfile(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
-			name:     "ErrorCheckToken",
+			name:                 "ErrorInsideCheckToken",
+			inToken:              tokenTest,
+			outUser:              dbapp.User{},
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/check",
+			method:               http.MethodPost,
+		},
+		{
+			name:     "FalseCheckToken",
 			inToken:  tokenTest,
 			outUser:  dbapp.User{},
 			outCheck: false,
-			isError:  true,
+			isError:  false,
 			url:      "http://token:8080/check",
 			method:   http.MethodPost,
 		},
@@ -579,6 +614,16 @@ func TestProfile(t *testing.T) {
 			method:   http.MethodPost,
 		},
 		{
+			name:                 "ErrorInsideExtractToken",
+			inToken:              tokenTest,
+			outUser:              dbapp.User{},
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/extract",
+			method:               http.MethodPost,
+		},
+		{
 			name:     "ErrorGetID",
 			inToken:  tokenTest,
 			outUser:  dbapp.User{},
@@ -586,6 +631,16 @@ func TestProfile(t *testing.T) {
 			isError:  true,
 			url:      "http://db:8080/user/id",
 			method:   http.MethodGet,
+		},
+		{
+			name:                 "ErrorInsideGetID",
+			inToken:              tokenTest,
+			outUser:              dbapp.User{},
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://db:8080/user/id",
+			method:               http.MethodGet,
 		},
 	} {
 		tt := tt
@@ -608,56 +663,38 @@ func TestProfile(t *testing.T) {
 				errorResponse = errWebServer.Error()
 			}
 
-			testResp := struct {
-				Username string     `json:"username"`
-				Email    string     `json:"email"`
-				Err      string     `json:"err"`
-				User     dbapp.User `json:"user"`
-				ID       int        `json:"id"`
-				Check    bool       `json:"check"`
-			}{
-				User:     tt.outUser,
-				ID:       tt.outUser.ID,
-				Username: tt.outUser.Username,
-				Email:    tt.outUser.Email,
-				Check:    tt.outCheck,
-				Err:      errorResponse,
-			}
-
-			if !tt.outCheck {
-				testResp.Err = ""
-				errorResponse = service.ErrTokenNotValid.Error()
-			}
-
-			jsonData, err := json.Marshal(testResp)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-				testCheck := struct {
-					Check bool `json:"check"`
-				}{
-					Check: tt.outCheck,
-				}
-
-				jsonCheck, err := json.Marshal(testCheck)
-				if err != nil {
-					assert.Error(t, err)
-				}
-
-				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
-
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
-						response = &http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader((jsonData))),
+			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
+				if tt.isError {
+					if req.URL.String() == tt.url && req.Method == tt.method {
+						if tt.isErrorInsideRequest {
+							return &http.Response{
+								Body: io.NopCloser(bytes.NewReader([]byte(`{
+										"err":"error"
+									}`),
+								)),
+							}, nil
+						} else {
+							return nil, errWebServer
 						}
 					}
 				}
 
-				return response, nil
+				s := fmt.Sprintf(`{
+					"user":{
+						"username":"username",
+						"password":"password",
+						"email":"email@email.com",
+						"id":1
+					},
+					"id":1,    
+					"username":"usename",    
+					"email":"email@email.com",
+					"check":%t    
+				}`, tt.outCheck)
+
+				return &http.Response{
+					Body: io.NopCloser(bytes.NewReader([]byte(s))),
+				}, nil
 			})
 
 			svc := service.NewService(
@@ -668,7 +705,11 @@ func TestProfile(t *testing.T) {
 			resultUser, resultErr = svc.Profile(tt.inToken)
 
 			if !tt.isError {
-				assert.Nil(t, resultErr)
+				if tt.outCheck {
+					assert.Nil(t, resultErr)
+				} else {
+					assert.ErrorContains(t, resultErr, errorResponse)
+				}
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
 			}
@@ -682,12 +723,13 @@ func TestDeleteAccount(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct {
-		name     string
-		inToken  string
-		url      string
-		method   string
-		outCheck bool
-		isError  bool
+		name                 string
+		inToken              string
+		url                  string
+		method               string
+		outCheck             bool
+		isError              bool
+		isErrorInsideRequest bool
 	}{
 		{
 			name:     "NoError",
@@ -705,12 +747,20 @@ func TestDeleteAccount(t *testing.T) {
 			url:      "http://token:8080/check",
 			method:   http.MethodPost,
 		},
-
 		{
-			name:     "ErrorCheckToken",
+			name:                 "ErrorInsideCheckToken",
+			inToken:              tokenTest,
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/check",
+			method:               http.MethodPost,
+		},
+		{
+			name:     "FalseCheckToken",
 			inToken:  tokenTest,
 			outCheck: false,
-			isError:  true,
+			isError:  false,
 			url:      "http://token:8080/check",
 			method:   http.MethodPost,
 		},
@@ -721,6 +771,15 @@ func TestDeleteAccount(t *testing.T) {
 			isError:  true,
 			url:      "http://token:8080/extract",
 			method:   http.MethodPost,
+		},
+		{
+			name:                 "ErrorInsideExtractToken",
+			inToken:              tokenTest,
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/extract",
+			method:               http.MethodPost,
 		},
 		{
 			name:     "ErrorDeleteToken",
@@ -750,61 +809,38 @@ func TestDeleteAccount(t *testing.T) {
 				errorResponse = errWebServer.Error()
 			}
 
-			testResp := struct {
-				Username string     `json:"username"`
-				Email    string     `json:"email"`
-				Err      string     `json:"err"`
-				User     dbapp.User `json:"user"`
-				Check    bool       `json:"check"`
-				ID       int        `json:"id"`
-			}{
-				User: dbapp.User{
-					ID:       idTest,
-					Username: usernameTest,
-					Password: passwordTest,
-					Email:    emailTest,
-				},
-				ID:       idTest,
-				Username: usernameTest,
-				Email:    emailTest,
-				Check:    tt.outCheck,
-				Err:      errorResponse,
-			}
-
-			if !tt.outCheck {
-				testResp.Err = ""
-				errorResponse = service.ErrTokenNotValid.Error()
-			}
-
-			jsonData, err := json.Marshal(testResp)
-			if err != nil {
-				assert.Error(t, err)
-			}
-
-			mock := service.NewMockClient(func(req *http.Request) (*http.Response, error) {
-				testCheck := struct {
-					Check bool `json:"check"`
-				}{
-					Check: tt.outCheck,
-				}
-
-				jsonCheck, err := json.Marshal(testCheck)
-				if err != nil {
-					assert.Error(t, err)
-				}
-
-				response := &http.Response{Body: io.NopCloser(bytes.NewReader(jsonCheck))}
-
-				if req.URL.String() == tt.url {
-					if req.Method == tt.method {
-						response = &http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader(jsonData)),
+			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
+				if tt.isError {
+					if req.URL.String() == tt.url && req.Method == tt.method {
+						if tt.isErrorInsideRequest {
+							return &http.Response{
+								Body: io.NopCloser(bytes.NewReader([]byte(`{
+										"err":"error"
+									}`),
+								)),
+							}, nil
+						} else {
+							return nil, errWebServer
 						}
 					}
 				}
 
-				return response, nil
+				s := fmt.Sprintf(`{
+					"user":{
+						"username":"username",
+						"password":"password",
+						"email":"email@email.com",
+						"id":1
+					},
+					"id":1,    
+					"username":"usename",    
+					"email":"email@email.com",
+					"check":%t    
+				}`, tt.outCheck)
+
+				return &http.Response{
+					Body: io.NopCloser(bytes.NewReader([]byte(s))),
+				}, nil
 			})
 
 			svc := service.NewService(
@@ -815,10 +851,14 @@ func TestDeleteAccount(t *testing.T) {
 			resultErr = svc.DeleteAccount(tt.inToken)
 
 			if !tt.isError {
-				assert.Nil(t, resultErr)
+				if tt.outCheck {
+					assert.Nil(t, resultErr)
+				} else {
+					assert.ErrorContains(t, resultErr, errorResponse)
+				}
 			} else {
 				assert.ErrorContains(t, resultErr, errorResponse)
 			}
 		})
 	}
-} */
+}

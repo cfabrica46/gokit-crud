@@ -110,3 +110,87 @@ func TestRequestFunc(t *testing.T) {
 		})
 	}
 }
+
+func TestRequestFuncWithoutBody(t *testing.T) {
+	t.Parallel()
+
+	mockOK := service.NewMockClient(func(_ *http.Request) (*http.Response, error) {
+		response := &http.Response{
+			StatusCode: http.StatusOK,
+			Body: io.NopCloser(strings.NewReader(`{
+				"users": [
+					{
+						"id":1,
+						"username":"username",
+						"password":"password",
+						"email":"email@email.com"
+					}
+				]
+			}`)),
+		}
+
+		return response, nil
+	})
+
+	mockNotOK := service.NewMockClient(func(_ *http.Request) (*http.Response, error) {
+		return nil, fmt.Errorf("%w: error", errWebServer)
+	})
+
+	for _, tt := range []struct {
+		Response *dbapp.UsersErrorResponse
+		client   service.HttpClient
+		name     string
+		inURL    string
+		inMethod string
+		outErr   string
+	}{
+		{
+			name:     "NoError",
+			client:   mockOK,
+			inURL:    "localhost:8080",
+			inMethod: http.MethodPost,
+			Response: &dbapp.UsersErrorResponse{},
+			outErr:   "",
+		},
+		{
+			name:     "ErrorURL",
+			client:   mockOK,
+			inURL:    "%%",
+			inMethod: http.MethodPost,
+			Response: &dbapp.UsersErrorResponse{},
+			outErr:   "error to make petition",
+		},
+		{
+			name:     "ErrorService",
+			client:   mockNotOK,
+			inURL:    "localhost:8080",
+			inMethod: http.MethodPost,
+			Response: &dbapp.UsersErrorResponse{},
+			outErr:   "error to make petition",
+		},
+		{
+			name:     "ErrorDecode",
+			client:   mockOK,
+			inURL:    "localhost:8080",
+			inMethod: http.MethodPost,
+			Response: nil,
+			outErr:   "failed to decode request",
+		},
+	} {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := service.RequestFuncWithoutBody(tt.client, tt.inURL, tt.inMethod, tt.Response)
+
+			if tt.name == "NoError" {
+				assert.Nil(t, err)
+				assert.NotNil(t, idTest, tt.Response.Users)
+				assert.Zero(t, tt.Response.Err)
+			} else {
+				assert.NotNil(t, err)
+				assert.ErrorContains(t, err, tt.outErr)
+			}
+		})
+	}
+}
