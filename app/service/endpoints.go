@@ -1,17 +1,24 @@
 package service
 
-/* import (
+import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/go-kit/kit/endpoint"
 )
+
+var ErrRequest = errors.New("error to request")
 
 // MakeSignUpEndpoint ...
 func MakeSignUpEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(UsernamePasswordEmailRequest)
+		req, ok := request.(UsernamePasswordEmailRequest)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
+		}
 
 		token, err := svc.SignUp(req.Username, req.Password, req.Email)
 		if err != nil {
@@ -27,7 +34,10 @@ func MakeSignInEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(UsernamePasswordRequest)
+		req, ok := request.(UsernamePasswordRequest)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
+		}
 
 		token, err := svc.SignIn(req.Username, req.Password)
 		if err != nil {
@@ -43,7 +53,10 @@ func MakeLogOutEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(TokenRequest)
+		req, ok := request.(TokenRequest)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
+		}
 
 		err := svc.LogOut(req.Token)
 		if err != nil {
@@ -73,7 +86,10 @@ func MakeProfileEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(TokenRequest)
+		req, ok := request.(TokenRequest)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
+		}
 
 		user, err := svc.Profile(req.Token)
 		if err != nil {
@@ -89,7 +105,10 @@ func MakeDeleteAccountEndpoint(svc serviceInterface) endpoint.Endpoint {
 	return func(_ context.Context, request any) (any, error) {
 		var errMessage string
 
-		req, _ := request.(TokenRequest)
+		req, ok := request.(TokenRequest)
+		if !ok {
+			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
+		}
 
 		err := svc.DeleteAccount(req.Token)
 		if err != nil {
@@ -98,4 +117,4 @@ func MakeDeleteAccountEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 		return ErrorResponse{Err: errMessage}, nil
 	}
-} */
+}

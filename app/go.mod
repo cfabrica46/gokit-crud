@@ -5,12 +5,14 @@ go 1.18
 require (
 	github.com/cfabrica46/gokit-crud/database-app v0.0.0-20220529014019-0d6d24c5011f
 	github.com/cfabrica46/gokit-crud/token-app v0.0.0-20220529014019-0d6d24c5011f
+	github.com/go-kit/kit v0.12.0
+	github.com/gorilla/mux v1.8.0
+	github.com/joho/godotenv v1.4.0
 	github.com/stretchr/testify v1.7.1
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible // indirect

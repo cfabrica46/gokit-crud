@@ -1,6 +1,6 @@
 package main
 
-/* import (
+import (
 	"log"
 	"net/http"
 	"os"
@@ -40,37 +40,37 @@ func runServer(port string, infServ *service.InfoServices) {
 
 	getSignUpHandler := httptransport.NewServer(
 		service.MakeSignUpEndpoint(svc),
-		service.DecodeSignUpRequest,
+		service.DecodeRequestWithBody(service.UsernamePasswordEmailRequest{}),
 		service.EncodeResponse,
 	)
 
 	getSignInHandler := httptransport.NewServer(
 		service.MakeSignInEndpoint(svc),
-		service.DecodeSignInRequest,
+		service.DecodeRequestWithBody(service.UsernamePasswordRequest{}),
 		service.EncodeResponse,
 	)
 
 	getLogOutHandler := httptransport.NewServer(
 		service.MakeLogOutEndpoint(svc),
-		service.DecodeLogOutRequest,
+		service.DecodeRequestWithHeader(service.TokenRequest{}),
 		service.EncodeResponse,
 	)
 
 	getAllUsersHandler := httptransport.NewServer(
 		service.MakeGetAllUsersEndpoint(svc),
-		service.DecodeGetAllUsersRequest,
+		service.DecodeRequestWithoutBody(),
 		service.EncodeResponse,
 	)
 
 	getProfileHandler := httptransport.NewServer(
 		service.MakeProfileEndpoint(svc),
-		service.DecodeProfileRequest,
+		service.DecodeRequestWithHeader(service.TokenRequest{}),
 		service.EncodeResponse,
 	)
 
 	getDeleteAccountHandler := httptransport.NewServer(
 		service.MakeDeleteAccountEndpoint(svc),
-		service.DecodeDeleteAccountRequest,
+		service.DecodeRequestWithHeader(service.TokenRequest{}),
 		service.EncodeResponse,
 	)
 
@@ -84,4 +84,4 @@ func runServer(port string, infServ *service.InfoServices) {
 
 	log.Println("ListenAndServe on localhost:" + os.Getenv("PORT"))
 	log.Println(http.ListenAndServe(":"+port, router))
-} */
+}
