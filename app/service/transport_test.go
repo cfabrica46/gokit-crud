@@ -1,5 +1,266 @@
 package service_test
 
+import (
+	"bytes"
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/cfabrica46/gokit-crud/app/service"
+	"github.com/stretchr/testify/assert"
+)
+
+const (
+	usernamePasswordEmailRequestJSON = `{
+		 "username": "username",
+		 "password": "password",
+		 "email": "email@email.com"
+	}`
+
+	usernamePasswordRequestJSON = `{
+		 "username": "username",
+		 "password": "password"
+	}`
+)
+
+func TestDecodeRequestWithoutBody(t *testing.T) {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		out    any
+		in     *http.Request
+		name   string
+		outErr string
+	}{
+		{
+			name:   nameNoError + "GetAllRequest",
+			in:     nil,
+			outErr: "",
+			out:    service.EmptyRequest{},
+		},
+	} {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			r, err := service.DecodeRequestWithoutBody()(context.TODO(), tt.in)
+
+			assert.Empty(t, err)
+			assert.Equal(t, tt.out, r)
+		})
+	}
+}
+
+func TestDecodeRequestWithBody(t *testing.T) {
+	t.Parallel()
+
+	usernamePasswordEmailReq, err := http.NewRequest(
+		http.MethodPost,
+		urlTest,
+		bytes.NewBuffer([]byte(usernamePasswordEmailRequestJSON)),
+	)
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	usernamePasswordReq, err := http.NewRequest(
+		http.MethodPost,
+		urlTest,
+		bytes.NewBuffer([]byte(usernamePasswordRequestJSON)),
+	)
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodPost, urlTest, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	for _, tt := range []struct {
+		inType      any
+		in          *http.Request
+		name        string
+		outUsername string
+		outPassword string
+		outEmail    string
+		outErr      string
+		outID       int
+	}{
+		{
+			name:        nameNoError + "UsernamePasswordEmailRequest",
+			inType:      service.UsernamePasswordEmailRequest{},
+			in:          usernamePasswordEmailReq,
+			outUsername: usernameTest,
+			outPassword: passwordTest,
+			outEmail:    emailTest,
+			outErr:      "",
+		},
+		{
+			name:        nameNoError + "UsernamePasswordRequest",
+			inType:      service.UsernamePasswordRequest{},
+			in:          usernamePasswordReq,
+			outUsername: usernameTest,
+			outPassword: passwordTest,
+			outErr:      "",
+		},
+		{
+			name:   "BadRequest",
+			inType: service.UsernamePasswordEmailRequest{},
+			in:     badReq,
+			outErr: "EOF",
+		},
+	} {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var resultErr string
+
+			var r any
+
+			switch resultType := tt.inType.(type) {
+			case service.UsernamePasswordEmailRequest:
+				r, err = service.DecodeRequestWithBody(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+			case service.UsernamePasswordRequest:
+				r, err = service.DecodeRequestWithBody(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+			default:
+				assert.Fail(t, "Error to type inType")
+			}
+
+			switch result := r.(type) {
+			case service.UsernamePasswordEmailRequest:
+				assert.Equal(t, tt.outUsername, result.Username)
+				assert.Equal(t, tt.outPassword, result.Password)
+				assert.Equal(t, tt.outEmail, result.Email)
+				assert.Empty(t, resultErr)
+			case service.UsernamePasswordRequest:
+				assert.Equal(t, tt.outUsername, result.Username)
+				assert.Equal(t, tt.outPassword, result.Password)
+				assert.Empty(t, resultErr)
+			default:
+				if tt.name != nameNoError {
+					assert.Contains(t, resultErr, tt.outErr)
+				}
+			}
+		})
+	}
+}
+
+func TestDecodeRequestWithHeader(t *testing.T) {
+	t.Parallel()
+
+	okReq, err := http.NewRequest(
+		http.MethodPost,
+		urlTest,
+		bytes.NewBuffer([]byte{}),
+	)
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	okReq.Header.Set("Authorization", "token")
+
+	badReq, err := http.NewRequest(http.MethodPost, urlTest, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		assert.Error(t, err)
+	}
+
+	for _, tt := range []struct {
+		inType   service.TokenRequest
+		in       *http.Request
+		name     string
+		outErr   string
+		outToken string
+		outID    int
+	}{
+		{
+			name:     nameNoError,
+			inType:   service.TokenRequest{},
+			in:       okReq,
+			outToken: tokenTest,
+			outErr:   "",
+		},
+		{
+			name:   "BadRequest",
+			inType: service.TokenRequest{},
+			in:     badReq,
+			outErr: "failed to get header",
+		},
+	} {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var resultErr string
+
+			r, err := service.DecodeRequestWithHeader(tt.inType)(context.TODO(), tt.in)
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			result, ok := r.(service.TokenRequest)
+			if tt.name == nameNoError {
+				if !ok {
+					assert.Fail(t, "Error to type inType")
+				}
+			}
+
+			if tt.name == nameNoError {
+				assert.Equal(t, tt.outToken, result.Token)
+				assert.Nil(t, err)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+		})
+	}
+}
+
+func TestEncodeResponse(t *testing.T) {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name   string
+		in     any
+		outErr string
+	}{
+		{
+			name:   nameNoError,
+			in:     "test",
+			outErr: "",
+		},
+		{
+			name:   "ErrorBadEncode",
+			in:     func() {},
+			outErr: "json: unsupported type: func()",
+		},
+	} {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			var resultErr string
+
+			err := service.EncodeResponse(context.TODO(), httptest.NewRecorder(), tt.in)
+			if err != nil {
+				resultErr = err.Error()
+			}
+
+			if tt.name == nameNoError {
+				assert.Empty(t, resultErr)
+			} else {
+				assert.Contains(t, resultErr, tt.outErr)
+			}
+		})
+	}
+}
+
 /* import (
 	"bytes"
 	"context"

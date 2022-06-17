@@ -1,6 +1,6 @@
 package service_test
 
-/* import (
+import (
 	"bytes"
 	"context"
 	"encoding/json"
@@ -12,6 +12,14 @@ package service_test
 	dbapp "github.com/cfabrica46/gokit-crud/database-app/service"
 	"github.com/stretchr/testify/assert"
 )
+
+const (
+	nameErrorRequest string = "ErrorRequest"
+)
+
+type incorrectRequest struct {
+	incorrect bool
+}
 
 func TestSignUpEndpoint(t *testing.T) {
 	t.Parallel()
@@ -26,13 +34,13 @@ func TestSignUpEndpoint(t *testing.T) {
 
 	for _, tt := range []struct {
 		name     string
-		in       service.SignUpRequest
+		in       any
 		outToken string
 		outErr   string
 	}{
 		{
 			name: nameNoError,
-			in: service.SignUpRequest{
+			in: service.UsernamePasswordEmailRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 				Email:    emailTest,
@@ -41,8 +49,15 @@ func TestSignUpEndpoint(t *testing.T) {
 			outErr:   "",
 		},
 		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:     "ErrorWebService",
-			in:       service.SignUpRequest{},
+			in:       service.UsernamePasswordEmailRequest{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
 		},
@@ -50,6 +65,8 @@ func TestSignUpEndpoint(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			testResp := struct {
 				Token string `json:"token"`
@@ -80,18 +97,24 @@ func TestSignUpEndpoint(t *testing.T) {
 
 			r, err := service.MakeSignUpEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.SignUpResponse)
+			result, ok := r.(service.TokenErrorResponse)
 			if !ok {
-				assert.Error(t, errNotTypeIndicated)
+				if tt.name != nameErrorRequest {
+					assert.Error(t, errNotTypeIndicated)
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outToken, result.Token)
@@ -112,13 +135,13 @@ func TestSignInEndpoint(t *testing.T) {
 
 	for _, tt := range []struct {
 		name     string
-		in       service.SignInRequest
+		in       any
 		outToken string
 		outErr   string
 	}{
 		{
 			name: nameNoError,
-			in: service.SignInRequest{
+			in: service.UsernamePasswordRequest{
 				Username: usernameTest,
 				Password: passwordTest,
 			},
@@ -126,8 +149,15 @@ func TestSignInEndpoint(t *testing.T) {
 			outErr:   "",
 		},
 		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:     "ErrorWebService",
-			in:       service.SignInRequest{},
+			in:       service.UsernamePasswordRequest{},
 			outToken: "",
 			outErr:   errWebServer.Error(),
 		},
@@ -136,10 +166,12 @@ func TestSignInEndpoint(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			var resultErr string
+
 			testResp := struct {
-				User  dbapp.User
 				Token string `json:"token"`
 				Err   string `json:"err"`
+				User  dbapp.User
 			}{
 				User: dbapp.User{
 					ID:       idTest,
@@ -170,18 +202,24 @@ func TestSignInEndpoint(t *testing.T) {
 
 			r, err := service.MakeSignInEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.SignInResponse)
+			result, ok := r.(service.TokenErrorResponse)
 			if !ok {
-				assert.Error(t, errNotTypeIndicated)
+				if tt.name != nameErrorRequest {
+					assert.Error(t, errNotTypeIndicated)
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outToken, result.Token)
@@ -202,25 +240,34 @@ func TestLogOutEndpoint(t *testing.T) {
 
 	for _, tt := range []struct {
 		name   string
-		in     service.LogOutRequest
+		in     any
 		outErr string
 	}{
 		{
 			name: nameNoError,
-			in: service.LogOutRequest{
+			in: service.TokenRequest{
 				Token: tokenTest,
 			},
 			outErr: "",
 		},
 		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:   "ErrorWebService",
-			in:     service.LogOutRequest{},
+			in:     service.TokenRequest{},
 			outErr: errWebServer.Error(),
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			testResp := struct {
 				Err   string `json:"err"`
@@ -249,18 +296,24 @@ func TestLogOutEndpoint(t *testing.T) {
 
 			r, err := service.MakeLogOutEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.LogOutResponse)
+			result, ok := r.(service.ErrorResponse)
 			if !ok {
-				assert.Error(t, errNotTypeIndicated)
+				if tt.name != nameErrorRequest {
+					assert.Error(t, errNotTypeIndicated)
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
@@ -334,7 +387,7 @@ func TestGetAllUsersEndpoint(t *testing.T) {
 				assert.Error(t, err)
 			}
 
-			result, ok := r.(service.GetAllUsersResponse)
+			result, ok := r.(service.UsersErrorResponse)
 			if !ok {
 				assert.Error(t, errNotTypeIndicated)
 			}
@@ -362,14 +415,14 @@ func TestProfileEndpoint(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
+		in      any
 		name    string
-		in      service.ProfileRequest
-		outUser dbapp.User
 		outErr  string
+		outUser dbapp.User
 	}{
 		{
 			name: nameNoError,
-			in: service.ProfileRequest{
+			in: service.TokenRequest{
 				Token: tokenTest,
 			},
 			outUser: dbapp.User{
@@ -381,8 +434,15 @@ func TestProfileEndpoint(t *testing.T) {
 			outErr: "",
 		},
 		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:    "ErrorWebService",
-			in:      service.ProfileRequest{},
+			in:      service.TokenRequest{},
 			outUser: dbapp.User{},
 			outErr:  errWebServer.Error(),
 		},
@@ -390,6 +450,8 @@ func TestProfileEndpoint(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			testResp := struct {
 				Username string     `json:"username"`
@@ -426,18 +488,24 @@ func TestProfileEndpoint(t *testing.T) {
 
 			r, err := service.MakeProfileEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.ProfileResponse)
+			result, ok := r.(service.UserErrorResponse)
 			if !ok {
-				assert.Error(t, errNotTypeIndicated)
+				if tt.name != nameErrorRequest {
+					assert.Error(t, errNotTypeIndicated)
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 
 			assert.Equal(t, tt.outUser, result.User)
@@ -458,25 +526,34 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 	for _, tt := range []struct {
 		name   string
-		in     service.DeleteAccountRequest
+		in     any
 		outErr string
 	}{
 		{
 			name: nameNoError,
-			in: service.DeleteAccountRequest{
+			in: service.TokenRequest{
 				Token: tokenTest,
 			},
 			outErr: "",
 		},
 		{
+			name: nameErrorRequest,
+			in: incorrectRequest{
+				incorrect: true,
+			},
+			outErr: "isn't of type",
+		},
+		{
 			name:   "ErrorWebService",
-			in:     service.DeleteAccountRequest{},
+			in:     service.TokenRequest{},
 			outErr: errWebServer.Error(),
 		},
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
+			var resultErr string
 
 			testResp := struct {
 				Username string `json:"username"`
@@ -511,19 +588,25 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 			r, err := service.MakeDeleteAccountEndpoint(svc)(context.TODO(), tt.in)
 			if err != nil {
-				assert.Error(t, err)
+				resultErr = err.Error()
 			}
 
-			result, ok := r.(service.DeleteAccountResponse)
+			result, ok := r.(service.ErrorResponse)
 			if !ok {
-				assert.Error(t, errNotTypeIndicated)
+				if tt.name != nameErrorRequest {
+					assert.Error(t, errNotTypeIndicated)
+				}
+			}
+
+			if result.Err != "" {
+				resultErr = result.Err
 			}
 
 			if tt.name == nameNoError {
 				assert.Empty(t, result.Err)
 			} else {
-				assert.Contains(t, result.Err, tt.outErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}
-} */
+}
