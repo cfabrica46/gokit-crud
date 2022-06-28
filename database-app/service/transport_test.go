@@ -3,6 +3,7 @@ package service_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,24 +12,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type myRequests struct {
+	idReq, usernameReq, usernamePasswordReq, usernamePasswordEmailReq, badReq *http.Request
+}
+
 const (
 	idRequestJSON = `{
 		 "id": 1
 	}`
 
 	usernameRequestJSON = `{
-		 "username": "username",
+		 "username": "username"
 	}`
 
+	//nolint:gosec
 	usernamePasswordRequestJSON = `{
 		 "username": "username",
-		 "password": "password",
+		 "password": "password"
 	}`
 
+	//nolint:gosec
 	usernamePasswordEmailRequestJSON = `{
 		 "username": "username",
 		 "password": "password",
-		 "email": "email@email.com",
+		 "email": "email@email.com"
 	}`
 )
 
@@ -63,43 +70,7 @@ func TestDecodeRequestWithoutBody(t *testing.T) {
 func TestDecodeRequest(t *testing.T) {
 	t.Parallel()
 
-	idReq, err := http.NewRequest(
-		http.MethodPost,
-		urlTest,
-		bytes.NewBuffer([]byte(idRequestJSON)),
-	)
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	usernameReq, err := http.NewRequest(
-		http.MethodPost,
-		urlTest,
-		bytes.NewBuffer([]byte(usernameRequestJSON)),
-	)
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	usernamePasswordReq, err := http.NewRequest(
-		http.MethodPost,
-		urlTest,
-		bytes.NewBuffer([]byte(usernamePasswordRequestJSON)),
-	)
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	usernamePasswordEmailReq, err := http.NewRequest(
-		http.MethodPost,
-		urlTest,
-		bytes.NewBuffer([]byte(usernameRequestJSON)),
-	)
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	badReq, err := http.NewRequest(http.MethodPost, urlTest, bytes.NewBuffer([]byte{}))
+	myReqs, err := getRequests()
 	if err != nil {
 		assert.Error(t, err)
 	}
@@ -117,27 +88,29 @@ func TestDecodeRequest(t *testing.T) {
 		{
 			name:   nameNoError + "IDRequest",
 			inType: service.IDRequest{},
-			in:     idReq,
+			in:     myReqs.idReq,
 			outID:  idTest,
 			outErr: "",
 		},
 		{
 			name:        nameNoError + "UsernameRequest",
 			inType:      service.UsernameRequest{},
-			in:          usernameReq,
+			in:          myReqs.usernameReq,
 			outUsername: usernameTest,
 			outErr:      "",
 		},
 		{
-			name:   nameNoError + "UsernamePasswordRequest",
-			inType: service.UsernamePasswordRequest{},
-			in:     usernamePasswordReq,
-			outErr: "",
+			name:        nameNoError + "UsernamePasswordRequest",
+			inType:      service.UsernamePasswordRequest{},
+			in:          myReqs.usernamePasswordReq,
+			outUsername: usernameTest,
+			outPassword: passwordTest,
+			outErr:      "",
 		},
 		{
 			name:        nameNoError + "UsernamePasswordEmailRequest",
 			inType:      service.UsernamePasswordEmailRequest{},
-			in:          usernamePasswordEmailReq,
+			in:          myReqs.usernamePasswordEmailReq,
 			outUsername: usernameTest,
 			outPassword: passwordTest,
 			outEmail:    emailTest,
@@ -146,7 +119,7 @@ func TestDecodeRequest(t *testing.T) {
 		{
 			name:   "BadRequest",
 			inType: service.IDRequest{},
-			in:     badReq,
+			in:     myReqs.badReq,
 			outErr: "EOF",
 		},
 	} {
@@ -156,53 +129,63 @@ func TestDecodeRequest(t *testing.T) {
 
 			var resultErr string
 
-			var r any
+			var req any
 
 			switch resultType := tt.inType.(type) {
 			case service.IDRequest:
-				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
 				if err != nil {
 					resultErr = err.Error()
 				}
-			case service.UsernameRequest:
-				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
-				if err != nil {
-					resultErr = err.Error()
-				}
-			case service.UsernamePasswordRequest:
-				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
-				if err != nil {
-					resultErr = err.Error()
-				}
-			case service.UsernamePasswordEmailRequest:
-				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
-				if err != nil {
-					resultErr = err.Error()
-				}
-			default:
-				assert.Fail(t, "Error to type inType")
-			}
 
-			switch result := r.(type) {
-			case service.IDRequest:
-				assert.Equal(t, tt.outID, result.ID)
-				assert.Empty(t, resultErr)
+				result, ok := req.(service.IDRequest)
+				if ok {
+					assert.Equal(t, tt.outID, result.ID)
+					assert.Contains(t, resultErr, tt.outErr)
+				} else {
+					assert.NotNil(t, err)
+				}
+
 			case service.UsernameRequest:
+				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+
+				result, ok := req.(service.UsernameRequest)
+				assert.True(t, ok)
+
 				assert.Equal(t, tt.outUsername, result.Username)
-				assert.Empty(t, resultErr)
+				assert.Contains(t, resultErr, tt.outErr)
+
 			case service.UsernamePasswordRequest:
+				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+
+				result, ok := req.(service.UsernamePasswordRequest)
+				assert.True(t, ok)
+
 				assert.Equal(t, tt.outUsername, result.Username)
 				assert.Equal(t, tt.outPassword, result.Password)
-				assert.Empty(t, resultErr)
+				assert.Contains(t, resultErr, tt.outErr)
+
 			case service.UsernamePasswordEmailRequest:
+				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+
+				result, ok := req.(service.UsernamePasswordEmailRequest)
+				assert.True(t, ok)
+
 				assert.Equal(t, tt.outUsername, result.Username)
 				assert.Equal(t, tt.outPassword, result.Password)
 				assert.Equal(t, tt.outEmail, result.Email)
-				assert.Empty(t, resultErr)
+				assert.Contains(t, resultErr, tt.outErr)
 			default:
-				if tt.name != nameNoError {
-					assert.Contains(t, resultErr, tt.outErr)
-				}
+				assert.Fail(t, "Error to type inType")
 			}
 		})
 	}
@@ -244,4 +227,55 @@ func TestEncodeResponse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func getRequests() (myReqs *myRequests, err error) {
+	idReq, err := http.NewRequest(
+		http.MethodPost,
+		urlTest,
+		bytes.NewBuffer([]byte(idRequestJSON)),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error: %w", err)
+	}
+
+	usernameReq, err := http.NewRequest(
+		http.MethodPost,
+		urlTest,
+		bytes.NewBuffer([]byte(usernameRequestJSON)),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error: %w", err)
+	}
+
+	usernamePasswordReq, err := http.NewRequest(
+		http.MethodPost,
+		urlTest,
+		bytes.NewBuffer([]byte(usernamePasswordRequestJSON)),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error: %w", err)
+	}
+
+	usernamePasswordEmailReq, err := http.NewRequest(
+		http.MethodPost,
+		urlTest,
+		bytes.NewBuffer([]byte(usernamePasswordEmailRequestJSON)),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error: %w", err)
+	}
+
+	badReq, err := http.NewRequest(http.MethodPost, urlTest, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		return nil, fmt.Errorf("error: %w", err)
+	}
+
+	return &myRequests{
+		idReq:                    idReq,
+		usernameReq:              usernameReq,
+		usernamePasswordReq:      usernamePasswordReq,
+		usernamePasswordEmailReq: usernamePasswordEmailReq,
+		badReq:                   badReq,
+	}, nil
 }

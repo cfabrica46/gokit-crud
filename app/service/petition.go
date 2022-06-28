@@ -23,7 +23,20 @@ type MyResponse interface {
 		tokenapp.CheckErrResponse
 }
 
-func RequestFunc[responseEntity MyResponse](client HttpClient, body any, url, methodHTTP string, response *responseEntity) (err error) {
+type HTTPComponents struct {
+	url, method string
+}
+
+func NewHTTPComponents(url, method string) HTTPComponents {
+	return HTTPComponents{url: url, method: method}
+}
+
+func RequestFunc[responseEntity MyResponse](
+	client HTTPClient,
+	body any,
+	httpComponents HTTPComponents,
+	response *responseEntity,
+) (err error) {
 	bodyJSON, err := json.Marshal(body)
 	if err != nil {
 		err = fmt.Errorf("error to make petition: %w", err)
@@ -34,7 +47,7 @@ func RequestFunc[responseEntity MyResponse](client HttpClient, body any, url, me
 	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Minute)
 	defer ctxCancel()
 
-	req, err := http.NewRequestWithContext(ctx, methodHTTP, url, bytes.NewBuffer(bodyJSON))
+	req, err := http.NewRequestWithContext(ctx, httpComponents.method, httpComponents.url, bytes.NewBuffer(bodyJSON))
 	if err != nil {
 		err = fmt.Errorf("error to make petition: %w", err)
 
@@ -55,11 +68,15 @@ func RequestFunc[responseEntity MyResponse](client HttpClient, body any, url, me
 	return nil
 }
 
-func RequestFuncWithoutBody(client HttpClient, url, methodHTTP string, response *dbapp.UsersErrorResponse) (err error) {
+func RequestFuncWithoutBody(
+	client HTTPClient,
+	httpComponents HTTPComponents,
+	response *dbapp.UsersErrorResponse,
+) (err error) {
 	ctx, ctxCancel := context.WithTimeout(context.TODO(), time.Minute)
 	defer ctxCancel()
 
-	req, err := http.NewRequestWithContext(ctx, methodHTTP, url, bytes.NewBuffer(nil))
+	req, err := http.NewRequestWithContext(ctx, httpComponents.method, httpComponents.url, bytes.NewBuffer(nil))
 	if err != nil {
 		err = fmt.Errorf("error to make petition: %w", err)
 

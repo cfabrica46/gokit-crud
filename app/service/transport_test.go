@@ -12,12 +12,14 @@ import (
 )
 
 const (
+	//nolint:gosec
 	usernamePasswordEmailRequestJSON = `{
 		 "username": "username",
 		 "password": "password",
 		 "email": "email@email.com"
 	}`
 
+	//nolint:gosec
 	usernamePasswordRequestJSON = `{
 		 "username": "username",
 		 "password": "password"
@@ -118,37 +120,42 @@ func TestDecodeRequestWithBody(t *testing.T) {
 
 			var resultErr string
 
-			var r any
+			var req any
 
 			switch resultType := tt.inType.(type) {
 			case service.UsernamePasswordEmailRequest:
-				r, err = service.DecodeRequestWithBody(resultType)(context.TODO(), tt.in)
+				req, err = service.DecodeRequestWithBody(resultType)(context.TODO(), tt.in)
 				if err != nil {
 					resultErr = err.Error()
 				}
+
+				result, ok := req.(service.UsernamePasswordEmailRequest)
+				if ok {
+					assert.Equal(t, tt.outUsername, result.Username)
+					assert.Equal(t, tt.outPassword, result.Password)
+					assert.Equal(t, tt.outEmail, result.Email)
+					assert.Contains(t, resultErr, tt.outErr)
+				} else {
+					assert.NotNil(t, err)
+				}
+
 			case service.UsernamePasswordRequest:
-				r, err = service.DecodeRequestWithBody(resultType)(context.TODO(), tt.in)
+				req, err = service.DecodeRequestWithBody(resultType)(context.TODO(), tt.in)
 				if err != nil {
 					resultErr = err.Error()
 				}
+
+				result, ok := req.(service.UsernamePasswordRequest)
+				if ok {
+					assert.Equal(t, tt.outUsername, result.Username)
+					assert.Equal(t, tt.outPassword, result.Password)
+					assert.Contains(t, resultErr, tt.outErr)
+				} else {
+					assert.NotNil(t, err)
+				}
+
 			default:
 				assert.Fail(t, "Error to type inType")
-			}
-
-			switch result := r.(type) {
-			case service.UsernamePasswordEmailRequest:
-				assert.Equal(t, tt.outUsername, result.Username)
-				assert.Equal(t, tt.outPassword, result.Password)
-				assert.Equal(t, tt.outEmail, result.Email)
-				assert.Empty(t, resultErr)
-			case service.UsernamePasswordRequest:
-				assert.Equal(t, tt.outUsername, result.Username)
-				assert.Equal(t, tt.outPassword, result.Password)
-				assert.Empty(t, resultErr)
-			default:
-				if tt.name != nameNoError {
-					assert.Contains(t, resultErr, tt.outErr)
-				}
 			}
 		})
 	}

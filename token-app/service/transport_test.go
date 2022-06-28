@@ -12,18 +12,21 @@ import (
 )
 
 const (
+	//nolint:gosec
 	generateTokenRequestJSON = `{
 		 "username": "username",
 		 "email": "email@email.com",
 		 "secret": "secret",
 		 "id": 1
-	}`
+	 }`
 
+	//nolint:gosec
 	extractTokenRequestJSON = `{
 		"token": "token",
 		 "secret": "secret"
 	}`
 
+	//nolint:gosec
 	tokenRequestJSON = `{
 		"token": "token"
 	}`
@@ -113,46 +116,50 @@ func TestDecodeRequest(t *testing.T) {
 
 			var resultErr string
 
-			var r any
+			var req any
 
 			switch resultType := tt.inType.(type) {
 			case service.IDUsernameEmailSecretRequest:
-				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
 				if err != nil {
 					resultErr = err.Error()
 				}
-			case service.TokenSecretRequest:
-				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
-				if err != nil {
-					resultErr = err.Error()
-				}
-			case service.Token:
-				r, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
-				if err != nil {
-					resultErr = err.Error()
-				}
-			default:
-				assert.Fail(t, "Error to type inType")
-			}
 
-			switch result := r.(type) {
-			case service.IDUsernameEmailSecretRequest:
-				assert.Equal(t, tt.outID, result.ID)
-				assert.Equal(t, tt.outUsername, result.Username)
-				assert.Equal(t, tt.outEmail, result.Email)
-				assert.Equal(t, tt.outSecret, result.Secret)
-				assert.Empty(t, resultErr)
-			case service.TokenSecretRequest:
-				assert.Equal(t, tt.outToken, result.Token)
-				assert.Equal(t, tt.outSecret, result.Secret)
-				assert.Empty(t, resultErr)
-			case service.Token:
-				assert.Equal(t, tt.outToken, result.Token)
-				assert.Empty(t, resultErr)
-			default:
-				if tt.name != nameNoError {
+				result, ok := req.(service.IDUsernameEmailSecretRequest)
+				if ok {
+					assert.Equal(t, tt.outID, result.ID)
+					assert.Equal(t, tt.outUsername, result.Username)
+					assert.Equal(t, tt.outEmail, result.Email)
+					assert.Equal(t, tt.outSecret, result.Secret)
 					assert.Contains(t, resultErr, tt.outErr)
+				} else {
+					assert.NotNil(t, err)
 				}
+
+			case service.TokenSecretRequest:
+				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+
+				result, ok := req.(service.TokenSecretRequest)
+				assert.True(t, ok)
+
+				assert.Equal(t, tt.outToken, result.Token)
+				assert.Equal(t, tt.outSecret, result.Secret)
+				assert.Contains(t, resultErr, tt.outErr)
+
+			case service.Token:
+				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
+				if err != nil {
+					resultErr = err.Error()
+				}
+
+				result, ok := req.(service.Token)
+				assert.True(t, ok)
+
+				assert.Equal(t, tt.outToken, result.Token)
+				assert.Contains(t, resultErr, tt.outErr)
 			}
 		})
 	}

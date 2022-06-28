@@ -32,27 +32,32 @@ type serviceInterface interface {
 	DeleteAccount(string) error
 }
 
-type HttpClient interface {
+type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
 // Service ...
 type Service struct {
-	client                    HttpClient
+	client                    HTTPClient
 	dbHost, tokenHost, secret string
 }
 
 // NewService ...
-func NewService(client HttpClient, is *InfoServices) *Service {
-	return &Service{client, "http://" + is.DBHost + ":" + is.DBPort, "http://" + is.TokenHost + ":" + is.TokenPort, is.Secret}
+func NewService(client HTTPClient, is *InfoServices) *Service {
+	return &Service{
+		client,
+		"http://" + is.DBHost + ":" + is.DBPort, "http://" + is.TokenHost + ":" + is.TokenPort, is.Secret,
+	}
 }
 
 // SignUp ...
 func (s *Service) SignUp(username, password, email string) (token string, err error) {
-	var errorDBResponse dbapp.ErrorResponse
-	var idResponse dbapp.IDErrorResponse
-	var tokenResponse tokenapp.Token
-	var errorTokenResponse tokenapp.ErrorResponse
+	var (
+		errorDBResponse    dbapp.ErrorResponse
+		idResponse         dbapp.IDErrorResponse
+		tokenResponse      tokenapp.Token
+		errorTokenResponse tokenapp.ErrorResponse
+	)
 
 	if err = RequestFunc(
 		s.client,
@@ -61,8 +66,10 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 			Password: password,
 			Email:    email,
 		},
-		s.dbHost+"/user",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.dbHost+"/user",
+			http.MethodPost,
+		),
 		&errorDBResponse,
 	); err != nil {
 		return "", err
@@ -77,8 +84,10 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 		dbapp.UsernameRequest{
 			Username: username,
 		},
-		s.dbHost+"/id/username",
-		http.MethodGet,
+		NewHTTPComponents(
+			s.dbHost+"/id/username",
+			http.MethodGet,
+		),
 		&idResponse,
 	); err != nil {
 		return "", err
@@ -96,8 +105,10 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 			Email:    email,
 			Secret:   s.secret,
 		},
-		s.tokenHost+"/generate",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/generate",
+			http.MethodPost,
+		),
 		&tokenResponse,
 	); err != nil {
 		return "", err
@@ -108,8 +119,10 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 		tokenapp.Token{
 			Token: tokenResponse.Token,
 		},
-		s.tokenHost+"/token",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/token",
+			http.MethodPost,
+		),
 		&errorTokenResponse,
 	); err != nil {
 		return "", err
@@ -124,9 +137,11 @@ func (s *Service) SignUp(username, password, email string) (token string, err er
 
 // SignIn ...
 func (s *Service) SignIn(username, password string) (token string, err error) {
-	var userErrorResponse dbapp.UserErrorResponse
-	var tokenResponse tokenapp.Token
-	var errorResponse tokenapp.ErrorResponse
+	var (
+		userErrorResponse dbapp.UserErrorResponse
+		tokenResponse     tokenapp.Token
+		errorResponse     tokenapp.ErrorResponse
+	)
 
 	if err = RequestFunc(
 		s.client,
@@ -134,8 +149,10 @@ func (s *Service) SignIn(username, password string) (token string, err error) {
 			Username: username,
 			Password: password,
 		},
-		s.dbHost+"/user/username_password",
-		http.MethodGet,
+		NewHTTPComponents(
+			s.dbHost+"/user/username_password",
+			http.MethodGet,
+		),
 		&userErrorResponse,
 	); err != nil {
 		return "", err
@@ -153,8 +170,10 @@ func (s *Service) SignIn(username, password string) (token string, err error) {
 			Email:    userErrorResponse.User.Email,
 			Secret:   s.secret,
 		},
-		s.tokenHost+"/generate",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/generate",
+			http.MethodPost,
+		),
 		&tokenResponse,
 	); err != nil {
 		return "", err
@@ -165,8 +184,10 @@ func (s *Service) SignIn(username, password string) (token string, err error) {
 		tokenapp.Token{
 			Token: tokenResponse.Token,
 		},
-		s.tokenHost+"/token",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/token",
+			http.MethodPost,
+		),
 		&errorResponse,
 	); err != nil {
 		return "", err
@@ -181,16 +202,20 @@ func (s *Service) SignIn(username, password string) (token string, err error) {
 
 // LogOut ...
 func (s *Service) LogOut(token string) (err error) {
-	var checkErrorResponse tokenapp.CheckErrResponse
-	var errorResponse tokenapp.ErrorResponse
+	var (
+		checkErrorResponse tokenapp.CheckErrResponse
+		errorResponse      tokenapp.ErrorResponse
+	)
 
 	if err = RequestFunc(
 		s.client,
 		tokenapp.Token{
 			Token: token,
 		},
-		s.tokenHost+"/check",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/check",
+			http.MethodPost,
+		),
 		&checkErrorResponse,
 	); err != nil {
 		return err
@@ -211,8 +236,10 @@ func (s *Service) LogOut(token string) (err error) {
 		tokenapp.Token{
 			Token: token,
 		},
-		s.tokenHost+"/token",
-		http.MethodDelete,
+		NewHTTPComponents(
+			s.tokenHost+"/token",
+			http.MethodDelete,
+		),
 		&errorResponse,
 	); err != nil {
 		return err
@@ -231,8 +258,10 @@ func (s *Service) GetAllUsers() (users []dbapp.User, err error) {
 
 	if err = RequestFuncWithoutBody(
 		s.client,
-		s.dbHost+"/users",
-		http.MethodGet,
+		NewHTTPComponents(
+			s.dbHost+"/users",
+			http.MethodGet,
+		),
 		&usersErrorResponse,
 	); err != nil {
 		return nil, err
@@ -247,17 +276,21 @@ func (s *Service) GetAllUsers() (users []dbapp.User, err error) {
 
 // Profile  ...
 func (s *Service) Profile(token string) (user dbapp.User, err error) {
-	var checkErrorResponse tokenapp.CheckErrResponse
-	var idUsernameEmailErrResponse tokenapp.IDUsernameEmailErrResponse
-	var userErrorResponse dbapp.UserErrorResponse
+	var (
+		checkErrorResponse         tokenapp.CheckErrResponse
+		idUsernameEmailErrResponse tokenapp.IDUsernameEmailErrResponse
+		userErrorResponse          dbapp.UserErrorResponse
+	)
 
 	if err = RequestFunc(
 		s.client,
 		tokenapp.Token{
 			Token: token,
 		},
-		s.tokenHost+"/check",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/check",
+			http.MethodPost,
+		),
 		&checkErrorResponse,
 	); err != nil {
 		return dbapp.User{}, err
@@ -279,8 +312,10 @@ func (s *Service) Profile(token string) (user dbapp.User, err error) {
 			Token:  token,
 			Secret: s.secret,
 		},
-		s.tokenHost+"/extract",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/extract",
+			http.MethodPost,
+		),
 		&idUsernameEmailErrResponse,
 	); err != nil {
 		return dbapp.User{}, err
@@ -295,8 +330,10 @@ func (s *Service) Profile(token string) (user dbapp.User, err error) {
 		dbapp.IDRequest{
 			ID: idUsernameEmailErrResponse.ID,
 		},
-		s.dbHost+"/user/id",
-		http.MethodGet,
+		NewHTTPComponents(
+			s.dbHost+"/user/id",
+			http.MethodGet,
+		),
 		&userErrorResponse,
 	); err != nil {
 		return dbapp.User{}, err
@@ -311,17 +348,21 @@ func (s *Service) Profile(token string) (user dbapp.User, err error) {
 
 // DeleteAccount  ...
 func (s *Service) DeleteAccount(token string) (err error) {
-	var checkErrorResponse tokenapp.CheckErrResponse
-	var idUsernameEmailErrResponse tokenapp.IDUsernameEmailErrResponse
-	var errorResponse dbapp.ErrorResponse
+	var (
+		checkErrorResponse         tokenapp.CheckErrResponse
+		idUsernameEmailErrResponse tokenapp.IDUsernameEmailErrResponse
+		errorResponse              dbapp.ErrorResponse
+	)
 
 	if err = RequestFunc(
 		s.client,
 		tokenapp.Token{
 			Token: token,
 		},
-		s.tokenHost+"/check",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/check",
+			http.MethodPost,
+		),
 		&checkErrorResponse,
 	); err != nil {
 		return err
@@ -343,8 +384,10 @@ func (s *Service) DeleteAccount(token string) (err error) {
 			Token:  token,
 			Secret: s.secret,
 		},
-		s.tokenHost+"/extract",
-		http.MethodPost,
+		NewHTTPComponents(
+			s.tokenHost+"/extract",
+			http.MethodPost,
+		),
 		&idUsernameEmailErrResponse,
 	); err != nil {
 		return err
@@ -354,17 +397,15 @@ func (s *Service) DeleteAccount(token string) (err error) {
 		return fmt.Errorf("%w:%s", ErrWebServer, idUsernameEmailErrResponse.Err)
 	}
 
-	if err = RequestFunc(
+	return RequestFunc(
 		s.client,
 		dbapp.IDRequest{
 			ID: idUsernameEmailErrResponse.ID,
 		},
-		s.dbHost+"/user",
-		http.MethodDelete,
+		NewHTTPComponents(
+			s.dbHost+"/user",
+			http.MethodDelete,
+		),
 		&errorResponse,
-	); err != nil {
-		return err
-	}
-
-	return nil
+	)
 }

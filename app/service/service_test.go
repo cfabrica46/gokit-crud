@@ -153,9 +153,9 @@ func TestSignUp(t *testing.T) {
 									}`),
 								)),
 							}, nil
-						} else {
-							return nil, errWebServer
 						}
+
+						return nil, errWebServer
 					}
 				}
 
@@ -278,9 +278,9 @@ func TestSignIn(t *testing.T) {
 									}`),
 								)),
 							}, nil
-						} else {
-							return nil, errWebServer
 						}
+
+						return nil, errWebServer
 					}
 				}
 
@@ -406,9 +406,9 @@ func TestLogOut(t *testing.T) {
 									}`),
 								)),
 							}, nil
-						} else {
-							return nil, errWebServer
 						}
+
+						return nil, errWebServer
 					}
 				}
 
@@ -512,9 +512,9 @@ func TestGetAllUsers(t *testing.T) {
 									}`),
 								)),
 							}, nil
-						} else {
-							return nil, errWebServer
 						}
+
+						return nil, errWebServer
 					}
 				}
 
@@ -673,13 +673,13 @@ func TestProfile(t *testing.T) {
 									}`),
 								)),
 							}, nil
-						} else {
-							return nil, errWebServer
 						}
+
+						return nil, errWebServer
 					}
 				}
 
-				s := fmt.Sprintf(`{
+				body := fmt.Sprintf(`{
 					"user":{
 						"username":"username",
 						"password":"password",
@@ -693,7 +693,7 @@ func TestProfile(t *testing.T) {
 				}`, tt.outCheck)
 
 				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(s))),
+					Body: io.NopCloser(bytes.NewReader([]byte(body))),
 				}, nil
 			})
 
@@ -819,13 +819,13 @@ func TestDeleteAccount(t *testing.T) {
 									}`),
 								)),
 							}, nil
-						} else {
-							return nil, errWebServer
 						}
+
+						return nil, errWebServer
 					}
 				}
 
-				s := fmt.Sprintf(`{
+				body := fmt.Sprintf(`{
 					"user":{
 						"username":"username",
 						"password":"password",
@@ -839,7 +839,7 @@ func TestDeleteAccount(t *testing.T) {
 				}`, tt.outCheck)
 
 				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(s))),
+					Body: io.NopCloser(bytes.NewReader([]byte(body))),
 				}, nil
 			})
 

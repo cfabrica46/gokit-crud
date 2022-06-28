@@ -32,7 +32,7 @@ func TestRequestFunc(t *testing.T) {
 
 	for _, tt := range []struct {
 		Response *dbapp.IDErrorResponse
-		client   service.HttpClient
+		client   service.HTTPClient
 		body     any
 		name     string
 		inURL    string
@@ -97,7 +97,15 @@ func TestRequestFunc(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := service.RequestFunc(tt.client, tt.body, tt.inURL, tt.inMethod, tt.Response)
+			err := service.RequestFunc(
+				tt.client,
+				tt.body,
+				service.NewHTTPComponents(
+					tt.inURL,
+					tt.inMethod,
+				),
+				tt.Response,
+			)
 
 			if tt.name == "NoError" {
 				assert.Nil(t, err)
@@ -138,7 +146,7 @@ func TestRequestFuncWithoutBody(t *testing.T) {
 
 	for _, tt := range []struct {
 		Response *dbapp.UsersErrorResponse
-		client   service.HttpClient
+		client   service.HTTPClient
 		name     string
 		inURL    string
 		inMethod string
@@ -181,7 +189,14 @@ func TestRequestFuncWithoutBody(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := service.RequestFuncWithoutBody(tt.client, tt.inURL, tt.inMethod, tt.Response)
+			err := service.RequestFuncWithoutBody(
+				tt.client,
+				service.NewHTTPComponents(
+					tt.inURL,
+					tt.inMethod,
+				),
+				tt.Response,
+			)
 
 			if tt.name == "NoError" {
 				assert.Nil(t, err)
