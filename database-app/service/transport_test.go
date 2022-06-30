@@ -184,8 +184,6 @@ func TestDecodeRequest(t *testing.T) {
 				assert.Equal(t, tt.outPassword, result.Password)
 				assert.Equal(t, tt.outEmail, result.Email)
 				assert.Contains(t, resultErr, tt.outErr)
-			default:
-				assert.Fail(t, "Error to type inType")
 			}
 		})
 	}

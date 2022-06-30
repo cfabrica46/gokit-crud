@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/cfabrica46/gokit-crud/app/service"
@@ -34,25 +35,39 @@ var (
 	errNotTypeIndicated = errors.New("response is not of the type indicated")
 )
 
-func TestSignUp(t *testing.T) {
-	t.Parallel()
+type errorHTTPComponents struct {
+	errorURL, errorMethod string
+}
 
-	infoServiceTest := service.InfoServices{
-		DBHost:    dbHostTest,
-		DBPort:    portTest,
-		TokenHost: tokenHostTest,
-		TokenPort: portTest,
-		Secret:    secretTest,
+type signUpTestStruct struct {
+	name                            string
+	inUsername, inPassword, inEmail string
+	url                             string
+	method                          string
+	isError                         bool
+	isErrorInsideRequest            bool
+}
+
+type profileTestStruct struct {
+	name                 string
+	inToken              string
+	url                  string
+	method               string
+	outUser              dbapp.User
+	outCheck             bool
+	isError              bool
+	isErrorInsideRequest bool
+}
+
+func newErrorHTTPComponets(url, method string) errorHTTPComponents {
+	return errorHTTPComponents{
+		errorURL:    url,
+		errorMethod: method,
 	}
+}
 
-	for _, tt := range []struct {
-		name                            string
-		inUsername, inPassword, inEmail string
-		url                             string
-		method                          string
-		isError                         bool
-		isErrorInsideRequest            bool
-	}{
+func getSignUpTestEntity() []signUpTestStruct {
+	return []signUpTestStruct{
 		{
 			name:       "NoError",
 			inUsername: usernameTest,
@@ -128,7 +143,106 @@ func TestSignUp(t *testing.T) {
 			url:                  "http://token:8080/token",
 			method:               http.MethodPost,
 		},
-	} {
+	}
+}
+
+func getProfileTestEntity() []profileTestStruct {
+	return []profileTestStruct{
+		{
+			name:    "NoError",
+			inToken: tokenTest,
+			outUser: dbapp.User{
+				ID:       idTest,
+				Username: usernameTest,
+				Password: passwordTest,
+				Email:    emailTest,
+			},
+			outCheck: true,
+			isError:  false,
+			url:      "http://db:8080/user/id",
+			method:   http.MethodGet,
+		},
+		{
+			name:     "ErrorCheckToken",
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			name:                 "ErrorInsideCheckToken",
+			inToken:              tokenTest,
+			outUser:              dbapp.User{},
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/check",
+			method:               http.MethodPost,
+		},
+		{
+			name:     "FalseCheckToken",
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: false,
+			isError:  false,
+			url:      "http://token:8080/check",
+			method:   http.MethodPost,
+		},
+		{
+			name:     "ErrorExtractToken",
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: true,
+			isError:  true,
+			url:      "http://token:8080/extract",
+			method:   http.MethodPost,
+		},
+		{
+			name:                 "ErrorInsideExtractToken",
+			inToken:              tokenTest,
+			outUser:              dbapp.User{},
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://token:8080/extract",
+			method:               http.MethodPost,
+		},
+		{
+			name:     "ErrorGetID",
+			inToken:  tokenTest,
+			outUser:  dbapp.User{},
+			outCheck: true,
+			isError:  true,
+			url:      "http://db:8080/user/id",
+			method:   http.MethodGet,
+		},
+		{
+			name:                 "ErrorInsideGetID",
+			inToken:              tokenTest,
+			outUser:              dbapp.User{},
+			outCheck:             true,
+			isError:              true,
+			isErrorInsideRequest: true,
+			url:                  "http://db:8080/user/id",
+			method:               http.MethodGet,
+		},
+	}
+}
+
+func TestSignUp(t *testing.T) {
+	t.Parallel()
+
+	infoServiceTest := service.InfoServices{
+		DBHost:    dbHostTest,
+		DBPort:    portTest,
+		TokenHost: tokenHostTest,
+		TokenPort: portTest,
+		Secret:    secretTest,
+	}
+
+	for _, tt := range getSignUpTestEntity() {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -136,6 +250,7 @@ func TestSignUp(t *testing.T) {
 			var resultToken string
 			var resultErr error
 			var tokenResponse, errorResponse string
+			var mock *service.MockClient
 
 			if tt.isError {
 				errorResponse = errWebServer.Error()
@@ -143,29 +258,22 @@ func TestSignUp(t *testing.T) {
 				tokenResponse = tokenTest
 			}
 
-			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
-				if tt.isError {
-					if req.URL.String() == tt.url && req.Method == tt.method {
-						if tt.isErrorInsideRequest {
-							return &http.Response{
-								Body: io.NopCloser(bytes.NewReader([]byte(`{
-										"err":"error"
-									}`),
-								)),
-							}, nil
-						}
+			responseJSON := `{
+						"token": "token",
+						"id": 1
+			}`
 
-						return nil, errWebServer
-					}
-				}
-
-				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(`{
-						"token":"token",
-						"id":1
-					}`))),
-				}, nil
-			})
+			if tt.isError {
+				mock = service.NewMockClient(getIsErrorMock(
+					tt.isErrorInsideRequest,
+					newErrorHTTPComponets(tt.url, tt.method),
+					responseJSON,
+				))
+			} else {
+				mock = service.NewMockClient(getMock(
+					responseJSON,
+				))
+			}
 
 			svc := service.NewService(
 				mock,
@@ -261,6 +369,7 @@ func TestSignIn(t *testing.T) {
 			var resultToken string
 			var resultErr error
 			var tokenResponse, errorResponse string
+			var mock *service.MockClient
 
 			if tt.isError {
 				errorResponse = errWebServer.Error()
@@ -268,34 +377,27 @@ func TestSignIn(t *testing.T) {
 				tokenResponse = tokenTest
 			}
 
-			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
-				if tt.isError {
-					if req.URL.String() == tt.url && req.Method == tt.method {
-						if tt.isErrorInsideRequest {
-							return &http.Response{
-								Body: io.NopCloser(bytes.NewReader([]byte(`{
-										"err":"error"
-									}`),
-								)),
-							}, nil
-						}
-
-						return nil, errWebServer
+			responseJSON := `{
+					"token":"token",
+					"user":{
+						"id":       1,
+						"username": "username",
+						"password": "password",
+						"email":    "email@email.com"
 					}
-				}
+			}`
 
-				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(`{
-						"token":"token",
-						"user":{
-							"id":       1,
-							"username": "username",
-							"password": "password",
-							"email":    "email@email.com"
-						}
-					}`))),
-				}, nil
-			})
+			if tt.isError {
+				mock = service.NewMockClient(getIsErrorMock(
+					tt.isErrorInsideRequest,
+					newErrorHTTPComponets(tt.url, tt.method),
+					responseJSON,
+				))
+			} else {
+				mock = service.NewMockClient(getMock(
+					responseJSON,
+				))
+			}
 
 			svc := service.NewService(
 				mock,
@@ -381,6 +483,10 @@ func TestLogOut(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			var resultErr error
+			var errorResponse string
+			var mock *service.MockClient
+
 			infoServiceTest := service.InfoServices{
 				DBHost:    dbHostTest,
 				DBPort:    portTest,
@@ -389,37 +495,25 @@ func TestLogOut(t *testing.T) {
 				Secret:    secretTest,
 			}
 
-			var resultErr error
-			var errorResponse string
-
 			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
-			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
-				if tt.isError {
-					if req.URL.String() == tt.url && req.Method == tt.method {
-						if tt.isErrorInsideRequest {
-							return &http.Response{
-								Body: io.NopCloser(bytes.NewReader([]byte(`{
-										"err":"error"
-									}`),
-								)),
-							}, nil
-						}
-
-						return nil, errWebServer
-					}
-				}
-
-				s := fmt.Sprintf(`{
+			responseJSON := fmt.Sprintf(`{
 					"check": %t
 				}`, tt.outCheck)
 
-				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(s))),
-				}, nil
-			})
+			if tt.isError {
+				mock = service.NewMockClient(getIsErrorMock(
+					tt.isErrorInsideRequest,
+					newErrorHTTPComponets(tt.url, tt.method),
+					responseJSON,
+				))
+			} else {
+				mock = service.NewMockClient(getMock(
+					responseJSON,
+				))
+			}
 
 			svc := service.NewService(
 				mock,
@@ -497,40 +591,34 @@ func TestGetAllUsers(t *testing.T) {
 			var resultUsers []dbapp.User
 			var resultErr error
 			var errorResponse string
+			var mock *service.MockClient
 
 			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
-			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
-				if tt.isError {
-					if req.URL.String() == tt.url && req.Method == tt.method {
-						if tt.isErrorInsideRequest {
-							return &http.Response{
-								Body: io.NopCloser(bytes.NewReader([]byte(`{
-										"err":"error"
-									}`),
-								)),
-							}, nil
-						}
-
-						return nil, errWebServer
+			responseJSON := `{
+				"users":[
+					{
+						"username":"username",
+						"password":"password",
+						"email":"email@email.com",
+						"id":1
 					}
-				}
+				]
+			}`
 
-				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(`{
-						"users":[
-							{
-								"username":"username",
-								"password":"password",
-								"email":"email@email.com",
-								"id":1
-							}
-						]
-					}`))),
-				}, nil
-			})
+			if tt.isError {
+				mock = service.NewMockClient(getIsErrorMock(
+					tt.isErrorInsideRequest,
+					newErrorHTTPComponets(tt.url, tt.method),
+					responseJSON,
+				))
+			} else {
+				mock = service.NewMockClient(getMock(
+					responseJSON,
+				))
+			}
 
 			svc := service.NewService(
 				mock,
@@ -552,97 +640,7 @@ func TestGetAllUsers(t *testing.T) {
 func TestProfile(t *testing.T) {
 	t.Parallel()
 
-	for _, tt := range []struct {
-		name                 string
-		inToken              string
-		url                  string
-		method               string
-		outUser              dbapp.User
-		outCheck             bool
-		isError              bool
-		isErrorInsideRequest bool
-	}{
-		{
-			name:    "NoError",
-			inToken: tokenTest,
-			outUser: dbapp.User{
-				ID:       idTest,
-				Username: usernameTest,
-				Password: passwordTest,
-				Email:    emailTest,
-			},
-			outCheck: true,
-			isError:  false,
-			url:      "http://db:8080/user/id",
-			method:   http.MethodGet,
-		},
-		{
-			name:     "ErrorCheckToken",
-			inToken:  tokenTest,
-			outUser:  dbapp.User{},
-			outCheck: true,
-			isError:  true,
-			url:      "http://token:8080/check",
-			method:   http.MethodPost,
-		},
-		{
-			name:                 "ErrorInsideCheckToken",
-			inToken:              tokenTest,
-			outUser:              dbapp.User{},
-			outCheck:             true,
-			isError:              true,
-			isErrorInsideRequest: true,
-			url:                  "http://token:8080/check",
-			method:               http.MethodPost,
-		},
-		{
-			name:     "FalseCheckToken",
-			inToken:  tokenTest,
-			outUser:  dbapp.User{},
-			outCheck: false,
-			isError:  false,
-			url:      "http://token:8080/check",
-			method:   http.MethodPost,
-		},
-		{
-			name:     "ErrorExtractToken",
-			inToken:  tokenTest,
-			outUser:  dbapp.User{},
-			outCheck: true,
-			isError:  true,
-			url:      "http://token:8080/extract",
-			method:   http.MethodPost,
-		},
-		{
-			name:                 "ErrorInsideExtractToken",
-			inToken:              tokenTest,
-			outUser:              dbapp.User{},
-			outCheck:             true,
-			isError:              true,
-			isErrorInsideRequest: true,
-			url:                  "http://token:8080/extract",
-			method:               http.MethodPost,
-		},
-		{
-			name:     "ErrorGetID",
-			inToken:  tokenTest,
-			outUser:  dbapp.User{},
-			outCheck: true,
-			isError:  true,
-			url:      "http://db:8080/user/id",
-			method:   http.MethodGet,
-		},
-		{
-			name:                 "ErrorInsideGetID",
-			inToken:              tokenTest,
-			outUser:              dbapp.User{},
-			outCheck:             true,
-			isError:              true,
-			isErrorInsideRequest: true,
-			url:                  "http://db:8080/user/id",
-			method:               http.MethodGet,
-		},
-	} {
+	for _, tt := range getProfileTestEntity() {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -658,44 +656,36 @@ func TestProfile(t *testing.T) {
 			var resultUser dbapp.User
 			var resultErr error
 			var errorResponse string
+			var mock *service.MockClient
 
 			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
-			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
-				if tt.isError {
-					if req.URL.String() == tt.url && req.Method == tt.method {
-						if tt.isErrorInsideRequest {
-							return &http.Response{
-								Body: io.NopCloser(bytes.NewReader([]byte(`{
-										"err":"error"
-									}`),
-								)),
-							}, nil
-						}
-
-						return nil, errWebServer
-					}
-				}
-
-				body := fmt.Sprintf(`{
+			responseJSON := fmt.Sprintf(`{
 					"user":{
 						"username":"username",
 						"password":"password",
 						"email":"email@email.com",
 						"id":1
 					},
-					"id":1,    
-					"username":"usename",    
+					"id":1,
+					"username":"usename",
 					"email":"email@email.com",
-					"check":%t    
+					"check":%t
 				}`, tt.outCheck)
 
-				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(body))),
-				}, nil
-			})
+			if tt.isError {
+				mock = service.NewMockClient(getIsErrorMock(
+					tt.isErrorInsideRequest,
+					newErrorHTTPComponets(tt.url, tt.method),
+					responseJSON,
+				))
+			} else {
+				mock = service.NewMockClient(getMock(
+					responseJSON,
+				))
+			}
 
 			svc := service.NewService(
 				mock,
@@ -804,44 +794,36 @@ func TestDeleteAccount(t *testing.T) {
 
 			var resultErr error
 			var errorResponse string
+			var mock *service.MockClient
 
 			if tt.isError {
 				errorResponse = errWebServer.Error()
 			}
 
-			mock := service.NewMockClient(func(req *http.Request) (response *http.Response, err error) {
-				if tt.isError {
-					if req.URL.String() == tt.url && req.Method == tt.method {
-						if tt.isErrorInsideRequest {
-							return &http.Response{
-								Body: io.NopCloser(bytes.NewReader([]byte(`{
-										"err":"error"
-									}`),
-								)),
-							}, nil
-						}
-
-						return nil, errWebServer
-					}
-				}
-
-				body := fmt.Sprintf(`{
+			responseJSON := fmt.Sprintf(`{
 					"user":{
 						"username":"username",
 						"password":"password",
 						"email":"email@email.com",
 						"id":1
 					},
-					"id":1,    
-					"username":"usename",    
+					"id":1,
+					"username":"usename",
 					"email":"email@email.com",
-					"check":%t    
+					"check":%t
 				}`, tt.outCheck)
 
-				return &http.Response{
-					Body: io.NopCloser(bytes.NewReader([]byte(body))),
-				}, nil
-			})
+			if tt.isError {
+				mock = service.NewMockClient(getIsErrorMock(
+					tt.isErrorInsideRequest,
+					newErrorHTTPComponets(tt.url, tt.method),
+					responseJSON,
+				))
+			} else {
+				mock = service.NewMockClient(getMock(
+					responseJSON,
+				))
+			}
 
 			svc := service.NewService(
 				mock,
@@ -860,5 +842,39 @@ func TestDeleteAccount(t *testing.T) {
 				assert.ErrorContains(t, resultErr, errorResponse)
 			}
 		})
+	}
+}
+
+func getMock(jsonResponse string) func(*http.Request) (*http.Response, error) {
+	return func(r *http.Request) (*http.Response, error) {
+		return &http.Response{
+			Body: io.NopCloser(strings.NewReader(jsonResponse)),
+		}, nil
+	}
+}
+
+//nolint:revive
+func getIsErrorMock(
+	isErrorInsideRequest bool,
+	errorHTTPComponents errorHTTPComponents,
+	jsonResponse string,
+) func(*http.Request) (*http.Response, error) {
+	return func(r *http.Request) (*http.Response, error) {
+		if r.URL.String() == errorHTTPComponents.errorURL && r.Method == errorHTTPComponents.errorMethod {
+			if isErrorInsideRequest {
+				return &http.Response{
+					Body: io.NopCloser(bytes.NewReader([]byte(`{
+										"err":"error"
+									}`),
+					)),
+				}, nil
+			}
+
+			return nil, errWebServer
+		}
+
+		return &http.Response{
+			Body: io.NopCloser(strings.NewReader(jsonResponse)),
+		}, nil
 	}
 }

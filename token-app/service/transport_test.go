@@ -151,15 +151,12 @@ func TestDecodeRequest(t *testing.T) {
 
 			case service.Token:
 				req, err = service.DecodeRequest(resultType)(context.TODO(), tt.in)
-				if err != nil {
-					resultErr = err.Error()
-				}
 
 				result, ok := req.(service.Token)
 				assert.True(t, ok)
 
 				assert.Equal(t, tt.outToken, result.Token)
-				assert.Contains(t, resultErr, tt.outErr)
+				assert.ErrorContains(t, err, tt.outErr)
 			}
 		})
 	}
