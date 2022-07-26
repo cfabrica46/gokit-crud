@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 
@@ -53,7 +54,9 @@ func MakeGetUserByUsernameAndPasswordEndpoint(svc serviceInterface) endpoint.End
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
 
-		user, err := svc.GetUserByUsernameAndPassword(req.Username, req.Password)
+		passwordHashed := NewHash(req.Password)
+
+		user, err := svc.GetUserByUsernameAndPassword(req.Username, passwordHashed)
 		if err != nil {
 			errMessage = err.Error()
 		}
@@ -91,7 +94,9 @@ func MakeInsertUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 			return nil, fmt.Errorf("%w: isn't of type GenerateTokenRequest", ErrRequest)
 		}
 
-		err := svc.InsertUser(req.Username, req.Password, req.Email)
+		passwordHashed := NewHash(req.Password)
+
+		err := svc.InsertUser(req.Username, passwordHashed, req.Email)
 		if err != nil {
 			errMessage = err.Error()
 		}
@@ -117,4 +122,12 @@ func MakeDeleteUserEndpoint(svc serviceInterface) endpoint.Endpoint {
 
 		return RowsErrorResponse{RowsAffected: rowsAffected, Err: errMessage}, nil
 	}
+}
+
+func NewHash(data string) (hash string) {
+	hasher := sha256.New()
+
+	result := hasher.Sum([]byte(data))
+
+	return string(result)
 }

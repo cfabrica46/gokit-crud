@@ -1,5 +1,5 @@
 # GetAllUsers
-curl -XGET localhost:7070/users
+# curl -XGET localhost:7070/users
 
 # GetUserByID
 # curl -XGET -d'{"id":1}' localhost:7070/user/id
@@ -11,8 +11,7 @@ curl -XGET localhost:7070/users
 # curl -XGET -d'{"username":"cesar"}' localhost:7070/id/username
 
 # Insert User
-# curl -XPOST -d'{"username":"arturo","password":"nava","email":"arthurnavah@gmail.com"}' localhost:7070/user
+curl -XPOST -d'{"username":"arturo","password":"nava","email":"arthurnavah@gmail.com"}' localhost:7070/user
 
 # DeleteUserByUsername
 # curl -XDELETE -d'{"username":"arturo","password":"nava","email":"arthurnavah@gmail.com"}' localhost:7070/user
-
